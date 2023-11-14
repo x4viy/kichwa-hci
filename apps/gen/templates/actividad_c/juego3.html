@@ -1,0 +1,135 @@
+{% load static %}
+{#Autor: Santiago Cedillo, Bryan Amaya#}
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="{% static '/css/stylejuego3.css' %}">
+    <title>App Quichua</title>
+    <script src="{% static '/tau-prolog/tau-prolog.js' %}"></script>
+</head>
+<body>
+<div id="main">
+    <header>
+        <h1>App Quechua</h1>
+    </header>
+    <section>
+        <div class="example">
+            <button onclick="procesar()" id="procesar">ESCUCHAR PALABRA</button>
+            <textarea id="texto" readonly></textarea>
+
+        </div>
+    </section>
+</div>
+
+
+</body>
+
+{#<script id="prolog.pl" type="text/prolog">#}
+{#		analisis(F,X,Y):- asercion(F,X,Y).#}
+{##}
+{#		asercion(F) --> sn(S), verb(S,X,F),compl(X).#}
+{##}
+{#		compl([])--> [].#}
+{#		compl([arg(X,O)|Y])--> prep(X),sn(O),compl(Y).#}
+{#		compl([arg(nulo,O)|Y])--> sn(O),compl(Y).#}
+{##}
+{#		sn(S)--> npr(S).#}
+{#		sn(S)--> det,adj(S).#}
+{#		verb(S,A,F)--> [W],{verbo(W,S,A,F)}.#}
+{#		npr(W)--> [W],{npropio(W)}.#}
+{#		adj(F)--> [W],{adjetivo(W,_,F)}.#}
+{#		det--> [W],{determ(W)}.#}
+{#		prep(W)--> [W],{prepo(W)}.#}
+{##}
+{#		npropio(hachi).#}
+{#		npropio(jachi).#}
+{##}
+{#		adjetivo(izquierda,_,i).#}
+{#		adjetivo(derecha,_,d).#}
+{##}
+{#		determ(la).#}
+{##}
+{#		prepo(a).#}
+{##}
+{#		verbo(gira,_,[arg(a,O)],O).#}
+{#		verbo(avanza,_,[],a).#}
+{#		verbo(retrocede,_,[],r).#}
+{#		verbo(para,_,[],p).#}
+{##}
+{#</script>#}
+
+<script type="text/javascript">
+
+    var ip = "10.10.206.206";
+    var puerto = ":80";
+    var recognition;
+    var recognizing = false;
+    var bandera = false;
+
+    if (!('webkitSpeechRecognition' in window)) {
+        alert("¡API no soportada!");
+    } else {
+
+        recognition = new webkitSpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onstart = function () {
+            recognizing = true;
+            console.log("Empezó Orden");
+        }
+        recognition.onresult = function (event) {
+            for (var i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal)
+                    document.getElementById("texto").value = event.results[i][0].transcript.toLowerCase();
+            }
+        }
+
+        recognition.onerror = function (event) {
+        }
+
+        recognition.onend = function () {
+            recognizing = false;
+            document.getElementById("procesar").innerHTML = "DAR INSTRUCCION";
+            console.log("Terminó Orden");
+
+            //Llamada a prolog
+            {#var orden = document.getElementById("texto").value.split(" ");#}
+            {#var session = pl.create();#}
+            {#var valueAnswer;#}
+            {#var callback = function (answer) {#}
+            {#    valueAnswer = pl.format_answer(answer);#}
+            {# };#}
+
+            {#session.consult("prolog.pl");#}
+            {#session.query("analisis(F,[" + orden + "],[]).");#}
+            {#session.answer(callback);#}
+{##}
+{#            if (valueAnswer != "false.") {#}
+{##}
+{#                valueAnswer = valueAnswer.replace(/ /g, "");#}
+{#                valueAnswer = valueAnswer.replace(/;/g, "");#}
+{##}
+                {#var myWindow;#}
+                {#myWindow = window.open("http://" + ip + puerto + "/?" + valueAnswer, "", "width=200,height=100");#}
+                {#myWindow.close();#}
+{##}
+{#            }#}
+
+        }
+    }
+
+    function procesar() {
+        if (recognizing == false) {
+            recognition.start();
+            recognizing = true;
+            document.getElementById("procesar").innerHTML = "DETENER";
+        } else {
+            recognition.stop();
+            recognizing = false;
+            document.getElementById("procesar").innerHTML = "DAR INSTRUCCION";
+        }
+    }
+</script>
+</html>

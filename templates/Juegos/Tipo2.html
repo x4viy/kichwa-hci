@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>App Quichua-Tipo1</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+       <!-- Template Stylesheet -->
+    <link href="{% static '/css2/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static '/css2/style.css' %}" rel="stylesheet">
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Inter:wght@600&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{% static 'lib/Lib Template/animate/animate.min.css'%}" rel="stylesheet">
+    <link href="{% static 'lib/Lib Template/owlcarousel/assets/owl.carousel.min.css'%}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+
+    <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+<style>
+  .option:hover {
+    border-color: #ff7f00 !important; /* color naranja al pasar el ratón sobre la opción */
+    cursor: pointer; /* cambiar el cursor a la mano cuando se pasa el ratón sobre la opción */
+  }
+#modal_bodys img {
+          max-width: 300px; /* Ancho máximo */
+            max-height: 200px; /* Alto máximo */
+            object-fit: cover; /* Para que la imagen cubra el espacio sin deformarse */     /* Limita la altura máxima de la imagen al 70% del contenedor */
+    }
+</style>
+</head>
+
+<body>
+<div class="container-fluid bg-white p-0">
+    <!-- Botón de retroceso en la esquina superior derecha -->
+    <div class="text-right mx-5">
+        <button id="btnVolver" class="btn btn-primary mt-2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-bar-left" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5ZM10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5Z"/>
+</svg></button>
+    </div>
+
+    <h1 class="text-primary text-center">{{ juego.jue_nombre }}</h1>
+
+<div class="d-flex justify-content-center" style="height: 50px">
+        <div class="progress" style="width: 75%;">
+            <div id="barProgreso" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+    </div>
+
+
+
+<div class="container-fluid py-3 page-header2 position-relative">
+{#    <div class="container py-2">#}
+
+  <div class="container-fluid bg-light border border-3 rounded p-2 my-5">
+        <div class="text-center mb-3" style="color:#FE5D37; font-size: 36px; font-family: cursive">{{ juego.jue_enunciado }}</div>
+    </div>
+  <div class="options text-primary my-5" >
+
+
+{% if respuestas %}
+    <div class="row">
+    {% for respuesta in respuestas %}
+        <div class="col-6">
+            <div data-parameter="{{ respuesta.res_escorrecta }}" class="option border border-3 rounded p-3 text-center bg-light my-3 mx-3" style="font-size: 30px; font-family: cursive">
+                {{ respuesta.res_respuesta }}
+            </div>
+        </div>
+
+        <!-- Cierra la fila actual y comienza una nueva cada dos respuestas -->
+        {% if forloop.counter|divisibleby:2 and not forloop.last %}
+            </div><div class="row">
+        {% endif %}
+    {% endfor %}
+    </div>
+{% endif %}
+
+</div>
+
+</div>
+  <div class="d-flex justify-content-end align-items-center p-5">
+{#    <button class="btn btn-primary p-3">Comprobar</button>#}
+    <!-- Aquí puedes añadir otro botón si lo necesitas -->
+  </div>
+
+
+<!-- Modal Start -->
+<div class="modal fade" id="congratsModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tit_modal" style="font-family: cursive">Modal title</h5>
+      </div>
+      <div class="modal-body d-flex flex-column align-items-center justify-content-center" id="modal_bodys">
+        <!-- Aquí es donde se cambiará el texto e imagen -->
+        <img src="" alt="Imagen" class="img-fluid mb-3"/>
+          <div class="bg-light rounded p-2">
+            <div id="textopuntaje" class="text-primary text-center" style="font-family: cursive"></div>
+            <div id="textopuntaje2" class="text-primary text-center" style="font-family: cursive"></div>
+          </div>
+
+      </div>
+      <div class="justify-content-center modal-footer ">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="btnContinuar">Continuar</button>
+        <button type="button" class="btn btn-primary" id="btnContinuar2">Continuar</button>
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#scoreModal" data-bs-dismiss="modal" id="btnScore">Enviar Resultados</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal End -->
+</div>
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'lib/Lib Template/wow/wow.min.js' %}"></script>
+    <script src="{% static 'lib/Lib Template/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/Lib Template/waypoints/waypoints.min.js' %}"></script>
+    <script src=" {% static 'lib/Lib Template/owlcarousel/owl.carousel.min.js' %}"></script>
+
+    <!-- Template Javascript -->
+    <script src="{% static 'js/JS-Template/main.js' %}"></script>
+</body>
+<script>
+          var respuestaCorrecta2 = "{% for respuesta in respuestas %}{% if respuesta.res_escorrecta %}{{ respuesta.res_respuesta }}{% endif %}{% endfor %}";
+
+</script>
+</html>

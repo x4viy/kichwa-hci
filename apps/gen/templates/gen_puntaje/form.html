@@ -1,0 +1,48 @@
+{% extends 'crud/bodyFormCrispy.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block headScriptsForm %}
+{% endblock %}
+
+
+{% block contentForm %}
+    <script>
+
+        if ({{ is_edit }} == 1){
+            $('#delete_id').hide();
+            $('#save_id').hide();
+            $('#id_pun_nombre').addClass('disablegrid');
+            $('#id_pun_nombre').prop('readonly', true);
+            $('#id_pun_apellido').addClass('disablegrid');
+            $('#id_pun_apellido').prop('readonly', true);
+            $('#id_pun_institucion').addClass('disablegrid');
+            $('#id_pun_institucion').prop('readonly', true);
+            $('#id_pun_fecha').addClass('disablegrid');
+            $('#id_pun_fecha').prop('readonly', true);
+            $('#id_pun_email').addClass('disablegrid');
+            $('#id_pun_email').prop('readonly', true);
+            $('#id_pun_emailprofesor').addClass('disablegrid');
+            $('#id_pun_emailprofesor').prop('readonly', true);
+            $('#id_pun_curso').addClass('disablegrid');
+            $('#id_pun_curso').prop('readonly', true);
+            $('#id_pun_materia').addClass('disablegrid');
+            $('#id_pun_materia').prop('readonly', true);
+            $('#id_pun_puntaje').addClass('disablegrid');
+            $('#id_pun_puntaje').prop('readonly', true);
+            $('#id_tac').addClass('disablegrid');
+            $('#id_tac').prop('readonly', true);
+        };
+
+
+
+
+    </script>
+{% endblock %}
+
+{% block bodyFooterScriptsForm %}
+{% endblock %}
+
+
+
+

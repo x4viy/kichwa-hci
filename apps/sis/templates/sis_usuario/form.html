@@ -1,0 +1,50 @@
+{% extends 'crud/bodyFormCrispy.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block headScriptsForm %}
+{% endblock %}
+
+
+{% block contentForm %}
+    <script>
+        if ({{ is_edit }} == 1){
+            $('#div_id_rol').addClass('disablegrid');
+            $('#div_id_rol').prop('readonly', true);
+        };
+
+        if ({{ rol_user_actual }} == 1){
+            $('#div_id_rol').removeClass('disablegrid');
+            $('#div_id_rol').prop('readonly', false);
+        };
+
+        if ({{ rol_user_actual }} == 2){
+            $('#div_id_is_active').addClass('disablegrid');
+            $('#div_id_is_active').prop('readonly', true);
+        };
+
+        if ('{{ is_user_actual }}' == ''){
+
+        } else if ('{{ is_user_actual }}' == '{{ is_user_editando }}'){
+            $('#div_id_rol').addClass('disablegrid');
+            $('#div_id_rol').prop('readonly', true);
+            $('#delete_id').hide();
+            $('#div_id_username').addClass('disablegrid');
+            $('#div_id_username input').prop('readonly', true);
+        };
+    </script>
+{#    <script>#}
+{#        if ({{ nombre_usuario }} == 'r'){#}
+{#            $('#delete_id').hide();#}
+{#            alert('b');#}
+{##}
+{#        }#}
+{#    </script>#}
+{% endblock %}
+
+{% block bodyFooterScriptsForm %}
+{% endblock %}
+
+
+
+

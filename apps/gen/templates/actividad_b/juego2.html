@@ -1,0 +1,60 @@
+{# Autor: Bryan Amaya, Agustin Ferrari, Alex Coro #}
+{% load static %}
+<html>
+    <head>
+        <link rel="stylesheet" href="{% static '/css/stylejuego2.css' %}">
+        <meta http-equiv=”Content-Type” content=”text/html; charset=UTF-8″ />
+        <title>App Quichua</title>
+    </head>
+    <body onload="cargarPregunta()">
+        <div id="main">
+            <div id="page"></div>
+{#           <img id="logo" src="https://www.apkmirror.com/wp-content/uploads/2021/05/24/60a3198015ff2-384x384.png" alt="logo"> #}
+{#            <h1 id="title">App Quichua</h1>#}
+            <h3 id="mensaje">Coloca la palabra correcta segun el numero dado: </h3>
+            <div id="palabras"></div>
+            <h2 id="titulo"></h2>
+            <div class="caja">
+            <img id="letrero" src="/static/img/le.png">
+            <div id="puntos"></div>
+
+            </div>
+            <button id="submit" onclick="siguientePregunta()">SIGUIENTE</button>
+        </div>
+        <div id="contenedorimagenes">
+            <div id="imagencorrecto"></div>
+            <div id="imagenincorrecto"></div>
+        </div>
+
+    <script>
+        var cont = 0;
+        var cont2 = 0;
+        var TotalPuntJuego = 0;
+        let preguntas = [];
+        let puntaje = [];
+    </script>
+    {% if datos %}
+        {% for i in datos %}
+            <script>
+                preguntas[cont] = "{{ i.resultado }}";
+                preguntas[cont] = preguntas[cont].replace(/&quot;/g, '"');
+                preguntas[cont] = JSON.parse(preguntas[cont]);
+                console.log(preguntas[cont]);
+                cont++;
+                {#                a = ""</script > {{ i.res_respuesta }} <script>+"";#}
+            </script>
+
+        {% endfor %}
+        {% for i in datos2 %}
+            <script>
+                puntaje[cont2] = "{{ i.puntajepregunta }}";
+                TotalPuntJuego = TotalPuntJuego + parseFloat(puntaje[cont2].replace(/,/g, '.'));
+                cont2++;
+            </script>
+        {% endfor %}
+    {% endif %}
+
+    </body>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="{% static '/js/scriptjuego2.js' %}"></script>
+</html>

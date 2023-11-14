@@ -1,0 +1,101 @@
+.card {
+    position: relative;
+    width: 300px;
+    /*height: 350px;*/
+    height: 220px;
+    margin: 20px;
+}
+
+.card .face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: .5s;
+}
+
+.card .front {
+    transform: perspective(600px) rotateY(0deg);
+    box-shadow: 0 5px 10px #000;
+/*    background: rgb(37,112,230);*/
+/*background: linear-gradient(90deg, rgba(37,112,230,1) 0%, rgba(0,219,255,1) 65%, rgba(0,212,255,1) 100%);*/
+    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(24,60,0,1) 0%, rgba(62,121,9,1) 45%, rgba(81,198,0,1) 100%);
+}
+
+.card .front img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card .front h3 {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /*height: 45px;*/
+    line-height: 45px;
+    color: #fff;
+    background: rgba(0,0,0,.4);
+    text-align: center;
+    margin-bottom: 25%;
+}
+
+.card .back {
+    transform: perspective(600px) rotateY(180deg);
+    background: rgb(3, 35, 54);
+    padding: 15px;
+    color: #f3f3f3;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    box-shadow: 0 5px 10px #000;
+}
+
+.card .back .link {
+    border-top: solid 1px #f3f3f3;
+    height: 50px;
+    line-height: 50px;
+}
+
+.card .back .link a {
+    color: #f3f3f3;
+}
+
+.card .back h3 {
+    font-size: 30px;
+    margin-top: 20px;
+    letter-spacing: 2px;
+}
+
+.card .back p {
+    letter-spacing: 1px;
+}
+
+.card:hover .front {
+    transform: perspective(600px) rotateY(180deg);
+
+}
+
+.card:hover .back {
+    transform: perspective(600px) rotateY(360deg);
+}
+a {
+    color: wheat;
+    text-decoration: underline;
+    text-decoration: none;
+}
+.contenedorTemas {
+    text-align: -webkit-center;
+}
+a:hover {
+    color: lightblue;
+    text-decoration: underline;
+}
+
+img {
+    display: block;
+}

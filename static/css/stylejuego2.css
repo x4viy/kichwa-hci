@@ -1,0 +1,189 @@
+/* Autor: Bryan Amaya */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap');
+body{
+    font-family: 'Roboto';
+    /*background-repeat: repeat;*/
+    /*background-image: linear-gradient(276deg, #7928CA, #FF0080);*/
+    /*james*/
+    background-image: url("../img/fondo21.png");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+#main{
+    margin:10px auto;
+    width:55%;
+    /*background-color: #eee;*/
+    padding:15px 5%;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius:15px;
+    filter: drop-shadow(0px 0px 1px rgb(177, 177, 177));
+    /*james*/
+
+}
+
+h1{
+    color:#58cc02;
+}
+
+h3{
+    font-weight: 400;
+    font-size:1em;
+}
+
+h2{
+    font-size:1.3em;
+}
+
+#page{
+    font-size:1em;
+    padding-bottom:15px;
+    color:rgb(97, 97, 97);
+    font-weight: 400;
+}
+
+#logo{
+    width:170px;
+    height:auto;
+    border-radius:15px;
+}
+
+.field{
+    background-color: rgb(199, 199, 199);
+    padding:10px;
+    border-radius:20px;
+    width:80px;
+    height:10px;
+    display:inline-block;
+    margin:0px 5px -8px 5px;
+}
+
+#pregunta{
+    line-height: 200%;
+    color: rgb(97, 97, 97);
+}
+
+#palabras{
+    display:flex;
+    flex-wrap: wrap;
+
+}
+
+.palabra{
+    margin:5px;
+    /*background-color:#58cc02;*/
+    font-weight:400;
+    color:white;
+    transition: 0.4s;
+    text-align: center;
+    border-radius: 20px;
+    padding:10px 18px;
+    user-select: none;;
+    font-size: 35px;
+    /*james*/
+    /*background: linear-gradient(90deg, #FC466B 0%, #3F5EFB 100%);*/
+    background: linear-gradient(90deg, #9ebd13 0%, #008552 100%);
+    /*background-color: #85FFBD;
+    background-image: linear-gradient(45deg, #85FFBD 0%, #FFFB7D 100%);*/
+
+
+}
+
+.respuesta-incorrecta{
+    background: none !important;
+    background-color: #be4444 !important;
+}
+
+.boton-incorrecta{
+    background: none !important;
+    background-color: grey !important;
+
+}
+.boton-incognita{
+
+    background: none !important;
+    background-color: #008552 !important;
+    transition: background 100s ease-out;
+
+}
+
+#submit{
+    padding:15px 20px;
+    border-radius: 25px;
+    /*background-color: #ffc800;*/
+    background: #008552;
+    border:none;
+    /*color:rgb(97, 97, 97);*/
+    color:#f0f6ff;
+    font-weight: bold;
+    font-size:15px;
+    margin-top:10px;
+    transition: 0.4s;
+}
+
+
+.palabra:hover{
+    transform:scale(1.05);
+    background-color: #0f9120;
+}
+#submit:hover{
+    transform:scale(1.05);
+    background-color:#ffae00 ;
+}
+
+.hide {
+    display: none;
+    content: none;
+}
+/*james*/
+#letrero{
+    /*width: 400px;*/
+    /*height: 220px;*/
+    width: 450px;
+    height: 250px;
+
+}
+#caja{
+   position: relative;
+    display: inline-block;
+}
+/*james*/
+#puntos{
+    position: absolute;
+    top: 61%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'mifuente';
+    font-size: 30px;
+    /*color: #f0f6ff;*/
+}
+
+@font-face {
+        font-family: 'mifuente';
+        src:url("../img/fuente2.otf");
+
+}
+
+#imagencorrecto img{
+    width: 200px;
+    height: 160px;
+}
+
+#imagenincorrecto img{
+    width: 290px;
+    height: 135px;
+}
+.caja {
+    display: flex;
+}
+
+element.style {
+}
+div#contenedorimagenes {
+    text-align: center;
+    /* margin-bottom: 3%; */
+}

@@ -1,0 +1,31 @@
+{% extends 'crud/bodyList.html' %}
+{% load quichua_tags %}
+
+
+{% block headScriptsList %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Encuentra todos los elementos de imagen con la clase 'icono_editar'
+        var editIcons = document.querySelectorAll('.table-edit-pencil');
+
+        // Itera a través de todos los elementos y cambia la URL de la imagen
+        editIcons.forEach(function(editIcon) {
+            var eyeIconUrl = "/static/img/eye-edit.png";
+            editIcon.src = eyeIconUrl;
+            editIcon.alt = 'View';
+            editIcon.style.width = '25px';
+            editIcon.style.height = '25px';
+        });
+    });
+</script>
+{% endblock %}
+
+{% block contentList %}
+
+{% endblock %}
+
+{% block bodyFooterScriptsList %}
+    <script>
+        $('.btn-sm').hide();
+    </script>
+{% endblock %}

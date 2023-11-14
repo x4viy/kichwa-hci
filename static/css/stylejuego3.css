@@ -1,0 +1,191 @@
+/* Autor: Santiago Cedillo, Bryan Amaya */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap');
+body{
+    font-family: 'Roboto';
+    background-repeat: repeat;
+    /*background-image: linear-gradient(276deg, #7928CA, #FF0080);*/
+    background-image: url("../img/fondo1.png");
+    background-size: cover;
+    background-repeat: repeat-y;
+}
+
+#main{
+    margin:10px auto;
+    width:55%;
+    /*background-color: #eee;*/
+    padding:15px 5%;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius:15px;
+    filter: drop-shadow(0px 0px 1px rgb(177, 177, 177));
+}
+
+h1{
+    color:#58cc02;
+}
+
+h3{
+    font-weight: 400;
+    font-size:1em;
+}
+
+h2{
+    font-size:1.3em;
+}
+
+#page{
+    font-size:1em;
+    padding-bottom:15px;
+    color:rgb(97, 97, 97);
+}
+
+#logo{
+    width:170px;
+    height:auto;
+    border-radius:15px;
+}
+
+.field{
+    background-color: rgb(199, 199, 199);
+    padding:10px;
+    border-radius:20px;
+    width:80px;
+    height:10px;
+    display:inline-block;
+    margin:0px 5px -8px 5px;
+}
+
+#question{
+    line-height: 200%;
+    color: rgb(97, 97, 97);
+}
+
+#words{
+    display:flex;
+    flex-wrap: wrap;
+
+}
+
+.word{
+    margin:5px;
+    background-color:#58cc02;
+    font-weight:400;
+    color:white;
+    transition: 0.4s;
+    text-align: center;
+    border-radius: 20px;
+    padding:10px 18px;
+    user-select: none;;
+    font-size: 35px;
+}
+
+.wrong-answear{
+    background-color: #be4444 !important;
+}
+
+#submit{
+    padding:15px 20px;
+    border-radius: 25px;
+    background-color: #ffc800;
+    border:none;
+    color:rgb(97, 97, 97);
+    font-weight: bold;
+    font-size:15px;
+    margin-top:10px;
+    transition: 0.4s;
+}
+
+
+.word:hover{
+    transform:scale(1.05);
+    background-color: #0f9120;
+}
+#submit:hover{
+    transform:scale(1.05);
+    background-color:#ffae00 ;
+}
+
+.hide {
+    display: none;
+    content: none;
+}
+
+
+
+
+
+h3{
+    text-align: center;
+    font-size: 20px;
+    color: #08B
+}
+
+section {
+    width: 90%;
+    height:auto;
+    padding:10px;
+    margin: 90px auto 0 auto;
+}
+
+section:after {
+    content: " ";
+    display: block;
+    height: 0;
+    clear: both;
+}
+
+section h1{
+    text-align: center;
+    font-size: 35px;
+    color: #FFF;
+}
+
+p {
+    color: #000;
+}
+
+p.note {
+    color: #FFF;
+    font-size:14px;
+    text-align: center;
+}
+
+textarea{
+    display:block;
+    width:500px;
+    height:200px
+}
+
+a:link, a:visited{
+    color: #FFF;
+    text-decoration: none;
+}
+
+button {
+            color: #ffffff;
+            background-color: #007fff;
+            border-color: #007fff;
+            display: block;
+            margin: 0 auto;
+            font-weight: normal;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            background-image: none;
+            border: 1px solid transparent;
+            white-space: nowrap;
+            padding: 10px 18px;
+            font-size: 15px;
+            line-height: 1.42857143;
+            border-radius: 0;
+        }
+
+textarea {
+    display: block;
+    margin: 10px;
+    border: 1px solid #CCC;
+    padding: 10px;
+    width: 100%;
+    min-height: 150px;
+}

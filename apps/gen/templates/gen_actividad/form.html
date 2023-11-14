@@ -1,0 +1,92 @@
+{% extends 'crud/bodyFormCrispy.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block headScriptsForm %}
+    <script src="{% static 'js/syncfusion.js' %}"></script>
+    <script src="{% static 'js/util_dev.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'js/gen_actividad_archivo.js' %}"></script>
+
+{% endblock %}
+
+{% block contentForm %}
+{% endblock %}
+
+{% block bodyFooterScriptsForm %}
+    {# Convierte el grid de texto a un json para maniuplarlo #}
+    {{ grids_detalles|json_script:"gr_dets" }}
+
+    <script>
+        const gr_dets = get_json_from_script();
+        const elem_respuestas = gr_dets[0];
+        const elem_multimedia = gr_dets[1];
+
+        //para eliminar y cambiar el estado en un campo de la grid segun corresponda
+        eval("elem_respuestas.gridOptions.toolbarClick=" + elem_respuestas.gridOptions.toolbarClick);
+        eval("elem_respuestas.gridOptions.rowDataBound=" + elem_respuestas.gridOptions.rowDataBound);
+
+        eval("elem_multimedia.gridOptions.toolbarClick=" + elem_multimedia.gridOptions.toolbarClick);
+        eval("elem_multimedia.gridOptions.rowDataBound=" + elem_multimedia.gridOptions.rowDataBound);
+
+        {# mul_archivo #}
+        eval("elem_multimedia.gridOptions.columns[2].edit.create=" + elem_multimedia.gridOptions.columns[2].edit.create);
+        eval("elem_multimedia.gridOptions.columns[2].edit.destroy=" + elem_multimedia.gridOptions.columns[2].edit.destroy);
+        eval("elem_multimedia.gridOptions.columns[2].edit.read=" + elem_multimedia.gridOptions.columns[2].edit.read);
+        eval("elem_multimedia.gridOptions.columns[2].edit.write=" + elem_multimedia.gridOptions.columns[2].edit.write);
+
+
+        eval("elem_multimedia.gridOptions.columns[3].edit.create=" + elem_multimedia.gridOptions.columns[3].edit.create);
+        eval("elem_multimedia.gridOptions.columns[3].edit.destroy=" + elem_multimedia.gridOptions.columns[3].edit.destroy);
+        eval("elem_multimedia.gridOptions.columns[3].edit.read=" + elem_multimedia.gridOptions.columns[3].edit.read);
+        eval("elem_multimedia.gridOptions.columns[3].edit.write=" + elem_multimedia.gridOptions.columns[3].edit.write);
+
+        //Inicializa el grid (Detalle)
+        var grid = [];
+        ej.grids.Grid.Inject(ej.grids.Edit);
+        {#const grid = new ej.grids.Grid(elem_unimeds.gridOptions);#}
+
+        grid[0] = new ej.grids.Grid(elem_respuestas.gridOptions);
+        grid[0].appendTo("#" + elem_respuestas.grid_id);
+
+        grid[1] = new ej.grids.Grid(elem_multimedia.gridOptions);
+        grid[1].appendTo("#" + elem_multimedia.grid_id);
+
+        $("form#form_Gen_ActividadForm_id button[type = 'submit']").click(function (e) {
+            e.preventDefault();
+            btnClicked = $(this).attr("name");
+
+            form = document.querySelector('#form_Gen_ActividadForm_id');
+            form.enctype = "multipart/form-data"; // agregando el enctype al formulario
+            fields = new FormData(form);
+            fields.append(btnClicked, '');
+            fields.append(elem_respuestas.grid_id, JSON.stringify(elem_respuestas.gridOptions.dataSource));
+            fields.append(elem_multimedia.grid_id, JSON.stringify(elem_multimedia.gridOptions.dataSource));
+            fields.append('csrfmiddlewaretoken', '{{ csrf_token }}'); // Añade el token CSRF aquí
+            sendToServer(url = form.action, data = fields, method = form.method)
+                .then(data => {
+                    console.log(data)
+                    //recupera los errores ya mostrados en pantalla
+                    let elms = document.querySelectorAll("[id='error']");
+                    let elements = document.getElementsByClassName('is-invalid');
+                    //borrar los errores en pantalla
+                    for (let i = 0; i < elements.length; i++) {
+                        document.getElementById(elements[i].id).classList.remove('is-invalid');
+                    }
+                    // si la data = 1 significa que la petición no tiene errores
+
+                    if (data.a != 1) {
+                        for (let i = 0; i < elms.length; i++) {
+                            elms[i].parentNode.removeChild(elms[i]); //borra los errores en pantalla
+                         }
+                        imprimir_errores(data); //muestra los errores en pantalla
+                    } else {
+                        window.location.replace("{{url_list}}"); //redirecciona
+                    }
+                });
+        });
+    </script>
+
+{% endblock %}
+
+

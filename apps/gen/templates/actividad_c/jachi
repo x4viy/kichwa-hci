@@ -1,0 +1,38 @@
+
+
+
+
+avanza 				-> A
+derecha				-> D
+izquierda			-> I
+retrocede			-> R
+detente				-> P
+
+avanza
+gira a la derecha
+gira a la izquierda
+retrocede
+detente
+
+Hachi avanza
+Hachi gira a la derecha
+Hachi gira a la izquierda
+Hachi retrocede
+Hachi detente
+
+
+Hachi	gira 		a 				la 			  izquierda
+[S] 	[V] 	[Preposicion] 	[Preposicion]	 [Adejtivo]
+
+Hachi	gira 		a 				la 			  derecha
+[S] 	[V] 	[Preposicion] 	[Preposicion]	 [Adejtivo]
+
+
+Hachi Avanza
+[S] 	[V]
+
+Hachi detente
+[S] 	[V]
+
+Hachi retrocede
+[S] 	[V]

@@ -1,0 +1,946 @@
+{#{% load static %}#}
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{##}
+{#<head>#}
+{#    <meta charset="utf-8">#}
+{#    <title>App Quichua-Juegos</title>#}
+{#    <meta content="width=device-width, initial-scale=1.0" name="viewport">#}
+{#    <meta content="" name="keywords">#}
+{#    <meta content="" name="description">#}
+{#       <!-- Template Stylesheet -->#}
+{#    <link href="{% static '/css2/bootstrap.min.css' %}" rel="stylesheet">#}
+{#    <link href="{% static '/css2/style.css' %}" rel="stylesheet">#}
+{#    <!-- Google Web Fonts -->#}
+{#    <link rel="preconnect" href="https://fonts.googleapis.com">#}
+{#    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>#}
+{#    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Inter:wght@600&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">#}
+{##}
+{#    <!-- Icon Font Stylesheet -->#}
+{#    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">#}
+{#    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">#}
+{##}
+{#    <!-- Libraries Stylesheet -->#}
+{#    <link href="{% static 'lib/Lib Template/animate/animate.min.css'%}" rel="stylesheet">#}
+{#    <link href="{% static 'lib/Lib Template/owlcarousel/assets/owl.carousel.min.css'%}" rel="stylesheet">#}
+{#<style>#}
+{#  /* Estilo personalizado para mostrar solo el borde inferior de las filas */#}
+{#  table.table-borderless tbody tr {#}
+{#    border-bottom: 1px solid #dee2e6; /* Ajusta el color y grosor del borde según tus preferencias */#}
+{#  }#}
+{#</style>#}
+{#    <!-- Customized Bootstrap Stylesheet -->#}
+{#</head>#}
+{##}
+{#<body>#}
+{#        <div class="container-fluid bg-white p-0">#}
+{#        <!-- Spinner Start -->#}
+{#        <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">#}
+{#            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">#}
+{#                <span class="sr-only">Loading...</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <!-- Spinner End -->#}
+{##}
+{##}
+{#        <!-- Navbar Start -->#}
+{#        <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top px-4 px-lg-5 py-lg-0">#}
+{#            <a href="../../100/home/" class="navbar-brand">#}
+{#                <h1 class="m-0 text-primary"><i class="fa fa-book-reader me-3"></i>App Quichua</h1>#}
+{#            </a>#}
+{#            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">#}
+{#                <span class="navbar-toggler-icon"></span>#}
+{#            </button>#}
+{#            <div class="collapse navbar-collapse" id="navbarCollapse">#}
+{#                <div class="navbar-nav mx-auto">#}
+{#                    <a href="../../../100/home/" class="nav-item nav-link">Inicio</a>#}
+{#                    <a href="../../../100/temas/" class="nav-item nav-link">Juegos</a>#}
+{#                    <a href="../../../100/nosotros/" class="nav-item nav-link">Nosotros</a>#}
+{#                    <a href="../../../100/contact/" class="nav-item nav-link">Contáctanos</a>#}
+{#                    <div class="nav-item dropdown">#}
+{#                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Mi cuenta</a>#}
+{#                        <div class="dropdown-menu rounded-0 rounded-bottom border-0 shadow-sm m-0">#}
+{#                            <a href="../../../1/login/" class="dropdown-item">Iniciar Sesión</a>#}
+{#                            <a href="../../../1/register/" class="dropdown-item">Registrarse</a>#}
+{#                            <a href="#" class="dropdown-item">Manual de usuario</a>#}
+{#                        </div>#}
+{#                    </div>#}
+{##}
+{#                </div>#}
+{#                <div class="navbar-nav">#}
+{#                    <form class="d-flex">#}
+{#                        <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Search">#}
+{#                        <button class="btn btn-primary" type="submit">Buscar</button>#}
+{#                    </form>#}
+{#                </div>#}
+{#            </div>#}
+{#        </nav>#}
+{#        <!-- Navbar End -->#}
+{#        <!-- Body Start -->#}
+{#<div class="container mt-5">#}
+{#    <div class="row justify-content-center">#}
+{#      <div class="col-md-8">#}
+{#        <h1 class="mb-4 text-center text-primary">Juegos de la Actividad</h1>#}
+{#      <div id="juegos-container">#}
+{#<table class="table table-borderless table-rounded text-center">#}
+{#  <thead class="bg-primary" style="font-family: cursive">#}
+{#    <tr>#}
+{#      <th class="text-white py-3">Juego</th>#}
+{#      <th class="text-white py-3">Descripción</th>#}
+{#      <th class="text-white py-3">Puntaje</th>#}
+{#      <th>#}
+{#                <button id="jugarTodosBtn" type="button" class="btn btn-primary px-5">#}
+{#          <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">#}
+{#            <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"></path>#}
+{#          </svg>#}
+{##}
+{#        </button>#}
+{#      </th>#}
+{#    </tr>#}
+{#  </thead>#}
+{#  <tbody style="background: #FFF5F3; font-family: cursive">#}
+{#    {% if gen_juegos %}#}
+{#      {% for i in gen_juegos %}#}
+{#      <tr>#}
+{#        <td>{{ i.jue_nombre }}</td>#}
+{#        <td>{{ i.jue_descripcion }}</td>#}
+{#        <td>{{ i.jue_puntaje }}</td>#}
+{#        <td>#}
+{#          <button type="button" class="btn btn-primary jugarBtn" data-jue-id="{{ i.jue_id }}" data-tip-id="{{ i.tip_id }}">#}
+{#            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">#}
+{#              <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"></path>#}
+{#            </svg>#}
+{#            Jugar#}
+{#          </button>#}
+{#        </td>#}
+{#      </tr>#}
+{#      {% endfor %}#}
+{#    {% endif %}#}
+{#    <!-- Agrega más filas de datos aquí si es necesario -->#}
+{#  </tbody>#}
+{#</table>#}
+{#         </div>#}
+{#      </div>#}
+{#    </div>#}
+{#  </div>#}
+{##}
+{##}
+{##}
+{#        <!-- Body End -->#}
+{##}
+{#        <!-- Footer Start -->#}
+{#        <div class="container-fluid bg-primary text-white-50 footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">#}
+{##}
+{#            <div class="container">#}
+{#                <div class="copyright">#}
+{#                    <div class="row">#}
+{#                        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">#}
+{#                            &copy; <a class="border-bottom" href="#">Your Site Name</a>, All Right Reserved.#}
+{##}
+{#							<!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->#}
+{#							Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a>#}
+{#                            <br>Distributed By: <a class="border-bottom" href="https://themewagon.com" target="_blank">ThemeWagon</a>#}
+{#                        </div>#}
+{#                        <div class="col-md-6 text-center text-md-end">#}
+{#                            <div class="footer-menu">#}
+{#                                <a href="">Home</a>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#        <!-- Footer End -->#}
+{##}
+{##}
+{#        <!-- Back to Top -->#}
+{#        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>#}
+{#    </div>#}
+{##}
+{#    <!-- JavaScript Libraries -->#}
+{#    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>#}
+{#    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>#}
+{#    <script src="{% static 'lib/Lib Template/wow/wow.min.js' %}"></script>#}
+{#    <script src="{% static 'lib/Lib Template/easing/easing.min.js' %}"></script>#}
+{#    <script src="{% static 'lib/Lib Template/waypoints/waypoints.min.js' %}"></script>#}
+{#    <script src=" {% static 'lib/Lib Template/owlcarousel/owl.carousel.min.js' %}"></script>#}
+{##}
+{#    <!-- Template Javascript -->#}
+{#    <script src="{% static 'js/JS-Template/main.js' %}"></script>#}
+{#    <script src="{% static 'js/js-juegos/juegos-act.js' %}"></script>#}
+{#</body>#}
+{##}
+{#</html>#}
+
+{# AUTOR: Bryan Amaya, James García #}
+{#{% load static %}#}
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <title>Home</title>#}
+{#    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"#}
+{#          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">#}
+{#    <link rel="stylesheet" href="{% static '/css/styleindex.css' %}">#}
+{#    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"#}
+{#            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"#}
+{#            crossorigin="anonymous"></script>#}
+{#</head>#}
+{#<body>#}
+{##}
+{#<header class="hero">#}
+{#    <nav class="nav container">#}
+{#        <ul class="nav__link nav__link--menu">#}
+{#            <li class="nav__items">#}
+{#                <a href="../../400/temas/" class="nav__links">Home</a>#}
+{#            </li>#}
+{#            <li class="nav__items">#}
+{#                <a href="#" class="nav__links">Test</a>#}
+{#            </li>#}
+{#            <li class="nav__items">#}
+{#                <a href="#" class="nav__links">Test</a>#}
+{#            </li>#}
+{#            <li class="nav__items">#}
+{#                <a href="#" class="nav__links">Nosotros</a>#}
+{#            </li>#}
+{#            <li class="nav__items">#}
+{#                <a href="../../1/login/" target="_blank" class="nav__links"#}
+{#                   id="BtnLogin">Iniciar#}
+{#                    sesión</a>#}
+{#            </li>#}
+{##}
+{##}
+{#        </ul>#}
+{##}
+{##}
+{#    </nav>#}
+{##}
+{#    <section class="hero__container container">#}
+{#        <h1 class="hero__title">Aprendiendo Quichua</h1>#}
+{#        <p class="hero__paragraph">Aprende mientras te diviertes!#}
+{#        </p>#}
+{#    </section>#}
+{#</header>#}
+{#<main>#}
+{#    <section class="price container">#}
+{#        <h2 class="subtitle">TEMAS</h2>#}
+{##}
+{##}
+{##}
+{#        <div class="contenedorTemas">#}
+{#        {% if tema %}#}
+{#            {% for i in tema %}#}
+{##}
+{#                                    <button type="button" class="btn btn-primary w-auto me-1 mb-0"><a href="../../400/actividades/?tem={{ i.tem_id }}&ses={{ random }}"#}
+{#                                                                                              target="_blank"> {{ i.tem_nombre }} </a></button>#}
+{#                                    {{ i.tem_descripcion }}#}
+{##}
+{#                <br><br>#}
+{#                <div class="card">#}
+{#                    <div class="face front">#}
+{#                                                <button type="button" class="btn btn-primary w-auto me-1 mb-0"><a href="../../400/actividades/?tem={{ i.cat_id }}&ses={{ random }}"#}
+{#                                                                                                      target="_blank"> {{ i.cat_nombre }} </a></button>#}
+{#                        {% if multimedia %}#}
+{##}
+{#                            {% for j in multimedia %}#}
+{#                                {% if j.act_id is null %}#}
+{#                                    {% if i.tem_id == j.tem_id %}#}
+{#                                    <h6>{{ media_url }}</h6>#}
+{#                                        <img src="{{ media_url }}/{{ j.mul_archivo }}" alt="">#}
+{#                                    {% endif %}#}
+{#                                {% endif %}#}
+{#                            {% endfor %}#}
+{#                        {% endif %}#}
+{#                        <h3>{{ i.cat_nombre }}</h3>#}
+{#                    </div>#}
+{#                    <div class="face back">#}
+{#                        <p>{{ i.cat_descripcion }}</p>#}
+{#                        <div class="link">#}
+{#                            <a href="../../400/actividades/?tem={{ i.cat_id }}&ses={{ random }}" target="_blank">Ingresar</a>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{##}
+{#            {% endfor %}#}
+{#        {% endif %}#}
+{##}
+{#        </div>#}
+{##}
+{##}
+{##}
+{##}
+{#    <button type="button" class="btn btn-warning w-auto me-1 mb-0">Warning</button>#}
+{##}
+{#    <button type="button" class="btn btn-danger w-auto me-1 mb-0">Danger</button>#}
+{##}
+{#    <button type="button" class="btn btn-light w-auto me-1 mb-0">Light</button>#}
+{##}
+{#    <button type="button" class="btn btn-dark w-auto me-1 mb-0">Dark</button>#}
+{##}
+{#    <button type="button" class="btn btn-white w-auto me-1 mb-0">White</button>#}
+{##}
+{##}
+{#        <div class="price__table" id="proximas">#}
+{#            <div class="card">#}
+{#                <div class="face front">#}
+{#                    <img src="/static/img/abecedario.jpg" alt="">#}
+{#                    <h3>ALBAFETO</h3>#}
+{#                </div>#}
+{#                <div class="face back">#}
+{#                    <h3>ACHAHALA</h3>#}
+{#                    <p>Aprende el abecedario en Quichua de una manera divertida</p>#}
+{#                    <div class="link">#}
+{#                        <a href="#">Jugar</a>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <!--carta dos-->#}
+{#            <div class="card">#}
+{#                <div class="face front">#}
+{#                    <img src="/static/img/numeros_1.jpg" alt="">#}
+{#                    <h3>N&uacute;meros</h3>#}
+{#                </div>#}
+{#                <div class="face back">#}
+{#                    <h3>Yupay</h3>#}
+{#                    <p>Aprende los N&uacute;meros en Quichua de una manera divertida</p>#}
+{#                    <div class="link">#}
+{#                        <a href="#">Jugar</a>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <!--carta tres-->#}
+{#            <div class="card">#}
+{#                <div class="face front">#}
+{#                    <img src="/static/img/colores_1.jpg" alt="">#}
+{#                    <h3>Colores</h3>#}
+{#                </div>#}
+{#                <div class="face back">#}
+{#                    <h3>llinphikuna</h3>#}
+{#                    <p>Aprende los colores en Quichua de manera divetida</p>#}
+{#                    <div class="link">#}
+{#                        <a href="#">Jugar</a>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#        </div>#}
+{#    </section>#}
+{##}
+{##}
+{#</main>#}
+{##}
+{#<footer class="footer">#}
+{##}
+{#    <section class="footer__copy container">#}
+{#        <div class="footer__social">#}
+{#            <a href="https://www.facebook.com/japs.azogues.7" class="footer__icons"><img src="./images/facebook.svg"#}
+{#                                                                                         class="footer__img"></a>#}
+{#        </div>#}
+{##}
+{#        <h3 class="footer__copyright">Copyright &copy; 2022 Universidad del Azuay | Cuenca - Ecuador</h3>#}
+{#    </section>#}
+{#</footer>#}
+{##}
+{#</body>#}
+{#</html>#}
+{#{% load static %}#}
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{##}
+{#<head>#}
+{#    <meta charset="utf-8">#}
+{#    <title>App Quichua-Temas</title>#}
+{#    <meta content="width=device-width, initial-scale=1.0" name="viewport">#}
+{#    <meta content="" name="keywords">#}
+{#    <meta content="" name="description">#}
+{##}
+{#    <!-- Google Web Fonts -->#}
+{#    <link rel="preconnect" href="https://fonts.googleapis.com">#}
+{#    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>#}
+{#    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Inter:wght@600&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">#}
+{##}
+{#    <!-- Icon Font Stylesheet -->#}
+{#    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">#}
+{#    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">#}
+{##}
+{#    <!-- Libraries Stylesheet -->#}
+{#    <link href="{% static 'lib/Lib Template/animate/animate.min.css'%}" rel="stylesheet">#}
+{#    <link href="{% static 'lib/Lib Template/owlcarousel/assets/owl.carousel.min.css'%}" rel="stylesheet">#}
+{##}
+{#    <!-- Customized Bootstrap Stylesheet -->#}
+{#    <link href="{% static 'css2/bootstrap.min.css' %}" rel="stylesheet">#}
+{##}
+{#    <!-- Template Stylesheet -->#}
+{#    <link href="{% static 'css2/style.css'%}" rel="stylesheet">#}
+{#</head>#}
+{##}
+{#<body>#}
+{#        <div class="container-xxl bg-white p-0">#}
+{#        <!-- Spinner Start -->#}
+{#        <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">#}
+{#            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">#}
+{#                <span class="sr-only">Loading...</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <!-- Spinner End -->#}
+{##}
+{##}
+{#        <!-- Navbar Start -->#}
+{#        <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top px-4 px-lg-5 py-lg-0">#}
+{#            <a href="../../400/temas/" class="navbar-brand">#}
+{#                <h1 class="m-0 text-primary"><i class="fa fa-book-reader me-3"></i>App Quichua</h1>#}
+{#            </a>#}
+{#            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">#}
+{#                <span class="navbar-toggler-icon"></span>#}
+{#            </button>#}
+{#            <div class="collapse navbar-collapse" id="navbarCollapse">#}
+{#                <div class="navbar-nav mx-auto">#}
+{#                    <a href="../../400/home/" class="nav-item nav-link">Home</a>#}
+{#                    <a href="" class="nav-item nav-link">Nosotros</a>#}
+{#                    <a href="../../1/register/" class="nav-item nav-link">Registrarse</a>#}
+{##}
+{#                </div>#}
+{#                <a href="../../1/login/" class="btn btn-primary rounded-pill px-3 d-none d-lg-block">Iniciar Sesion<i class="fa fa-arrow-right ms-3"></i></a>#}
+{#            </div>#}
+{#        </nav>#}
+<!-- Navbar End -->
+
+<!--Body Start -->
+{##}
+{#<div class="container-fluid">#}
+{#    <div class="row flex-nowrap">#}
+{#        <div class="order-last col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">#}
+{#            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">#}
+{#                <a href="/" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">#}
+{#                    <span class="fs-5 d-none d-sm-inline">Categorias</span>#}
+{#                </a>#}
+{#                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">#}
+{#                    {% if categoria %}#}
+{#                     {% for i in categoria %}#}
+{#                    <li class="nav-item">#}
+{#                        <a href="#" class="nav-link align-middle px-0">#}
+{#                            <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">{{ i.cat_nombre }}</span>#}
+{#                        </a>#}
+{#                    </li>#}
+{#                    {% endfor %}#}
+{#                {% endif %}#}
+{#                </ul>#}
+{#                <hr>#}
+{##}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="col py-3">#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{##}
+{##}
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>App Quichua-Juegos</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+    <!-- Template Stylesheet -->
+    <link href="{% static '/css2/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static '/css2/style.css' %}" rel="stylesheet">
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Inter:wght@600&family=Lobster+Two:wght@700&display=swap"
+          rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{% static 'lib/Lib Template/animate/animate.min.css' %}" rel="stylesheet">
+    <link href="{% static 'lib/Lib Template/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <style>
+        .sidebar {
+            transition: all 0.3s;
+        }
+
+        .sidebar-hide {
+            max-width: 0;
+            overflow: hidden;
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: fixed;
+                top: 56px;
+                right: -250px;
+                width: 250px;
+                height: calc(100vh - 56px);
+                transition: right 0.3s;
+                overflow-y: auto;
+                background-color: #f8f9fa;
+                z-index: 1040;
+            }
+
+            .sidebar.show {
+                right: 0;
+            }
+        }
+
+        .content-container {
+            position: relative;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+            .description {
+        height: 50px; /* Ajusta este valor según el tamaño que desees */
+        overflow-y: auto;
+    }
+
+    /* Esconder scrollbar para Chrome, Safari y Opera */
+    .description::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Esconder scrollbar para IE, Edge y Firefox */
+    .description2 {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+
+     .description2 {
+        height: 80px; /* Ajusta este valor según el tamaño que desees */
+        overflow-y: auto;
+    }
+
+    /* Esconder scrollbar para Chrome, Safari y Opera */
+    .description2::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Esconder scrollbar para IE, Edge y Firefox */
+    .description2 {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+    </style>
+
+
+</head>
+
+<body data-tem-id="{{ tem_id }}" data-act-id="{{ act_id }}">
+
+<div class="container-fluid bg-white p-0">
+    <!-- Spinner Start -->
+    <div id="spinner"
+         class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- Spinner End -->
+
+
+     <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top px-4 px-lg-5 py-lg-0">
+                 <a href="/" class="navbar-brand">
+    <h1 class="m-0 text-primary d-flex align-items-center">
+        <img alt="" class="img-fluid me-3" src="{% static 'img/LogoUDA.png' %}" style="max-height: 1.2em;">
+        App Quichua
+    </h1>
+</a>
+
+        <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse"  style="font-family: cursive" id="navbarCollapse">
+            <div class="navbar-nav mx-auto">
+                <a href="/../100/home/" class="nav-item nav-link">Inicio</a>
+                <a href="/../100/temas/" class="nav-item nav-link active">Juegos</a>
+                <a href="/../100/nosotros/" class="nav-item nav-link">Nosotros</a>
+                <a href="/../100/contact/" class="nav-item nav-link">Contáctanos</a>
+                <div class="nav-item dropdown">
+                    {% if user.is_authenticated %}
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Panel de Administración</a>
+                            <div class="dropdown-menu rounded-0 rounded-bottom border-0 shadow-sm m-0">
+                                 <a href="/../100/perfil/" class="dropdown-item">Mi perfil</a>
+                                <!-- Modifica el href según donde tengas la página de perfil -->
+                                <a href="/../100/puntajes/" class="dropdown-item">Mis puntajes</a>
+                                <!-- Modifica el href según donde tengas la página de puntajes -->
+                                <a href="#" class="dropdown-item">Manual de usuario</a>
+                                <a href="{% url 'logout' %}" class="dropdown-item">Cerrar Sesión</a>
+                                <!-- Asegúrate de tener una vista de logout configurada -->
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Mi cuenta</a>
+                            <div class="dropdown-menu rounded-0 rounded-bottom border-0 shadow-sm m-0">
+                                <a href="/../100/login/" class="dropdown-item">Iniciar Sesión</a>
+                                <a href="/../100/register/" class="dropdown-item">Registrarse</a>
+                                <a href="#" class="dropdown-item">Manual de usuario</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="navbar-nav">
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Search" id="searchInput">
+                    <button class="btn btn-primary" type="text" id="searchButton">Buscar</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+<!-- Navbar End -->
+{#    <div class="container-fluid py-3 page-header2 position-relative mb-5">#}
+    <div class="container-fluid py-1 page-header2 position-relative mb-5">
+        <div class="container py-5 text-center">
+        <h1 class="display-2 text-white animated slideInDown mb-4">Juegos</h1>
+        </div>
+    </div>
+
+ <div class="container-fluid">
+        <div class="row mt-3">
+            <div class="col content-container ">
+                <div class="container-fluid ">
+                <div class="align-items-center mb-3">
+                                    <span class="text-primary fw-bold" style="font-size: calc(1.275rem + .3vw);font-family:cursive;">Juegos de la actividad: {{ act_nombre }}</span>
+                     {% if gen_juegos %}
+               <button id="jugarTodosBtn" class="btn btn-success px-4" data-jue-id="{{ i.jue_id }}" data-tip-id="{{ i.tip_id }}"
+                                    style="text-align: justify; font-family: cursive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
+                                     class="bi bi-play" viewBox="0 0 16 16">
+                                    <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"></path>
+                                </svg>
+                   Jugar Todos
+                            </button>
+                     {% endif %}
+                </div>
+                <div class="row" id="temas">
+    {% if gen_juegos %}
+        {% for i in gen_juegos %}
+            <div class="col-lg-4 col-md-6 mb-3" >
+ <!-- Bloque de Imagen -->
+                <div class="bg-light rounded-top w-100 h-50 mx-auto">
+{#                    {% if multimedia %}#}
+{#                        {% for j in multimedia %}#}
+{#                            {% if j.tem_id is null and i.act_id == j.act_id %}#}
+                                <img class="img-fluid rounded p-3" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" src="{{ i.mul_archivo }}" alt="">
+{#                            {% endif %}#}
+{#                        {% endfor %}#}
+{#                    {% endif %}#}
+                </div>
+                <!-- Bloque de Contenido -->
+                <div class="bg-light rounded-bottom p-3">
+
+                    <!-- 1. Nombre del tema -->
+                    <div>
+                        <div class="d-flex align-items-center justify-content-center description2">
+                        <span class="text-center fw-bold" style="font-size: calc(1.275rem + .3vw);font-family:cursive; color: #FE5D37">{{ i.jue_nombre }}</span>
+                    </div>
+                    </div>
+
+                    <!-- 2. Descripción del tema -->
+                    <div>
+                        <p class="text-secondary description" style="text-align: justify; font-family: cursive">{{ i.jue_descripcion }}</p>
+                    </div>
+
+                    <!-- 3. Asignatura y Nro. de Actividades -->
+                    <div class="d-flex justify-content-between align-items-center my-2">
+                        <div>
+                            <div>
+                                <span class="text-secondary" style="text-align: justify; font-family: cursive">Puntaje:</span>
+                                <span class="text-warning">{{ i.jue_puntaje }}</span>
+                            </div>
+                        </div>
+                        <!-- Botón Comenzar -->
+                        <div>
+                            <button class="btn btn-success startBtn px-4" data-jue-id="{{ i.jue_id }}" data-tip-id="{{ i.tip_id }}"
+                                    style="text-align: justify; font-family: cursive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
+                                     class="bi bi-play" viewBox="0 0 16 16">
+                                    <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+
+                    {#    dentro                #}
+                    <button class="btn btn-primary mt-3 toggle-btn" id="toggle-sidebar">Juegos</button>
+                </div>
+            </div>
+            <div class="col-2 sidebar bg-light rounded" id="sidebar">
+                <div class="p-3 bg-light">
+                    <a href="/../100/temas/"><h3 class="text-primary text-center my-3">
+                        Asignaturas</h3></a>
+                    <ul class="list-unstyled text-center my-3" id="listaCat">
+                        {% if asi %}
+                            {% for i in asi %}
+                                <li data-asi_id="{{ i.asi_id }}" style="cursor:pointer; font-family: cursive"
+                                    class="link-primary bg-light py-2 border-bottom border-secondary"
+                                    value="{{ i.asi_id }}">
+                                    {{ i.asi_nombre }}
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{#</div>#}
+    <!-- Body End -->
+    <!-- Modal Strart -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tit_modal">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id="actividades-body" class="modal-body">
+                    <ul id="lista-act" class="list-unstyled">
+
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary">Comenzar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal End -->
+  <!-- Footer Start -->
+        <div class="container-fluid bg-primary text-white-50 footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+            <div class="container" style="font-family: cursive">
+                <div class="row g-5 justify-content-center">
+                <div class="col-lg-3 col-md-6">
+                        <h3 class="text-white mb-4">Menu</h3>
+                        <a class="btn btn-link text-white-50" href="/">Inicio</a>
+                        <a class="btn btn-link text-white-50" href="/../100/contact/">Contáctanos</a>
+                        <a class="btn btn-link text-white-50" href="/../100/nosotros/">Nosotros</a>
+                        <a class="btn btn-link text-white-50" href="/..//100/terminos/">Términos y condiciones</a>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <h3 class="text-white mb-4">Redes Sociales</h3>
+                      <div class="d-flex pt-2">
+        {% if redes %}
+            {% for i in redes %}
+                {% if i.ind_nombre|lower == "facebook" %}
+                    <a class="btn btn-outline-light btn-social" href="{{ i.ind_descripcion|striptags }}"><i class="fab fa-facebook-f"></i></a>
+                {% endif %}
+                {% if i.ind_nombre|lower == "twitter" %}
+                    <a class="btn btn-outline-light btn-social" href="{{ i.ind_descripcion|striptags }}"><i class="fab fa-twitter"></i></a>
+                {% endif %}
+                {% if i.ind_nombre|lower == "instagram" %}
+                    <a class="btn btn-outline-light btn-social" href="{{ i.ind_descripcion|striptags }}"><i class="fab fa-instagram"></i></a>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+           <a class="btn btn-outline-light btn-social" href="https://twitter.com/uazuay/"><i class="fab fa-twitter"></i></a>
+            <a class="btn btn-outline-light btn-social" href="https://www.facebook.com/uazuay"><i class="fab fa-facebook-f"></i></a>
+            <a class="btn btn-outline-light btn-social" href="https://www.instagram.com/uda.oficial/"><i class="fab fa-instagram"></i></a>
+        {% endif %}
+    </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <h3 class="text-white mb-4">Contáctanos</h3>
+                        {% if contact %}
+                            {% for i in contact %}
+                                <div class="fw-bold">{{ i.ind_nombre}}</div>
+                                <div>{{ i.ind_descripcion | safe }}</div>
+                            {% endfor %}
+                        {% endif %}
+{#                        <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Av. 24 de Mayo 7-77 y Hernán Malo</p>#}
+{#                        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>(593) 7 4091000</p>#}
+{#                        <p class="mb-2"><i class="fa fa-envelope me-3"></i>dyac@uazuay.edu.ec</p>#}
+                    </div>
+
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="copyright">
+                    <div class="row" style="font-family: cursive">
+                        <div class="col-md-6 mx-auto text-center mb-3 mb-md-0">
+                            <p>
+                                © Copyright <strong>ERP</strong>. Todos los derechos reservados
+                            </p>
+                            <p>2023</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer End -->
+
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+</div>
+
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'lib/Lib Template/wow/wow.min.js' %}"></script>
+<script src="{% static 'lib/Lib Template/easing/easing.min.js' %}"></script>
+<script src="{% static 'lib/Lib Template/waypoints/waypoints.min.js' %}"></script>
+<script src=" {% static 'lib/Lib Template/owlcarousel/owl.carousel.min.js' %}"></script>
+
+<!-- Template Javascript -->
+<script src="{% static 'js/JS-Template/main.js' %}"></script>
+
+<script>
+
+    var sidebar = document.getElementById('sidebar');
+
+    function ocultarMostrarBoton() {
+        var windowWidth = window.innerWidth;
+        if (windowWidth < 991.98) { // Cambia el valor de 600 según tu criterio
+            document.getElementById('toggle-sidebar').style.display = 'block'; // Ocultar el botón si la ventana es pequeña
+        } else {
+            document.getElementById('toggle-sidebar').style.display = 'none'; // Mostrar el botón si la ventana es grande
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', ocultarMostrarBoton);
+    window.addEventListener('resize', ocultarMostrarBoton);
+
+    document.getElementById('toggle-sidebar').addEventListener('click', function () {
+        if (window.innerWidth > 991.98) {
+
+            if (sidebar.classList.contains('sidebar-hide')) {
+                sidebar.classList.remove('sidebar-hide');
+            } else {
+                sidebar.classList.add('sidebar-hide')
+            }
+
+        } else {
+
+            if (sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            } else {
+                sidebar.classList.add('show');
+            }
+
+        }
+    });
+</script>
+<script>
+
+$(document).ready(function() {
+
+    // Función que manejará la petición AJAX
+    function fetchJuegos(tem_id,act_id, searchTerm) {
+        $.ajax({
+            url: `/../100/juegos_busqueda/${tem_id}/${act_id}/`,
+            type: 'GET',
+            data: {
+                'searchTerm': searchTerm
+            },
+            dataType: 'json',
+            success: function(data) {
+                 $('#temas').empty();
+
+                data.forEach(function(juego) {
+                    let opciones = `            <div class="col-lg-4 col-md-6 mb-3" >
+ <!-- Bloque de Imagen -->
+                <div class="bg-light rounded-top w-100 h-50 mx-auto">
+                                <img class="img-fluid rounded p-3" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" src="${juego.mul_archivo}" alt="">
+                </div>
+                <!-- Bloque de Contenido -->
+                <div class="bg-light rounded-bottom p-3">
+
+                    <!-- 1. Nombre del tema -->
+                    <div>
+                        <div class="d-flex align-items-center justify-content-center description2">
+                        <span class="text-center fw-bold" style="font-size: calc(1.275rem + .3vw);font-family:cursive; color: #FE5D37">${juego.jue_nombre}</span>
+                    </div>
+                    </div>
+
+                    <!-- 2. Descripción del tema -->
+                    <div>
+                        <p class="text-secondary description" style="text-align: justify; font-family: cursive">${juego.jue_descripcion}</p>
+                    </div>
+
+                    <!-- 3. Asignatura y Nro. de Actividades -->
+                    <div class="d-flex justify-content-between align-items-center my-2">
+                        <div>
+                            <div>
+                                <span class="text-secondary" style="text-align: justify; font-family: cursive">Puntaje:</span>
+                                <span class="text-warning">${juego.jue_puntaje}</span>
+                            </div>
+                        </div>
+                        <!-- Botón Comenzar -->
+                        <div>
+                            <button class="btn btn-success startBtn px-4" data-jue-id="${juego.jue_id}" data-tip-id="${juego.tip_id}"
+                                    style="text-align: justify; font-family: cursive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
+                                     class="bi bi-play" viewBox="0 0 16 16">
+                                    <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div> `;
+                    $('#temas').append(opciones);
+                });
+            }
+        });
+    }
+
+    // Evento para el botón de búsqueda
+    $("#searchButton").click(function(e) {
+        e.preventDefault();  // Esto previene que el botón realice su comportamiento predeterminado.
+
+        var tem_id = $("body").data("tem-id"); // Aquí debes obtener el tem_id. Dependerá de cómo lo estés gestionando.
+         var act_id = $("body").data("act-id");
+        var searchTerm = $("#searchInput").val();
+
+        fetchJuegos(tem_id,act_id, searchTerm);
+    });
+
+    // Si deseas hacer la búsqueda también mientras escribes:
+    $("#searchInput").on('input', function() {
+        var tem_id = $("body").data("tem-id"); // Aquí debes obtener el tem_id. Dependerá de cómo lo estés gestionando.
+         var act_id = $("body").data("act-id");
+        var searchTerm = $(this).val();
+
+        fetchJuegos(tem_id,act_id,searchTerm);
+    });
+});
+</script>
+<script>
+$(document).ready(function() {
+     $('li[data-asi_id]').click(function() {
+        var asi_id = $(this).data('asi_id');
+        const url = `/../100/temas/`+asi_id+`/`;
+       window.location.href = url;
+
+    });
+});
+</script>
+<script src="{% static 'js/js-juegos/juegos-act.js' %}"></script>
+</body>
+
+</html>

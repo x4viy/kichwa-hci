@@ -1,0 +1,104 @@
+{% load static %}
+{# Autor: Bryan Amaya, Agustin Ferrari, Alex Coro #}
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="Javascript Duolingo">
+
+
+    <title>App Quechua</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800&family=Oswald&family=PT+Serif:wght@700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static '/css/stylejuego1.css' %}">
+</head>
+<body>
+<div id="main">
+    <div id="page"></div>
+{#    <h1 id="title">App Quechua</h1>#}
+    {#    <div class="TituloJuego"><h1>Escoja la palabra correcta</h1></div>#}
+    <div id="wrapper">
+        Escoja la palabra correcta:
+        <br><br>
+        <div id="titulo"></div>
+        <br>
+        Opciones
+        <br>
+        <div id="opciones">
+        </div>
+        <div id="result"></div>
+        <div id="puntos"></div>
+         <img id="letrero" src="/static/img/le.png">
+
+        <div id="imagencorrecto"></div>
+        <div id="imagenincorrecto"></div>
+
+    </div>
+
+
+    {#     Se obtienen los datos que se pasan por el parametro context #}
+    {#     Y se recorre en una grid para imprimir y visualizar en el html #}
+    <script>
+        var cont = 0;
+        var cont2 = 0;
+        var TotalPuntJuego = 0;
+        let preguntas = [];
+        let puntaje = [];
+
+    </script>
+    {% if datos %}
+        <script>
+            {#console.log("{{ datos.replace('&#x27;','"') }}");#}
+            {#console.log("{{ datos[0].a }}");#}
+        </script>
+        {% for i in datos %}
+            <script>
+                {#console.log("{{ i.replace('&#x27;','"') }}");#}
+                {#console.log("{{ i.resultado }}");#}
+                preguntas[cont] = "{{ i.resultado }}";
+                preguntas[cont] = preguntas[cont].replace(/&quot;/g, '"');
+                {#console.log("reemplazado", preguntas[cont]);#}
+                {#console.log("JSON", JSON.stringify(preguntas[cont]));#}
+                preguntas[cont] = JSON.parse(preguntas[cont]);
+
+                {#console.log("ALFIIIN",preguntas[cont]);#}
+                {#console.log("test",preguntas[cont].alternativas.length);</script>#}
+                {#                <ul>#}
+                {#                    <script>#}
+                {#                        for (let i = 0; i < preguntas[cont].alternativas.length; i++) {#}
+                {#                         document.write("<li class='alternativa'></li>");#}
+                {#                        }</script>#}
+                {#                </ul>#}
+
+
+                {#                console.log("{{ i.resultado.titulo }}");#}
+                {#                enunciado[cont] = "{{ i.act_nombre }}"#}
+                {#                a[cont] = "{{ i.res_respuesta }}";#}
+                {#                b[cont] = "{{ i.res_esCorrecta }}";#}
+                {#                console.log(a[cont]);#}
+                cont++;
+                {#                a = ""</script > {{ i.res_respuesta }} <script>+"";#}
+            </script>
+
+        {% endfor %}
+        {% for i in datos2 %}
+            <script>
+                puntaje[cont2] = "{{ i.puntajepregunta }}";
+                TotalPuntJuego = TotalPuntJuego + parseFloat(puntaje[cont2].replace(/,/g, '.'));
+                cont2++;
+            </script>
+        {% endfor %}
+    {% endif %}
+
+
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="{% static '/js/script.js' %}"></script>
+
+</body>
+</html>
