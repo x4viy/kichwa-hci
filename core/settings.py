@@ -48,6 +48,9 @@ INSTALLED_APPS = [
     # Plugins
     'crispy_forms',
     'bootstrap_datepicker_plus',
+    'captcha',
+    'ckeditor',
+
 ]
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
@@ -96,9 +99,9 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('DB_NAME', 'quichua'),
+        'NAME': os.getenv('DB_NAME', 'postgres'),
         'USER': os.getenv('DB_USERNAME', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASS', 'root'),
+        'PASSWORD': os.getenv('DB_PASS', 'kevinsil1.'),
         # 'PASSWORD': os.getenv('DB_PASS', 'Erp2k19'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         # 'HOST': os.getenv('DB_HOST', '172.16.1.77'),
@@ -221,3 +224,7 @@ LOGIN_URL = '/'
 
 # Para redirigir a una URL personalizada, defina la siguiente configuración:
 SESSION_TIMEOUT_REDIRECT = '/'
+
+
+RECAPTCHA_PUBLIC_KEY = '6LfQdJwnAAAAAK56nWNTefh3jecVyyrWpVme77BB'
+RECAPTCHA_PRIVATE_KEY = '6LfQdJwnAAAAALAtxonM64CUY6k3r1oDe1dfy9va'
