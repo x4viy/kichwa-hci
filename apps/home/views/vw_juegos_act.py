@@ -172,3 +172,4 @@ def juegos_busqueda(request, tem_id, act_id):
 
     return JsonResponse(gen_juegos, safe=False)
 
+

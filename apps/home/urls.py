@@ -49,6 +49,7 @@ urlpatterns = [
     path("actividades_busqueda/<int:tem_id>/", actividad_busqueda, name='actividad_busqueda'),
     path("juegos_busqueda/<int:tem_id>/<int:act_id>/", juegos_busqueda, name='juegos_busqueda'),
     path('enviar_puntajes/', enviar_puntajes, name='enviar_puntajes'),
+
     # # Matches any html file
     # re_path(r'^.*\.*', pages, name='pages'),
     # re_path(r'^.*\.*', pages, name='pages'),
