@@ -234,3 +234,98 @@ class Gen_Respuesta(ERPBaseModel):
 
     def __str__(self):
         return str(self.res_id) + ": " + str(self.res_respuesta)
+
+
+
+
+
+
+
+# Autor: Bryan Amaya
+# Fecha: 09/05/2023 09:00
+# Descripción: Modelo de multimedia.
+class Gen_MultimediaFile(ERPBaseModel):
+    muar_id = models.BigAutoField(primary_key=True, verbose_name='ID_Multimedia')
+    muar_ruta = models.FileField(upload_to=path_and_rename, verbose_name='Multimedia')
+    muar_formato = models.CharField(max_length=10, blank=True, null=True, verbose_name='Formato')
+    muar_estado = models.SmallIntegerField(default=True, verbose_name="Estado")
+    muar_tipo = models.CharField(max_length=25, verbose_name='Tipo')
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        print(self.muar_ruta)
+        filename = self.muar_ruta.name
+        if not filename.startswith(settings.MEDIA_URL):
+            filename = f'{settings.MEDIA_URL}{filename}'
+        self.muar_ruta.name = filename
+        if self.muar_formato:
+            print(self.muar_formato)
+            self.muar_formato = convertir_a_minusculas(self.muar_formato)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        managed = False
+        verbose_name = 'Multimedia_File'
+        verbose_name_plural = 'Multimedia_Files'
+        db_table = 'gen\".\"multimedia_archivos'
+        unique_together = (('muar_id'),)
+
+
+# Autor: Kevin Campoverde
+# Fecha: 27/12/2023 09:00
+# Descripción: Modelo de juego (Cartas).
+class Gen_Carta(ERPBaseModel):
+    cart_id = models.BigAutoField(primary_key=True, verbose_name='ID_Carta')
+    cart_descripcion = models.CharField(max_length=500, verbose_name='Descripción')
+
+    class Meta:
+        managed = False
+        verbose_name = 'Carta'
+        verbose_name_plural = 'Cartas'
+        db_table = 'gen\".\"carta'
+    # def __str__(self):
+    #     return str(self.act.act_id) + ": " + str(self.act.act_nombre)
+
+
+def path_and_rename(instance, filename):
+    ext = filename.split('.')[-1]
+    print('rename')
+    print('IMPORTTANTE ', filename)
+    fecha_hora_actual = timezone.now().strftime('%Y-%m-%d_%H-%M-%S')
+    filename = '{}.{}'.format(fecha_hora_actual, ext)
+    return filename
+
+
+def convertir_a_minusculas(texto):
+    return texto.lower()
+
+
+
+
+# Autor: Kevin Campoverde
+# Fecha: 27/12/2023 09:00
+# Descripción: Modelo de juego (Cartas).
+class Gen_CartaMultimedia(ERPBaseModel):
+    camu_id = models.BigAutoField(primary_key=True, db_column='camu_id', verbose_name='ID_Relacion')
+    camu_cart_id = models.ForeignKey('Gen_Carta', models.DO_NOTHING, db_column='camu_cart_id')
+    camu_muar_id = models.ForeignKey('Gen_MultimediaFile', models.DO_NOTHING,  db_column='camu_muar_id')
+
+
+    class Meta:
+        managed = False
+        verbose_name = 'Carta Multimedia'
+        verbose_name_plural = 'Cartas Multimedia'
+        db_table = 'gen\".\"carta_mult'
+
+
+def path_and_rename(instance, filename):
+    ext = filename.split('.')[-1]
+    print('rename')
+    print('IMPORTTANTE ', filename)
+    fecha_hora_actual = timezone.now().strftime('%Y-%m-%d_%H-%M-%S')
+    filename = '{}.{}'.format(fecha_hora_actual, ext)
+    return filename
+
+
+def convertir_a_minusculas(texto):
+    return texto.lower()

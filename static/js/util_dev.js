@@ -1,5 +1,7 @@
 function get_json_from_script(script_id = "gr_dets") {
     //transforma un scritp tag a JSON
+    console.log("amogus ", script_id)
+
     if (!!script_id) {
         let x = (document.getElementById(script_id) ? JSON.parse(document.getElementById(script_id).textContent) : null)
         return (x != null && Object.keys(x).length > 0 ? x : null)

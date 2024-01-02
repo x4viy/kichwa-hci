@@ -273,12 +273,14 @@ class Gen_JuegoCreateView(CreateView):
         extra_errors = []
         request.POST._mutable = True
         r = {'a': 1}
-        # print('ENTRE AL CREAR')
+        print('ENTRE AL CREAR')
         # Crear el registro
         if 'CREATE' in request.POST and form.is_valid():
             try:
+                print("adentro   ", request.POST)
                 data_grid_Respuesta = pd.DataFrame(json.loads(request.POST['respuesta_grid']))
-                # print('tab_respuesta0 :', data_grid_Respuesta)
+                print('tab_respuesta0 :', data_grid_Respuesta)
+                print('tab_respuesta1 :', json.loads(request.POST['respuesta_grid']))
                 with transaction.atomic():
                     # Guarda cabecera con commit false, esto con el objetivo
                     # de poder acceder a los datos con los que se guardaria en la base
@@ -328,7 +330,9 @@ class Gen_JuegoCreateView(CreateView):
                                 tab_multimedia.mul_formato = row.mul_formato
                                 # print('PRINT MIXTOOOOO' , row.mul_archivo)
                                 tab_multimedia.save()
+                print("r ", r)
                 messages.success(request, CRUD_MSG.CREATE)
+                print("request", request)
                 return JsonResponse(r)
             except django.db.models.query_utils.InvalidQuery as e:
                 extra_errors.append(str(e))

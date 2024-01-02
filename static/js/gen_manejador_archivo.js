@@ -80,7 +80,7 @@ function escribirtres() {
     console.log('escribirtres');
     console.log('extfinal:', extension);
     console.log('nombre:', fileName);
-    var elem3 = document.querySelector('input[name="mul_formato"]'); // buscar el elemento por su atributo name
+    var elem3 = document.querySelector('input[name="muar_formato"]'); // buscar el elemento por su atributo name
     if (extension) { // verificar si se encontró el elemento
         elem3.setAttribute('value', extension); // establecer el valor del elemento usando setAttribute
         // o bien, puedes asignar el valor a la propiedad "value" del elemento:
@@ -97,7 +97,7 @@ function escribirdos() {
     console.log('escribirdos');
     console.log('extfinal:', extension);
     console.log('nombre:', fileName);
-    var elem2 = document.querySelector('input[name="mul_tipo"]'); // buscar el elemento por su atributo name
+    var elem2 = document.querySelector('input[name="muar_tipo"]'); // buscar el elemento por su atributo name
     if (extension) { // verificar si se encontró el elemento
         elem2.setAttribute('value', tipo_arch); // establecer el valor del elemento usando setAttribute
         // o bien, puedes asignar el valor a la propiedad "value" del elemento:
@@ -114,8 +114,8 @@ function escribir() {
     console.log('estoysubiendounarchivo');
     uploadObj = new ej.inputs.Uploader({
         asyncSettings: {
-            saveUrl: '/200/upload_file/',
-            removeUrl: '/200/delete_file/',
+            saveUrl: '/500/upload_file/',
+            removeUrl: '/500/delete_file/',
             autoUpload: false // deshabilitar la subida automática
         },
         //para que funcionen los metodos onupload
@@ -312,9 +312,9 @@ function handleDeleteButtonClick(args) {
 
         // Comprobar si se ha seleccionado una fila
         if (selectedRecords.length > 0) {
-            // Obtener los valores de mul_archivo y mul_tipo de la fila seleccionada
-            var mulArchivo = selectedRecords[0].mul_archivo;
-            var mulTipo = selectedRecords[0].mul_tipo;
+            // Obtener los valores de muar_ruta y muar_tipo de la fila seleccionada
+            var mulArchivo = selectedRecords[0].muar_ruta;
+            var mulTipo = selectedRecords[0].muar_tipo;
 
             // Hacer lo que necesites con los valores
             console.log("Archivo: ", mulArchivo);
