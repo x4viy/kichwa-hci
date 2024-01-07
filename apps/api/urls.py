@@ -17,6 +17,7 @@ urlpatterns = [
     # Fecha: 27/12/2022 16:00
     # Descripción: URLs para la opción 'Opcion'.
     path("multimedia/game/", MultimediaGame.myFirstView, name="multimedia_game"),
+    path("multimedia/game2/", MultimediaGame.secondView, name="multimedia_game2"),
 
     path("carta/list/", login_required(Gen_CartaListView.as_view()), name="gen_carta_list"),
     path("carta/add/", login_required(Gen_CartaCreateView.as_view()), name="gen_carta_add"),

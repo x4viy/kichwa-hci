@@ -1,5 +1,3 @@
-
-
 body {
   align-items: center;
   background-image: radial-gradient(circle 448px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%);
@@ -157,7 +155,9 @@ body {
       -ms-user-select: none;
           user-select: none;
 }
-
+.final-text{
+  font-size: 35px;
+}
 .reset {
   background-color: #fbc300;
   border-radius: 50%;
@@ -169,7 +169,7 @@ body {
   margin-left: 20px;
   position: relative;
   top: -3px;
-  width: 96px;
+  width: 110px;
 }
 .reset:active {
   box-shadow: none;
@@ -213,35 +213,35 @@ body {
   height: 30px;
 }
 
-[data-tile=egg] div:nth-child(3) {
-  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-egg.svg) center center no-repeat;
-  background-size: 60px;
-}
+/*[data-tile=egg] div:nth-child(3) {*/
+/*  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-egg.svg) center center no-repeat;*/
+/*  background-size: 60px;*/
+/*}*/
 
-[data-tile=dino] div:nth-child(3) {
-  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-dino1.svg) bottom center no-repeat;
-  background-size: 85px;
-}
+/*[data-tile=dino] div:nth-child(3) {*/
+/*  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-dino1.svg) bottom center no-repeat;*/
+/*  background-size: 85px;*/
+/*}*/
 
-[data-tile=ahahah] div:nth-child(3) {
-  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-ah.svg) center center no-repeat;
-  background-size: 60px;
-}
+/*[data-tile=ahahah] div:nth-child(3) {*/
+/*  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-ah.svg) center center no-repeat;*/
+/*  background-size: 60px;*/
+/*}*/
 
-[data-tile=tri] div:nth-child(3) {
-  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-tri.svg) center center no-repeat;
-  background-size: 85px;
-}
+/*[data-tile=tri] div:nth-child(3) {*/
+/*  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-tri.svg) center center no-repeat;*/
+/*  background-size: 85px;*/
+/*}*/
 
-[data-tile=ptero] div:nth-child(3) {
-  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-ptero.svg) center center no-repeat;
-  background-size: 85px;
-}
+/*[data-tile=ptero] div:nth-child(3) {*/
+/*  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-ptero.svg) center center no-repeat;*/
+/*  background-size: 85px;*/
+/*}*/
 
-[data-tile=erupt] div:nth-child(3) {
-  background: #fff8e7 url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-erupt.svg) center center no-repeat;
-  background-size: 85px;
-}
+/*[data-tile=Volcan] div:nth-child(3) {*/
+/*  background: #fff8e7 url(/media/2024-01-06_09-15-48.svg) center center no-repeat;*/
+/*  background-size: 85px;*/
+/*}*/
 
 audio {
   display: none;

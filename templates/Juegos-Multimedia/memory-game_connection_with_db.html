@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Juego de Memoria</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <link rel="stylesheet" href="{% static 'memory_game/css/memory-game.css' %}" >
+
+    <style>
+
+        {% if datos %}
+            {% for i in datos %}
+                {% if i.tipo == "image" %}
+                    [data-tile={{ i.descripcion }}] div:nth-child(3) {
+                      background: #fff8e7 url( {{ i.ruta }} ) center center no-repeat;
+                      background-size: 85px;
+                    }
+                {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    </style>
+
+</head>
+<body>
+<div class='board' onkeydown="handleSpaceKey(event)"></div>
+<div class='clone' tabindex="1" onkeydown="handleSpaceKey(event)">
+  <div class='face' tabindex="2" onkeydown="handleSpaceKey(event)"></div>
+  <div class='face' tabindex="3" onkeydown="handleSpaceKey(event)"></div>
+  <div class='face' tabindex="4" onkeydown="handleSpaceKey(event)"></div>
+  <div class='face' tabindex="5" onkeydown="handleSpaceKey(event)"></div>
+  <div class='face' tabindex="6" onkeydown="handleSpaceKey(event)"></div>
+  <div class='face' tabindex="7" onkeydown="handleSpaceKey(event)"></div>
+</div>
+<div class='overlay hidden' tabindex="8" onkeydown="handleSpaceKey(event)">
+  <div class='gameover' tabindex="9" onkeydown="handleSpaceKey(event)">
+    <p tabindex="10" onkeydown="handleSpaceKey(event)" class="final-text">FELICIDADES!</p>
+    <button class='reset' tabindex="11" onkeydown="handleSpaceKey(event)">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M485.8 113.9L349.3 250.5c-3.5 3.5-3.5 9.1 0 12.6l136.6 136.6c5.6 5.6 15.2 1.6 15.2-6.3V120.2c-.1-7.9-9.7-11.9-15.3-6.3z" fill="#fff"/><path d="M500 194.8V317c125.9 0 228 102.1 228 228S625.9 773 500 773v121.8c193.3 0 350-156.7 350-350s-156.7-350-350-350zM272 545c0-55.1 19.6-105.7 52.1-145.1 6.5-7.9 5.9-19.5-1.4-26.8l-58.3-58.3c-8.2-8.2-21.7-7.7-29.3 1-53 61.5-85.1 141.5-85.1 229 0 193.3 156.7 350 350 350V773c-125.9 0-228-102.1-228-228z" fill="#fff"/></svg>
+    </button>
+  </div>
+</div>
+
+{% if datos %}
+    {% for i in datos %}
+            {% if i.tipo == "audio" %}
+                <audio preload="auto" class="audio-{{ i.descripcion }}" >
+                    <source src="{{ i.ruta }} ">
+                </audio>
+            {% endif %}
+    {% endfor %}
+{% endif %}
+
+<script>
+  function handleSpaceKey(event) {
+    if (event.key === ' ' || event.key === 'Spacebar') {
+      event.preventDefault(); // Prevent the default action of the space key
+      event.target.click(); // Simulate a click on the focused element
+    }
+  }
+</script>
+<script>
+
+const board = document.querySelector('.board');
+const clone = document.querySelector('.clone');
+const overlay = document.querySelector('.overlay');
+const reset = document.querySelector('.reset');
+const descripciones =[]
+const media = []
+var cont = 0;
+    {% if datos %}
+        {% for i in datos %}
+            descripciones[cont] = "{{ i.descripcion }}";
+            descripciones[cont]= descripciones[cont].replace(/&quot;/g, '"');
+            descripciones[cont]= descripciones[cont].replaceAll(' ', '-');
+            media[cont] = "{{ i.ruta }}";
+            media[cont] = media[cont].replace(/&quot;/g, '"');
+            cont++
+         {% endfor %}
+    {% endif %}
+
+function quitarDuplicadosArray(array) {
+  const uniqueSet = new Set(array);
+  return Array.from(uniqueSet);
+}
+
+const tileOptions = quitarDuplicadosArray(descripciones)
+console.table(tileOptions)
+
+
+//const tileOptions = ['erupt', 'ptero', 'tri', 'ahahah', 'egg', 'dino'];
+console.table(tileOptions)
+const state = {
+  selections: [],
+  boardLocked: false,
+  matches: 0
+};
+
+reset.addEventListener('click', () => {
+  if (state.boardLocked) return;
+  resetGame();
+});
+
+function resetGame() {
+  state.boardLocked = true;
+  state.selections = [];
+  state.matches = 0;
+
+  document.querySelectorAll('.cube').forEach(tile => {
+    tile.removeEventListener('click', () => selectTile(tile));
+    tile.remove();
+  });
+
+  overlay.classList.add('hidden');
+  createBoard();
+}
+
+function createBoard() {
+  const tiles = shuffleArray([...tileOptions, ...tileOptions]);
+  const length = tiles.length;
+
+  for (let i = 0; i < length; i++) {
+    window.setTimeout(() => {
+      board.appendChild(buildTile(tiles.pop(), i));
+    }, i * 100);
+  }
+
+  window.setTimeout(() => {
+    document.querySelectorAll('.cube').forEach(tile => {
+      tile.addEventListener('click', () => selectTile(tile));
+    });
+
+    state.boardLocked = false;
+  }, tiles.length * 100);
+}
+
+function buildTile(option, id) {
+  const tile = clone.cloneNode(true);
+  tile.classList.remove('clone');
+  tile.classList.add('cube');
+  tile.setAttribute('data-tile', option);
+  tile.setAttribute('data-id', id);
+  return tile;
+}
+
+function selectTile(selectedTile) {
+  if (state.boardLocked || selectedTile.classList.contains('flipped')) return;
+
+  state.boardLocked = true;
+
+  if (state.selections.length <= 1) {
+    selectedTile.classList.add('flipped');
+    state.selections.push({
+      id: selectedTile.dataset.id,
+      tile: selectedTile.dataset.tile,
+      el: selectedTile
+    });
+  }
+  if (state.selections.length === 2) {
+    if (state.selections[0].tile === state.selections[1].tile) {
+      window.setTimeout(() => {
+        state.selections[0].el.classList.add('matched');
+        state.selections[1].el.classList.add('matched');
+
+        state.boardLocked = false;
+        state.matches = state.matches + 1;
+
+        if (state.matches === tileOptions.length) {
+          window.setTimeout(() => {
+            overlay.classList.remove('hidden');
+            document.querySelector('.audio-win').play();
+          }, 600);
+        }
+        state.selections = [];
+        document.querySelector(`.audio-${selectedTile.dataset.tile}`).play();
+      }, 600);
+    } else {
+      setTimeout(() => {
+        document.querySelectorAll('.cube').forEach(tile => {
+          tile.classList.remove('flipped');
+        });
+        state.boardLocked = false;
+      }, 800);
+      state.selections = [];
+    }
+  } else {
+    state.boardLocked = false;
+  }
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+createBoard();
+
+</script>
+</body>
+</html>

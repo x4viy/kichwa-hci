@@ -38,6 +38,8 @@ def Juego1(request):
         # res_estado = % s
         # el resultado de la consulta se lo transforma a lista de diccionarios
         data = dictfetchall(cursor)
+
+        print('datitos ', data)
         cursor.execute(
             """select af.act_puntaje as puntajepregunta
                 from gen.actividad af   
