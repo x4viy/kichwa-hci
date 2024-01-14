@@ -96,7 +96,7 @@ class UserProfileForm(forms.ModelForm):
         model = User
         fields = ['username', 'email', 'first_name',
                   'last_name',
-                  'username', 'curso', 'institucion']
+                  'username']
 
     def clean_username(self):
         username = self.cleaned_data['username']

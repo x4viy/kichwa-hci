@@ -2,13 +2,14 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
+from django.views.static import serve
+
 from apps.api.views.vw_api_juego import *
 from apps.api.views.vw_gen_juego_multimedia import *
 from apps.api.handler_file import *
 from django.conf.urls.static import static
 from django.contrib.auth.decorators import login_required
-from django.urls import path
-
+from django.urls import path, re_path
 
 app_name = 'multimedia_game'
 
@@ -18,6 +19,7 @@ urlpatterns = [
     # Descripción: URLs para la opción 'Opcion'.
     path("multimedia/game/", MultimediaGame.myFirstView, name="multimedia_game"),
     path("multimedia/game2/", MultimediaGame.secondView, name="multimedia_game2"),
+    path("multimedia/classification/", MultimediaGame.clasification_game_view, name="mult_game_clasification"),
 
     path("carta/list/", login_required(Gen_CartaListView.as_view()), name="gen_carta_list"),
     path("carta/add/", login_required(Gen_CartaCreateView.as_view()), name="gen_carta_add"),
@@ -26,7 +28,6 @@ urlpatterns = [
 
     path('upload_file/', upload_file, name='upload_file'),
     path('delete_file/', delete_file, name='delete_file'),
-
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

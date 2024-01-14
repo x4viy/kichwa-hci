@@ -1,0 +1,2726 @@
+[1mdiff --git a/.idea/sqldialects.xml b/.idea/sqldialects.xml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..df5a422[m
+[1m--- /dev/null[m
+[1m+++ b/.idea/sqldialects.xml[m
+[36m@@ -0,0 +1,7 @@[m
+[32m+[m[32m<?xml version="1.0" encoding="UTF-8"?>[m
+[32m+[m[32m<project version="4">[m
+[32m+[m[32m  <component name="SqlDialectMappings">[m
+[32m+[m[32m    <file url="file://$PROJECT_DIR$/apps/gen/forms.py" dialect="GenericSQL" />[m
+[32m+[m[32m    <file url="PROJECT" dialect="PostgreSQL" />[m
+[32m+[m[32m  </component>[m
+[32m+[m[32m</project>[m
+\ No newline at end of file[m
+[1mdiff --git a/apps/api/__init__.py b/apps/api/__init__.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..e69de29[m
+[1mdiff --git a/apps/api/handler_file.py b/apps/api/handler_file.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..306b075[m
+[1m--- /dev/null[m
+[1m+++ b/apps/api/handler_file.py[m
+[36m@@ -0,0 +1,109 @@[m
+[32m+[m[32m# Autor: Dre[m
+[32m+[m[32m# Fecha: 17/12/2022 010:00[m
+[32m+[m[32m# Descripción: Vista para la opción categorias.[m
+[32m+[m[32m#              En esta opción permite:[m
+[32m+[m[32m#              listar, agregar, modificar, eliminar[m
+[32m+[m[32mimport json[m
+[32m+[m[32mimport os[m
+[32m+[m
+[32m+[m[32mimport django.db.models.query_utils[m
+[32m+[m[32mimport pandas as pd[m
+[32m+[m[32mfrom django.db import transaction, connection[m
+[32m+[m[32mfrom django.forms.utils import ErrorList[m
+[32m+[m[32mfrom django.shortcuts import render[m
+[32m+[m[32mfrom django.http import HttpResponse, JsonResponse[m
+[32m+[m[32mfrom django.urls import reverse_lazy[m
+[32m+[m[32mfrom django.views.generic import ListView, UpdateView, CreateView[m
+[32m+[m[32mfrom apps.gen.models import *[m
+[32m+[m[32mfrom apps.gen.forms import *[m
+[32m+[m[32mfrom vars.js import datatable_opts[m
+[32m+[m[32mfrom django.contrib import messages[m
+[32m+[m[32mfrom core.encryption_util import *[m
+[32m+[m[32mfrom utils import utils[m
+[32m+[m[32mfrom vars.msg import CRUD_MSG[m
+[32m+[m[32mfrom django.http import HttpResponse, HttpResponseRedirect[m
+[32m+[m[32mfrom django.template import loader[m
+[32m+[m[32mfrom django.middleware import csrf[m
+[32m+[m[32mfrom django.shortcuts import redirect[m
+[32m+[m[32m#[m
+[32m+[m[32m_e = EncryptDES()[m
+[32m+[m
+[32m+[m[32mimport json[m
+[32m+[m[32mfrom django.http import JsonResponse[m
+[32m+[m[32mfrom django.middleware import csrf[m
+[32m+[m[32mfrom django.views.decorators.csrf import csrf_exempt[m
+[32m+[m[32mfrom django.core.files.storage import FileSystemStorage[m
+[32m+[m[32mfrom django.utils.datastructures import MultiValueDict[m
+[32m+[m[32mfrom datetime import datetime[m
+[32m+[m
+[32m+[m
+[32m+[m[32m# @csrf_exempt[m
+[32m+[m[32m# def upload_file(request):[m
+[32m+[m[32m#     if request.method == 'POST':[m
+[32m+[m[32m#         file_name = request.POST.get('myfile', '')[m
+[32m+[m[32m#         file_data = request.POST.get('myfile', '')[m
+[32m+[m[32m#         file_path = os.path.join(settings.MEDIA_ROOT, file_name)[m
+[32m+[m[32m#         print('INTERESANTE: ',file_path)[m
+[32m+[m[32m#         with open(file_path, 'wb+') as f:[m
+[32m+[m[32m#             f.write(file_data.encode())[m
+[32m+[m[32m#         return JsonResponse({'status': 'success'})[m
+[32m+[m[32m@csrf_exempt[m
+[32m+[m[32mdef upload_file(request):[m
+[32m+[m
+[32m+[m[32m    for key in request.FILES.keys():[m
+[32m+[m
+[32m+[m[32m        # Itera sobre todas las claves en el MultiValueDict, o sea sobre[m
+[32m+[m[32m        # request.FILES[m
+[32m+[m[32m        values = request.FILES.getlist(key)[m
+[32m+[m
+[32m+[m[32m        if not values:[m
+[32m+[m[32m            return JsonResponse({'success': False, 'error': 'No se ha enviado ningún archivo'})[m
+[32m+[m
+[32m+[m[32m        myfile = values[0][m
+[32m+[m[32m        extension_archivo = os.path.splitext(myfile.name)[1]  # obteniendo la extensión[m
+[32m+[m[32m        fs = FileSystemStorage()[m
+[32m+[m[32m        fecha_hora_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + extension_archivo[m
+[32m+[m[32m        fecha_hora_actual = fecha_hora_actual.replace(':', '-')  # Reemplazar los dos puntos con guiones[m
+[32m+[m[32m        fecha_hora_actual = fecha_hora_actual.replace(' ', '_')  # Reemplazar los espacios en blanco con guiones bajos[m
+[32m+[m[32m        # print(fecha_hora_actual)[m
+[32m+[m[32m        filename = fs.save(fecha_hora_actual, myfile)[m
+[32m+[m[32m        # Utiliza os.path.splitext para obtener la extensión del archivo[m
+[32m+[m[32m        extension = os.path.splitext(filename)[1][m
+[32m+[m
+[32m+[m[32m        # Imprime la extensión del archivo[m
+[32m+[m[32m        # print('La extensión del archivo es:', extension)[m
+[32m+[m[32m        uploaded_file_url = fs.url(filename)[m
+[32m+[m[32m        # print(myfile, fs, filename, uploaded_file_url)[m
+[32m+[m[32m        # print('soydiospelado ', filename)[m
+[32m+[m[32m        return JsonResponse({'success': True, 'url': uploaded_file_url})[m
+[32m+[m[32m    else:[m
+[32m+[m[32m        # print('algoandamal')[m
+[32m+[m[32m        return JsonResponse({'success': False, 'error': 'No se ha enviado ningún archivo'})[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@csrf_exempt[m
+[32m+[m[32mdef delete_file(request):[m
+[32m+[m[32m    if request.method == 'POST':[m
+[32m+[m[32m        file_url = request.POST.get('file_url')[m
+[32m+[m[32m        # print('vivalavidapelaoestoyeliminando ', file_url)[m
+[32m+[m[32m        # Verifica que la URL del archivo sea válida[m
+[32m+[m[32m        if file_url:[m
+[32m+[m[32m            # print('entresantamaria')[m
+[32m+[m[32m            # Elimina el archivo del sistema de archivos[m
+[32m+[m[32m            print(os.path)[m
+[32m+[m[32m            mediaurl = '/media/' + file_url[m
+[32m+[m[32m            fs = FileSystemStorage()[m
+[32m+[m[32m            # print('AMENODORIME', mediaurl)[m
+[32m+[m[32m            file_path = os.path.join(settings.MEDIA_ROOT, file_url)[m
+[32m+[m[32m            # print(file_path)[m
+[32m+[m[32m            fs.delete(file_path)[m
+[32m+[m[32m            mult = Gen_Multimedia.objects.filter(mul_archivo=mediaurl)[m
+[32m+[m[32m            # print('jeje')[m
+[32m+[m[32m            if mult.exists():[m
+[32m+[m[32m                # print('EEE ', mult[0].mul_id)[m
+[32m+[m[32m                mult[0].mul_estado = 0[m
+[32m+[m[32m                mult[0].save()[m
+[32m+[m[32m            return JsonResponse({'success': True, 'error': 'Eliminado'})[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            return JsonResponse({'success': False, 'error': 'No eliminado'})[m
+[32m+[m
+[1mdiff --git a/apps/api/urls.py b/apps/api/urls.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..d8a1ff1[m
+[1m--- /dev/null[m
+[1m+++ b/apps/api/urls.py[m
+[36m@@ -0,0 +1,31 @@[m
+[32m+[m[32m# -*- encoding: utf-8 -*-[m
+[32m+[m[32m"""[m
+[32m+[m[32mCopyright (c) 2019 - present AppSeed.us[m
+[32m+[m[32m"""[m
+[32m+[m[32mfrom apps.api.views.vw_api_juego import *[m
+[32m+[m[32mfrom apps.api.views.vw_gen_juego_multimedia import *[m
+[32m+[m[32mfrom apps.api.handler_file import *[m
+[32m+[m[32mfrom django.conf.urls.static import static[m
+[32m+[m[32mfrom django.contrib.auth.decorators import login_required[m
+[32m+[m[32mfrom django.urls import path[m
+[32m+[m
+[32m+[m
+[32m+[m[32mapp_name = 'multimedia_game'[m
+[32m+[m
+[32m+[m[32murlpatterns = [[m
+[32m+[m[32m    # Autor: Kevin Campoverde[m
+[32m+[m[32m    # Fecha: 27/12/2022 16:00[m
+[32m+[m[32m    # Descripción: URLs para la opción 'Opcion'.[m
+[32m+[m[32m    path("multimedia/game/", MultimediaGame.myFirstView, name="multimedia_game"),[m
+[32m+[m
+[32m+[m[32m    path("carta/list/", login_required(Gen_CartaListView.as_view()), name="gen_carta_list"),[m
+[32m+[m[32m    path("carta/add/", login_required(Gen_CartaCreateView.as_view()), name="gen_carta_add"),[m
+[32m+[m[32m    path("carta/edit/<str:pk>/", login_required(Gen_CartaUpdateView.as_view()),[m
+[32m+[m[32m         name="gen_carta_edit"),[m
+[32m+[m
+[32m+[m[32m    path('upload_file/', upload_file, name='upload_file'),[m
+[32m+[m[32m    path('delete_file/', delete_file, name='delete_file'),[m
+[32m+[m
+[32m+[m[32m][m
+[32m+[m
+[32m+[m[32murlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)[m
+[1mdiff --git a/apps/api/views/vw_api_juego.py b/apps/api/views/vw_api_juego.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..7b7d92d[m
+[1m--- /dev/null[m
+[1m+++ b/apps/api/views/vw_api_juego.py[m
+[36m@@ -0,0 +1,55 @@[m
+[32m+[m[32m# Autor: Bryan Amaya[m
+[32m+[m[32m# Fecha: 19/12/2022 20:00[m
+[32m+[m[32m# Descripción: Vista para la opción opcion.[m
+[32m+[m[32m#              En esta opción permite:[m
+[32m+[m[32m#              listar, agregar, modificar, eliminar[m
+[32m+[m
+[32m+[m[32mimport json[m
+[32m+[m[32mimport django.db.models.query_utils[m
+[32m+[m[32mimport pandas as pd[m
+[32m+[m[32mfrom django.db import transaction, connection[m
+[32m+[m[32mfrom django.forms.utils import ErrorList[m
+[32m+[m[32mfrom django.shortcuts import render[m
+[32m+[m[32mfrom django.http import HttpResponseRedirect, JsonResponse[m
+[32m+[m[32mfrom django.urls import reverse_lazy[m
+[32m+[m[32mfrom django.views.generic import ListView, UpdateView, CreateView[m
+[32m+[m[32mfrom apps.sis.models import *[m
+[32m+[m[32mfrom apps.sis.forms import *[m
+[32m+[m[32mfrom vars.js import datatable_opts[m
+[32m+[m[32mfrom django.contrib import messages[m
+[32m+[m[32mfrom core.encryption_util import *[m
+[32m+[m[32mfrom utils import utils[m
+[32m+[m[32mfrom django.shortcuts import redirect[m
+[32m+[m[32mfrom vars.msg import CRUD_MSG[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32mimport json[m
+[32m+[m[32mimport django.db.models.query_utils[m
+[32m+[m[32mimport pandas as pd[m
+[32m+[m[32mfrom django.db import transaction, connection[m
+[32m+[m[32mfrom django.forms.utils import ErrorList[m
+[32m+[m[32mfrom django.shortcuts import render[m
+[32m+[m[32mfrom django.http import HttpResponseRedirect, JsonResponse[m
+[32m+[m[32mfrom django.urls import reverse_lazy[m
+[32m+[m[32mfrom django.views.generic import ListView, UpdateView, CreateView[m
+[32m+[m[32mfrom apps.gen.forms import *[m
+[32m+[m[32mfrom vars.js import datatable_opts[m
+[32m+[m
+[32m+[m[32mfrom core.encryption_util import *[m
+[32m+[m
+[32m+[m[32mfrom django.shortcuts import redirect[m
+[32m+[m
+[32m+[m[32m_e = EncryptDES()[m
+[32m+[m
+[32m+[m[32m# Autor: Kevin Campoverde[m
+[32m+[m[32mclass MultimediaGame(ListView):[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    # Autor: Kevin Campoverde[m
+[32m+[m[32m    def myFirstView (request):[m
+[32m+[m[32m        return render(request, 'Juegos-Multimedia/memory-game.html')[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    def secondView (request):[m
+[32m+[m[32m        return render(request, 'Juegos-Multimedia/create-card.html')[m
+\ No newline at end of file[m
+[1mdiff --git a/apps/api/views/vw_gen_juego_multimedia.py b/apps/api/views/vw_gen_juego_multimedia.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..148faab[m
+[1m--- /dev/null[m
+[1m+++ b/apps/api/views/vw_gen_juego_multimedia.py[m
+[36m@@ -0,0 +1,432 @@[m
+[32m+[m[32m# Autor: Bryan Amaya[m
+[32m+[m[32m# Fecha: 07/05/2023 17:00[m
+[32m+[m[32m# Descripción: Vista para la opción cabecera tema, detalle actividad.[m
+[32m+[m[32m#              En esta opción permite:[m
+[32m+[m[32m#              listar, agregar, modificar, eliminar[m
+[32m+[m
+[32m+[m[32mimport json[m
+[32m+[m[32mimport django.db.models.query_utils[m
+[32m+[m[32mimport pandas as pd[m
+[32m+[m[32mfrom django.db import transaction, connection[m
+[32m+[m[32mfrom django.forms.utils import ErrorList[m
+[32m+[m[32mfrom django.shortcuts import render[m
+[32m+[m[32mfrom django.http import HttpResponseRedirect, JsonResponse[m
+[32m+[m[32mfrom django.urls import reverse_lazy[m
+[32m+[m[32mfrom django.views.generic import ListView, UpdateView, CreateView[m
+[32m+[m[32mfrom apps.gen.models import *[m
+[32m+[m[32mfrom apps.gen.forms import *[m
+[32m+[m[32mfrom vars.js import datatable_opts[m
+[32m+[m[32mfrom django.contrib import messages[m
+[32m+[m[32mfrom core.encryption_util import *[m
+[32m+[m[32mfrom utils import utils[m
+[32m+[m[32mfrom vars.msg import CRUD_MSG[m
+[32m+[m[32mimport numpy as np[m
+[32m+[m[32mfrom django.shortcuts import redirect[m
+[32m+[m
+[32m+[m[32m#[m
+[32m+[m[32m_e = EncryptDES()[m
+[32m+[m
+[32m+[m
+[32m+[m[32m# Autor: Bryan Amaya[m
+[32m+[m[32m# Listar[m
+[32m+[m[32mclass Gen_CartaListView(ListView):[m
+[32m+[m[32m    model = Gen_Carta[m
+[32m+[m[32m    template_name = 'gen_carta/list.html'[m
+[32m+[m
+[32m+[m[32m    def get(self, request, *args, **kwargs):[m
+[32m+[m[32m        rol_usuario_actual = self.request.session['AIGN_ROLID'][m
+[32m+[m[32m        if rol_usuario_actual != 1:[m
+[32m+[m[32m            if rol_usuario_actual != 2:[m
+[32m+[m[32m                return redirect('/')[m
+[32m+[m[32m            return super().get(request, *args, **kwargs)[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            return super().get(request, *args, **kwargs)[m
+[32m+[m
+[32m+[m[32m    def get_queryset(self):[m
+[32m+[m[32m        usuario_actual = self.request.session['AIGN_USERID'][m
+[32m+[m[32m        rol_usuario_actual = self.request.session['AIGN_ROLID'][m
+[32m+[m[32m        if rol_usuario_actual == 1:[m
+[32m+[m[32m            return Gen_Carta.objects.all()[m
+[32m+[m[32m        if rol_usuario_actual in [1, 2]:[m
+[32m+[m[32m            # Filtra los temas según el usuario_actual y rol_usuario_actual[m
+[32m+[m[32m            return Gen_Carta.objects.filter(aud_uc=usuario_actual)[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            return Gen_Carta.objects.none()[m
+[32m+[m
+[32m+[m[32m    def get_context_data(self, **kwargs):[m
+[32m+[m[32m        context = super().get_context_data(**kwargs)[m
+[32m+[m[32m        context['page_title'] = 'Reporte ' + self.model._meta.verbose_name[m
+[32m+[m[32m        context['url_form'] = reverse_lazy('multimedia_game:gen_carta_add')  # add[m
+[32m+[m[32m        context['url_form_add'] = reverse_lazy('multimedia_game:gen_carta_add')  # add[m
+[32m+[m[32m        context['url_form_edit'] = 'multimedia_game:gen_carta_edit'  # edit[m
+[32m+[m[32m        context['datatable_id'] = 'datatable1_id'[m
+[32m+[m[32m        context['datatable_opts'] = datatable_opts[m
+[32m+[m[32m        # Agregar boton 'Agregar' lista[m
+[32m+[m[32m        context['show_fields'] = {[m
+[32m+[m[32m            'cart_descripcion': None,[m
+[32m+[m[32m        }[m
+[32m+[m[32m        # # ecriptacion del id[m
+[32m+[m[32m        for r in context['object_list']:[m
+[32m+[m
+[32m+[m[32m            relacion_cartas_multimedia = Gen_CartaMultimedia.objects.filter(camu_cart_id=r.cart_id)[m
+[32m+[m[32m            r.cart_id = _e.encrypt(r.cart_id)[m
+[32m+[m[32m            r.alt = r.cart_descripcion[m
+[32m+[m
+[32m+[m[32m            for carta_multimedia in relacion_cartas_multimedia:[m
+[32m+[m[32m                identificador_archivo = carta_multimedia.camu_muar_id_id[m
+[32m+[m[32m                archivos_multimedia = Gen_MultimediaFile.objects.filter(muar_id=identificador_archivo,[m
+[32m+[m[32m                                                                        muar_tipo='image')[m
+[32m+[m[32m                for archivo_multimedia in archivos_multimedia:[m
+[32m+[m[32m                    ruta_archivo = archivo_multimedia.muar_ruta[m
+[32m+[m[32m                    r.ruta_archivo = ruta_archivo[m
+[32m+[m
+[32m+[m[32m        return context[m
+[32m+[m
+[32m+[m
+[32m+[m[32m# Autor: Bryan Amaya[m
+[32m+[m[32m# Agregar[m
+[32m+[m[32mclass Gen_CartaCreateView(CreateView):[m
+[32m+[m[32m    model = Gen_Carta[m
+[32m+[m[32m    form_class = Gen_CartaForm[m
+[32m+[m[32m    template_name = 'gen_carta/create-card.html'[m
+[32m+[m[32m    success_url = reverse_lazy('multimedia_game:gen_carta_list')[m
+[32m+[m
+[32m+[m[32m    def get(self, request, *args, **kwargs):[m
+[32m+[m[32m        rol_usuario_actual = self.request.session['AIGN_ROLID'][m
+[32m+[m[32m        if rol_usuario_actual != 1:[m
+[32m+[m[32m            if rol_usuario_actual != 2:[m
+[32m+[m[32m                return redirect('/')[m
+[32m+[m[32m            return super().get(request, *args, **kwargs)[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            return super().get(request, *args, **kwargs)[m
+[32m+[m
+[32m+[m[32m    # Asigna al kwargs la variable de session desde el formulario[m
+[32m+[m[32m    def get_form_kwargs(self):[m
+[32m+[m[32m        kwargs = super(Gen_CartaCreateView, self).get_form_kwargs()[m
+[32m+[m[32m        # #Roles[m
+[32m+[m[32m        # kwargs.update({'AIGN_OPCIONES': self.request.session['AIGN_OPCIONES']})[m
+[32m+[m[32m        # kwargs.update({'AIGN_EMP_ID': self.request.session.get('AIGN_EMP_ID')})[m
+[32m+[m[32m        return kwargs[m
+[32m+[m
+[32m+[m[32m    # # Iniciallizar el formulario[m
+[32m+[m[32m    def get_initial(self):[m
+[32m+[m[32m        rol_id = self.request.session['AIGN_ROLID'][m
+[32m+[m[32m        usuario_id = self.request.session['AIGN_USERID'][m
+[32m+[m[32m        return {'rol_id': rol_id, 'usuario_id': usuario_id}[m
+[32m+[m
+[32m+[m[32m    # Autor: Bryan Amaya[m
+[32m+[m[32m    def post(self, request, *args, **kwargs):[m
+[32m+[m[32m        form = self.get_form()[m
+[32m+[m[32m        extra_errors = [][m
+[32m+[m[32m        request.POST._mutable = True[m
+[32m+[m[32m        r = {'a': 1}[m
+[32m+[m[32m        print('ENTRE AL CREAR')[m
+[32m+[m[32m        # Crear el registro[m
+[32m+[m[32m        if 'CREATE' in request.POST and form.is_valid():[m
+[32m+[m[32m            try:[m
+[32m+[m[32m                print("adentro   ", request.POST)[m
+[32m+[m[32m                archivo_imagen = pd.DataFrame(json.loads(request.POST['multimedia_file_grid']))[m
+[32m+[m[32m                with transaction.atomic():[m
+[32m+[m[32m                    # Guarda cabecera con commit false, esto con el objetivo[m
+[32m+[m[32m                    # de poder acceder a los datos con los que se guardaria en la base[m
+[32m+[m[32m                    cabecera = form.save(commit=False)[m
+[32m+[m[32m                    usuario_actual = self.request.session['AIGN_USERID'][m
+[32m+[m[32m                    cabecera.usuario_actual = usuario_actual[m
+[32m+[m[32m                    cabecera.save()[m
+[32m+[m[32m                    print('ultimo ingresado',cabecera.cart_id)[m
+[32m+[m[32m                    for index, row in archivo_imagen.iterrows():[m
+[32m+[m[32m                        tab_imagen = Gen_MultimediaFile()[m
+[32m+[m[32m                        if 'muar_ruta' in row:[m
+[32m+[m[32m                            if str(row.muar_ruta).lower() != 'nan':[m
+[32m+[m[32m                                tab_imagen.muar_ruta = row.muar_ruta[m
+[32m+[m[32m                                tab_imagen.muar_tipo = row.muar_tipo[m
+[32m+[m[32m                                tab_imagen.muar_formato = row.muar_formato[m
+[32m+[m[32m                                tab_imagen.save()[m
+[32m+[m[32m                                print('ultimo ingresado archivo', tab_imagen.muar_id)[m
+[32m+[m
+[32m+[m[32m                                relacion_carta_multimedia = Gen_CartaMultimedia()[m
+[32m+[m[32m                                relacion_carta_multimedia.camu_muar_id_id = tab_imagen.muar_id[m
+[32m+[m[32m                                relacion_carta_multimedia.camu_cart_id_id = cabecera.cart_id[m
+[32m+[m[32m                                relacion_carta_multimedia.save()[m
+[32m+[m
+[32m+[m[32m                messages.success(request, CRUD_MSG.CREATE)[m
+[32m+[m[32m                print("request", request)[m
+[32m+[m[32m                return JsonResponse(r)[m
+[32m+[m[32m            except django.db.models.query_utils.InvalidQuery as e:[m
+[32m+[m[32m                print("error ", str(e))[m
+[32m+[m[32m                extra_errors.append(str(e))[m
+[32m+[m
+[32m+[m[32m        self.object = None[m
+[32m+[m[32m        context = self.get_context_data(**kwargs)[m
+[32m+[m[32m        context['form'] = form[m
+[32m+[m[32m        errors = form._errors.setdefault("__all__", ErrorList())[m
+[32m+[m[32m        errors.extend(extra_errors)[m
+[32m+[m[32m        return JsonResponse(dict(form._errors.items()))[m
+[32m+[m
+[32m+[m[32m    def get_context_data(self, **kwargs):[m
+[32m+[m[32m        context = super().get_context_data(**kwargs)[m
+[32m+[m[32m        context['page_title'] = self.model._meta.verbose_name[m
+[32m+[m[32m        context['url_list'] = self.success_url[m
+[32m+[m[32m        ret = [][m
+[32m+[m[32m        ret.append(get_genMultimediaFileDetsForm(None).to_JSON())[m
+[32m+[m[32m        print('ret  ', get_genMultimediaFileDetsForm(None).to_JSON())[m
+[32m+[m[32m        # ret.append(get_genMultimediaDetsForm(None).to_JSON())[m
+[32m+[m[32m        context['grids_detalles'] = ret[m
+[32m+[m[32m        # print('8')[m
+[32m+[m[32m        return context[m
+[32m+[m
+[32m+[m
+[32m+[m[32m# Autor: Bryan Amaya[m
+[32m+[m[32m# Editar[m
+[32m+[m[32m# Eiminar: Eliminado lógico -> Cambiar campo _estado = 1:Normal / 0: Eliminado[m
+[32m+[m[32mclass Gen_CartaUpdateView(UpdateView):[m
+[32m+[m[32m    model = Gen_Carta[m
+[32m+[m[32m    form_class = Gen_CartaForm[m
+[32m+[m[32m    template_name = 'gen_carta/create-card.html'[m
+[32m+[m[32m    success_url = reverse_lazy('multimedia_game:gen_carta_list')[m
+[32m+[m
+[32m+[m[32m    def get(self, request, *args, **kwargs):[m
+[32m+[m[32m        print('aqui5')[m
+[32m+[m[32m        rol_usuario_actual = self.request.session['AIGN_ROLID'][m
+[32m+[m[32m        if rol_usuario_actual != 1:[m
+[32m+[m[32m            if rol_usuario_actual != 2:[m
+[32m+[m[32m                return redirect('/')[m
+[32m+[m[32m            return super().get(request, *args, **kwargs)[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            return super().get(request, *args, **kwargs)[m
+[32m+[m
+[32m+[m[32m    # Autor: Bryan Amaya[m
+[32m+[m[32m    # Asigna al kwargs la variable de session desde el formulario[m
+[32m+[m[32m    def get_form_kwargs(self):[m
+[32m+[m[32m        print('aqui6')[m
+[32m+[m[32m        kwargs = super(Gen_CartaUpdateView, self).get_form_kwargs()[m
+[32m+[m[32m        # kwargs.update({'AIGN_OPCIONES': self.request.session['AIGN_OPCIONES']})[m
+[32m+[m[32m        # kwargs.update({'AIGN_EMP_ID': self.request.session['AIGN_EMP_ID']})[m
+[32m+[m[32m        return kwargs[m
+[32m+[m
+[32m+[m[32m    # Autor: Bryan Amaya[m
+[32m+[m[32m    def dispatch(self, request, *args, **kwargs):[m
+[32m+[m[32m        print('aqui7')[m
+[32m+[m[32m        # Desencriptando el pk[m
+[32m+[m[32m        for k in self.kwargs.keys():[m
+[32m+[m[32m            self.kwargs[k] = _e.decrypt(self.kwargs[k])[m
+[32m+[m[32m        self.object = self.get_object()[m
+[32m+[m[32m        return super().dispatch(request, *args, **kwargs)[m
+[32m+[m
+[32m+[m[32m    def get_initial(self):[m
+[32m+[m[32m        print('aqui8')[m
+[32m+[m[32m        rol_id = self.request.session['AIGN_ROLID'][m
+[32m+[m[32m        usuario_id = self.request.session['AIGN_USERID'][m
+[32m+[m[32m        return {'rol_id': rol_id, 'usuario_id': usuario_id}[m
+[32m+[m
+[32m+[m[32m    #Autor: Bryan Amaya[m
+[32m+[m[32m    def post(self, request, *args, **kwargs):[m
+[32m+[m[32m        form = self.get_form()[m
+[32m+[m[32m        extra_errors = [][m
+[32m+[m[32m        request.POST._mutable = True[m
+[32m+[m[32m        r = {'a': 1}[m
+[32m+[m
+[32m+[m[32m        print("adentro   ", request.POST['multimedia_file_grid'])[m
+[32m+[m[32m        print("json   ", pd.DataFrame(json.loads(request.POST['multimedia_file_grid'])))[m
+[32m+[m
+[32m+[m[32m        data_grid_multimedia = pd.DataFrame(json.loads(request.POST['multimedia_file_grid']))[m
+[32m+[m
+[32m+[m[32m        # # Editar[m
+[32m+[m[32m        # if 'SAVE' in request.POST and form.is_valid():[m
+[32m+[m[32m        #     try:[m
+[32m+[m[32m        #         # Aqui se invoca a la grid para obtener los datos que se encuentran en ella.[m
+[32m+[m[32m        #         data_grid_Respuesta = pd.DataFrame(json.loads(request.POST['multimedia_file_grid']))[m
+[32m+[m[32m        #         with transaction.atomic():[m
+[32m+[m[32m        #             # Guarda cabecera y detalle[m
+[32m+[m[32m        #             cabecera = form.save(commit=False)[m
+[32m+[m[32m        #             usuario_actual = self.request.session['AIGN_USERID'][m
+[32m+[m[32m        #             cabecera.usuario_actual = usuario_actual[m
+[32m+[m[32m        #             cabecera.save()[m
+[32m+[m[32m        #             # print('CABECERAAAAAAAAAAAAA ', cabecera.pk)[m
+[32m+[m[32m        #             for index, row in data_grid_Respuesta.iterrows():[m
+[32m+[m[32m        #                 tab_respuesta = Gen_Respuesta()[m
+[32m+[m[32m        #                 # Valida si el registro ingresado es uno nuevo, o es uno existente que fue modificado[m
+[32m+[m[32m        #                 if 'res_id' in data_grid_Respuesta:[m
+[32m+[m[32m        #                     # Si se edita, es decir si existe un valor[m
+[32m+[m[32m        #                     if not pd.isna(row.res_id):[m
+[32m+[m[32m        #                         print('MULTIMPORTANTE1.2 ', row.res_id, row.res_respuesta,[m
+[32m+[m[32m        #                               row.res_escorrecta)[m
+[32m+[m[32m        #                         tab_respuesta.res_id = row.res_id[m
+[32m+[m[32m        #                         tab_respuesta.cart_id = cabecera.pk[m
+[32m+[m[32m        #                         tab_respuesta.res_respuesta = row.res_respuesta[m
+[32m+[m[32m        #                         tab_respuesta.res_escorrecta = row.res_escorrecta[m
+[32m+[m[32m        #                         tab_respuesta.res_estado = 0 if row._action == 'E' else 1[m
+[32m+[m[32m        #                         # EN CASO DE ELIMINAR UN REGISTRO DE LA GRILLA AL EDITAR[m
+[32m+[m[32m        #                         if tab_respuesta.res_estado == 0:[m
+[32m+[m[32m        #                             tab_multimedia = Gen_Multimedia()[m
+[32m+[m[32m        #                             with transaction.atomic():[m
+[32m+[m[32m        #                                 # Elimina de detalle. Se usa el Kwargs, que es el arreglo donde se almacena[m
+[32m+[m[32m        #                                 # el pk desde el metodo dispach[m
+[32m+[m[32m        #                                 with connection.cursor() as cursor:[m
+[32m+[m[32m        #                                     cursor.execute([m
+[32m+[m[32m        #                                         """SELECT mul_archivo FROM gen.multimedia[m
+[32m+[m[32m        #                                            WHERE cart_id = %s AND res_id = %s""",[m
+[32m+[m[32m        #                                         [self.kwargs['pk'], tab_respuesta.res_id])[m
+[32m+[m[32m        #                                     result = cursor.fetchall()[m
+[32m+[m[32m        #                                     if result:[m
+[32m+[m[32m        #                                         imagen_url = result[0][m
+[32m+[m[32m        #                                         # print(imagen_url)[m
+[32m+[m[32m        #                                     else:[m
+[32m+[m[32m        #                                         imagen_url = None[m
+[32m+[m[32m        #[m
+[32m+[m[32m        #                                 # print(self.kwargs['pk'])[m
+[32m+[m[32m        #                                 # print(self.get_object())[m
+[32m+[m[32m        #                                 with connection.cursor() as cursor:[m
+[32m+[m[32m        #                                     cursor.execute([m
+[32m+[m[32m        #                                         """delete from gen.multimedia[m
+[32m+[m[32m        #                                           where cart_id = %s AND res_id = %s""",[m
+[32m+[m[32m        #                                         [self.kwargs['pk'], tab_respuesta.res_id])[m
+[32m+[m[32m        #[m
+[32m+[m[32m        #                                 if imagen_url:[m
+[32m+[m[32m        #                                     # print('existe_imagen')[m
+[32m+[m[32m        #                                     for row in result:[m
+[32m+[m[32m        #                                         # print(row[0])[m
+[32m+[m[32m        #                                         imagen_url = row[0][m
+[32m+[m[32m        #                                         file_path = os.path.join(settings.MEDIA_ROOT,[m
+[32m+[m[32m        #                                                                  imagen_url[len(settings.MEDIA_URL):])[m
+[32m+[m[32m        #                                         # print('yeyyyy ', file_path)[m
+[32m+[m[32m        #                                         if os.path.exists(file_path):[m
+[32m+[m[32m        #                                             os.remove(file_path)[m
+[32m+[m[32m        #[m
+[32m+[m[32m        #                     else:[m
+[32m+[m[32m        #                         print('MULTIMPORTANTE1.3 ', row.res_id, row.res_respuesta,[m
+[32m+[m[32m        #                               row.res_escorrecta)[m
+[32m+[m[32m        #                         tab_respuesta.cart_id = cabecera.pk[m
+[32m+[m[32m        #                         tab_respuesta.res_respuesta = row.res_respuesta[m
+[32m+[m[32m        #                         tab_respuesta.res_escorrecta = row.res_escorrecta[m
+[32m+[m[32m        #                         tab_respuesta.save()[m
+[32m+[m[32m        #                         if not pd.isna(row.mul_archivo):[m
+[32m+[m[32m        #                             tab_multimedia = Gen_Multimedia()[m
+[32m+[m[32m        #                             tema_actividad = Gen_TemaActividad.objects.get(tac_id=cabecera.tac_id)[m
+[32m+[m[32m        #                             tab_multimedia.tem_id = tema_actividad.tem_id[m
+[32m+[m[32m        #                             tab_multimedia.act_id = tema_actividad.act_id[m
+[32m+[m[32m        #                             tab_multimedia.res_id = tab_respuesta.res_id[m
+[32m+[m[32m        #                             tab_multimedia.cart_id = cabecera.pk[m
+[32m+[m[32m        #                             tab_multimedia.mul_archivo = row.mul_archivo[m
+[32m+[m[32m        #                             tab_multimedia.mul_tipo = row.mul_tipo[m
+[32m+[m[32m        #                             tab_multimedia.mul_formato = row.mul_formato[m
+[32m+[m[32m        #                             # print('arch ', row.mul_archivo)[m
+[32m+[m[32m        #                             # print('tip ', row.mul_tipo)[m
+[32m+[m[32m        #                             # print('for ', row.mul_formato)[m
+[32m+[m[32m        #                             tab_multimedia.save()[m
+[32m+[m[32m        #                 else:[m
+[32m+[m[32m        #                     print('MULTIMPORTANTE1.4 ', row.res_respuesta,[m
+[32m+[m[32m        #                           row.res_escorrecta)[m
+[32m+[m[32m        #                     tab_respuesta.cart_id = cabecera.pk[m
+[32m+[m[32m        #                     tab_respuesta.res_respuesta = row.res_respuesta[m
+[32m+[m[32m        #                     tab_respuesta.res_escorrecta = row.res_escorrecta[m
+[32m+[m[32m        #                     tab_respuesta.save()[m
+[32m+[m[32m        #                     if not pd.isna(row.mul_archivo):[m
+[32m+[m[32m        #                         tab_multimedia = Gen_Multimedia()[m
+[32m+[m[32m        #                         tema_actividad = Gen_TemaActividad.objects.get(tac_id=cabecera.tac_id)[m
+[32m+[m[32m        #                         tab_multimedia.tem_id = tema_actividad.tem_id[m
+[32m+[m[32m        #                         tab_multimedia.act_id = tema_actividad.act_id[m
+[32m+[m[32m        #                         tab_multimedia.res_id = tab_respuesta.res_id[m
+[32m+[m[32m        #                         tab_multimedia.cart_id = cabecera.pk[m
+[32m+[m[32m        #                         tab_multimedia.mul_archivo = row.mul_archivo[m
+[32m+[m[32m        #                         tab_multimedia.mul_tipo = row.mul_tipo[m
+[32m+[m[32m        #                         tab_multimedia.mul_formato = row.mul_formato[m
+[32m+[m[32m        #                         tab_multimedia.save()[m
+[32m+[m[32m        #                 tab_respuesta.save()[m
+[32m+[m[32m        #             messages.success(request, CRUD_MSG.CREATE)[m
+[32m+[m[32m        #             return JsonResponse(r)[m
+[32m+[m[32m        #     except django.db.models.query_utils.InvalidQuery as e:[m
+[32m+[m[32m        #         extra_errors.append(str(e))[m
+[32m+[m[32m        #[m
+[32m+[m[32m        # Eliminar[m
+[32m+[m[32m        if 'DELETE' in request.POST and form.is_valid():[m
+[32m+[m[32m            try:[m
+[32m+[m
+[32m+[m[32m                identificador_carta = -1[m
+[32m+[m[32m                with transaction.atomic():[m
+[32m+[m[32m                    with transaction.atomic():[m
+[32m+[m
+[32m+[m[32m                        for index, row in data_grid_multimedia.iterrows():[m
+[32m+[m[32m                            cart_id = row['cart_id'][m
+[32m+[m[32m                            muar_id = row['muar_id'][m
+[32m+[m
+[32m+[m[32m                            identificador_carta = cart_id[m
+[32m+[m[32m                            print('cart_id', cart_id)[m
+[32m+[m[32m                            print('muar_id', muar_id)[m
+[32m+[m[32m                            # Elimina de detalle. Se usa el Kwargs, que es el arreglo donde se almacena[m
+[32m+[m[32m                            # el pk desde el metodo dispach[m
+[32m+[m
+[32m+[m[32m                            with connection.cursor() as cursor:[m
+[32m+[m[32m                                cursor.execute([m
+[32m+[m[32m                                    """[m
+[32m+[m[32m                                    delete from gen.carta_mult[m
+[32m+[m[32m                                    where carta_mult.camu_cart_id = %s[m
+[32m+[m[32m                                    """,[m
+[32m+[m[32m                                    [cart_id])[m
+[32m+[m
+[32m+[m[32m                            with connection.cursor() as cursor:[m
+[32m+[m[32m                                cursor.execute([m
+[32m+[m[32m                                    """ SELECT muar_ruta[m[41m  [m
+[32m+[m[32m                                        FROM postgres.gen.multimedia_archivos ma[m[41m [m
+[32m+[m[32m                                        WHERE ma.muar_id = %s""",[m
+[32m+[m[32m                                    [muar_id])[m
+[32m+[m[32m                                result = cursor.fetchall()[m
+[32m+[m
+[32m+[m[32m                                print('muar ruta', result[0])[m
+[32m+[m[32m                                if result:[m
+[32m+[m[32m                                    ruta_archivo = result[0][m
+[32m+[m[32m                                else:[m
+[32m+[m[32m                                    ruta_archivo = None[m
+[32m+[m
+[32m+[m
+[32m+[m[32m                            with connection.cursor() as cursor:[m
+[32m+[m[32m                                cursor.execute([m
+[32m+[m[32m                                    """ DELETE[m
+[32m+[m[32m                                        FROM postgres.gen.multimedia_archivos ma[m
+[32m+[m[32m                                        WHERE ma.muar_id = %s""",[m
+[32m+[m[32m                                    [muar_id])[m
+[32m+[m
+[32m+[m[32m                            #[m
+[32m+[m[32m                            if ruta_archivo:[m
+[32m+[m[32m                                # print('existe_imagen')[m
+[32m+[m[32m                                for row in result:[m
+[32m+[m[32m                                    print(row[0])[m
+[32m+[m[32m                                    ruta_archivo = row[0][m
+[32m+[m[32m                                    file_path = os.path.join(settings.MEDIA_ROOT, ruta_archivo[len(settings.MEDIA_URL):])[m
+[32m+[m[32m                                    print('ruta archivo ', file_path)[m
+[32m+[m[32m                                    if os.path.exists(file_path):[m
+[32m+[m[32m                                        os.remove(file_path)[m
+[32m+[m
+[32m+[m[32m                    self.get_object().delete()[m
+[32m+[m[32m                    messages.success(request, CRUD_MSG.CREATE)[m
+[32m+[m[32m                    return JsonResponse(r)[m
+[32m+[m[32m            except django.db.utils.InternalError as e:[m
+[32m+[m[32m                extra_errors.append(str(e))[m
+[32m+[m
+[32m+[m[32m        self.object = None[m
+[32m+[m[32m        context = self.get_context_data(**kwargs)[m
+[32m+[m[32m        context['form'] = form[m
+[32m+[m[32m        errors = form._errors.setdefault("__all__", ErrorList())[m
+[32m+[m[32m        errors.extend(extra_errors)[m
+[32m+[m[32m        return JsonResponse(dict(form.errors.items()))[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    #Autor: Bryan Amaya[m
+[32m+[m[32m    def get_context_data(self, **kwargs):[m
+[32m+[m[32m        print('aqui9')[m
+[32m+[m[32m        context = super().get_context_data(**kwargs)[m
+[32m+[m[32m        context['page_title'] = self.model._meta.verbose_name[m
+[32m+[m[32m        context['url_list'] = self.success_url[m
+[32m+[m[32m        ret = [][m
+[32m+[m[32m        if 'pk' in context:[m
+[32m+[m[32m            cart_id = _e.decrypt(context['pk'])[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            cart_id = context['object'].cart_id[m
+[32m+[m
+[32m+[m[32m        print('el cart id', cart_id)[m
+[32m+[m[32m        ret.append(get_genMultimediaFileDetsForm(cart_id).to_JSON())[m
+[32m+[m[32m        # ret.append(get_genMultimediaDetsForm(cart_id).to_JSON())[m
+[32m+[m[32m        context['grids_detalles'] = ret[m
+[32m+[m[32m        # print('15')[m
+[32m+[m[32m        return context[m
+[1mdiff --git a/apps/gen/forms.py b/apps/gen/forms.py[m
+[1mindex faef319..7d9d237 100644[m
+[1m--- a/apps/gen/forms.py[m
+[1m+++ b/apps/gen/forms.py[m
+[36m@@ -70,22 +70,6 @@[m [mdef get_genTemaActividadDetsForm(tem_id):[m
+          'foreignKeyValue': 'act_nombre',  # MOSTRAR USUARIO,[m
+          'validationRules': {'required': True}[m
+          },[m
+[31m-        # {[m
+[31m-        #     'field': 'oro_esactivo',[m
+[31m-        #     'headerText': Sis_OpcionRol._meta.get_field('oro_esactivo').verbose_name,[m
+[31m-        #     'headerName': Sis_OpcionRol._meta.get_field('oro_esactivo').verbose_name,[m
+[31m-        #     'sortable': True,[m
+[31m-        #     'filter': True,[m
+[31m-        #     'textAlign': 'Center',[m
+[31m-        #     'allowEditing': True,[m
+[31m-        #     'editType': "booleanedit",[m
+[31m-        #     'type': 'boolean',[m
+[31m-        #     'dataSource': lov_yes_no,[m
+[31m-        #     'foreignKeyField': 'id',[m
+[31m-        #     'foreignKeyValue': 'name',[m
+[31m-        #     # 'displayAsCheckBox': False,[m
+[31m-        #     'width': 100,[m
+[31m-        # },[m
+         {[m
+             'field': '_action',[m
+             'visible': True,[m
+[36m@@ -119,89 +103,12 @@[m [mdef get_genTemaActividadDetsForm(tem_id):[m
+     return opts[m
+ [m
+ [m
+[31m-# def get_genActividadDetsForm(tem_id):[m
+[31m-#     mul_id = CharField(label="mul_id", widget=HiddenInput())[m
+[31m-#     mul_archivo = FileField(label="mul_archivo")[m
+[31m-#     # Instancia de la clase en donde estan las propiedades de la grid[m
+[31m-#     opts = SyncFusionGridOptions()[m
+[31m-#     opts.grid_id = 'actividad_grid'[m
+[31m-#     opts.grid_title = 'Actividad'[m
+[31m-#     # DropdownList para poner en una celda de la grid[m
+[31m-#[m
+[31m-#     # Lista para selección[m
+[31m-#     # lov_yes_no = [{'id': True, 'name': 'Sí'}, {'id': False, 'name': 'No'}][m
+[31m-#     # DropdownList para poner en una celda de la grid[m
+[31m-#     # lov_rol = list(Adm_Rol.objects.filter(rol_estado=1).values("rol_id", "rol_nombre"))[m
+[31m-#     # Aqui se puede modificar las propiedades de nuestra instancia opts[m
+[31m-#     opts.gridOptions['columns'] = [[m
+[31m-#         {[m
+[31m-#             # Este campo hace referencia al PK para la tabla[m
+[31m-#             'field': 'id',[m
+[31m-#             'visible': False,[m
+[31m-#             'isPrimaryKey': True,[m
+[31m-#             'editable': False,[m
+[31m-#         },[m
+[31m-#         {[m
+[31m-#             # Este campo hace referencia a la PK de la BD[m
+[31m-#             'field': 'act_id',[m
+[31m-#             'visible': True,[m
+[31m-#             'width': 1,[m
+[31m-#         },[m
+[31m-#[m
+[31m-#         {[m
+[31m-#             'field': 'act_nombre',[m
+[31m-#             'headerText': Gen_Actividad._meta.get_field('act_nombre').verbose_name,[m
+[31m-#             'headerName': Gen_Actividad._meta.get_field('act_nombre').verbose_name,[m
+[31m-#             'placeholder': 'Nada',[m
+[31m-#             'allowEditing': True,[m
+[31m-#             'validationRules': {'required': True},[m
+[31m-#             'width': 100,[m
+[31m-#         },[m
+[31m-#         {[m
+[31m-#             'field': 'act_descripcion',[m
+[31m-#             'headerText': Gen_Actividad._meta.get_field('act_descripcion').verbose_name,[m
+[31m-#             'headerName': Gen_Actividad._meta.get_field('act_descripcion').verbose_name,[m
+[31m-#             'placeholder': 'Nada',[m
+[31m-#             'allowEditing': True,[m
+[31m-#             'validationRules': {'required': True},[m
+[31m-#             'width': 100,[m
+[31m-#         },[m
+[31m-#         # {[m
+[31m-#         #     'field': 'mul_archivo',[m
+[31m-#         #     'headerText': Gen_Multimedia._meta.get_field('mul_archivo').verbose_name,[m
+[31m-#         #     'headerName': Gen_Multimedia._meta.get_field('mul_archivo').verbose_name,[m
+[31m-#         #     'placeholder': 'Nada',[m
+[31m-#         #     'allowEditing': True,[m
+[31m-#         #     'validationRules': {'required': True},[m
+[31m-#         #     'width': 100,[m
+[31m-#         # },[m
+[31m-#     ][m
+[31m-#     opts.gridOptions['toolbarClick'] = 'toolbarClick'[m
+[31m-#     opts.gridOptions['rowDataBound'] = 'rowDataBound'[m
+[31m-#     if True:[m
+[31m-#         # data = Adm_Rol.objects.filter(rol_id=rol_id, rol_estado=1).only("rol_nombre")[m
+[31m-#         data = Gen_Actividad.objects.filter(tem_id=tem_id, act_estado=1).only("act_id",[m
+[31m-#                                                                               "tem_id",[m
+[31m-#                                                                               "act_nombre",[m
+[31m-#                                                                               "act_descripcion")[m
+[31m-#         data_list = [][m
+[31m-#         for row in data:[m
+[31m-#             l_row_dict = row.__dict__[m
+[31m-#             del l_row_dict['_state'][m
+[31m-#             l_row_dict['_action'] = None[m
+[31m-#             data_list.append(l_row_dict)[m
+[31m-#         opts.gridOptions['dataSource'] = data_list[m
+[31m-#         print('tem_id tabla Actividad : ', tem_id)[m
+[31m-#         print(data_list)[m
+[31m-#     else:[m
+[31m-#         opts.gridOptions['dataSource'] = [][m
+[31m-#     return opts[m
+[31m-[m
+ [m
+ # Autor: Dre[m
+ # Fecha: 17/12/2022 11:00[m
+ # Descripción: Grids para Respuestas de la opcion Actividad..[m
+ ContadorControl = 0[m
+[32m+[m
+ def get_genRespuestaDetsForm(jue_id):[m
+     # Instancia de la clase en donde estan las propiedades de la grid[m
+     opts = SyncFusionGridOptions(allowEdit=False)[m
+[36m@@ -746,6 +653,7 @@[m [mclass Gen_JuegoForm(ModelForm):[m
+         self.fields['jue_enunciado'].required = True[m
+         self.fields['jue_puntaje'].required = True[m
+         self.fields['jue_nombre'].widget.attrs['autofocus'] = True[m
+[32m+[m
+         # Cambiar atributos genericos[m
+         for form in self.visible_fields():[m
+             form.field.widget.attrs['placeholder'] = Form_CSS.fields_placeholder + form.field.label  # .lower()[m
+[36m@@ -760,6 +668,7 @@[m [mclass Gen_JuegoForm(ModelForm):[m
+         self.helper.form_class = Form_CSS.form_class[m
+         self.helper.label_class = 'col-sm-4 text-right form-control-sm'[m
+         self.helper.field_class = 'col-sm-5'[m
+[32m+[m[32m        print('pk ',self.instance.pk)[m
+         self.helper.layout = Layout([m
+             Div([m
+                 # DivHeaderWithButtons(instance_pk=self.instance.pk, permisos=self.PERMISOS),[m
+[36m@@ -1133,3 +1042,224 @@[m [mclass Gen_TemaForm(ModelForm):[m
+         # super(Gen_AsignaturaForm, self).clean()[m
+         form_data = self.cleaned_data[m
+         return form_data[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m###################################################[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef get_genMultimediaFileDetsForm(cart_id):[m
+[32m+[m[32m    # Instancia de la clase en donde estan las propiedades de la grid[m
+[32m+[m[32m    opts = SyncFusionGridOptions(allowEdit=False)[m
+[32m+[m[32m    opts.grid_id = 'multimedia_file_grid'[m
+[32m+[m[32m    opts.grid_title = 'Respuesta'[m
+[32m+[m[32m    vista_previa = CharField(label="Vista previa", required=False)[m
+[32m+[m
+[32m+[m[32m    # DropdownList para poner en una celda de la grid[m
+[32m+[m[32m    # print('hola buenas tardes')[m
+[32m+[m[32m    # Lista para selección[m
+[32m+[m[32m    lov_yes_no = [{'id': True, 'name': 'Sí'}, {'id': False, 'name': 'No'}][m
+[32m+[m[32m    opts.gridOptions['toolbar'] = ['Add', 'Edit', 'Delete', 'Update', 'Cancel'][m
+[32m+[m[32m    # opts.gridOptions['toolbarText'] = {[m
+[32m+[m[32m    #     Add: 'Añadir',[m
+[32m+[m[32m    #     edit: 'Editar',[m
+[32m+[m[32m    #     delete: 'Eliminar',[m
+[32m+[m[32m    #     update: 'Actualizar',[m
+[32m+[m[32m    #     cancel: 'Cancelar'[m
+[32m+[m[32m    # }[m
+[32m+[m
+[32m+[m[32m    # Aqui se puede modificar las propiedades de nuestra instancia opts[m
+[32m+[m[32m    opts.gridOptions['columns'] = [[m
+[32m+[m[32m        {[m
+[32m+[m[32m            # Este campo hace referencia al PK para la tabla[m
+[32m+[m[32m            'field': 'id',[m
+[32m+[m[32m            'visible': False,[m
+[32m+[m[32m            # 'visible': True,[m
+[32m+[m[32m            # 'width': 100,[m
+[32m+[m[32m            'isPrimaryKey': True,[m
+[32m+[m[32m            'editable': False,[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            # Este campo hace referencia a la PK de la BD[m
+[32m+[m[32m            'field': 'muar_id',[m
+[32m+[m[32m            'visible': True,[m
+[32m+[m[32m            'width': 1,[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            'field': 'muar_ruta',[m
+[32m+[m[32m            'isPrimaryKey': True,[m
+[32m+[m[32m            'headerText': Gen_MultimediaFile._meta.get_field('muar_ruta').verbose_name,[m
+[32m+[m[32m            'headerName': Gen_MultimediaFile._meta.get_field('muar_ruta').verbose_name,[m
+[32m+[m[32m            'allowEditing': True,[m
+[32m+[m[32m            'validationRules': {'required': False},[m
+[32m+[m[32m            'width': 100,[m
+[32m+[m
+[32m+[m[32m            'edit': {[m
+[32m+[m[32m                'create': 'crear',[m
+[32m+[m[32m                'read': 'leer',[m
+[32m+[m[32m                'destroy': 'destruir',[m
+[32m+[m[32m                'write': 'escribir'[m
+[32m+[m[32m            },[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            'field': 'muar_tipo',[m
+[32m+[m[32m            'headerText': Gen_MultimediaFile._meta.get_field('muar_tipo').verbose_name,[m
+[32m+[m[32m            'headerName': Gen_MultimediaFile._meta.get_field('muar_tipo').verbose_name,[m
+[32m+[m[32m            'allowEditing': True,[m
+[32m+[m[32m            'validationRules': {'required': True},[m
+[32m+[m[32m            'visible': True,[m
+[32m+[m[32m            'width': 1,[m
+[32m+[m
+[32m+[m[32m            'edit': {[m
+[32m+[m[32m                'create': 'creardos',[m
+[32m+[m[32m                'read': 'leerdos',[m
+[32m+[m[32m                'destroy': 'destruirdos',[m
+[32m+[m[32m                'write': 'escribirdos'[m
+[32m+[m[32m            },[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            'field': 'muar_formato',[m
+[32m+[m[32m            'headerText': Gen_MultimediaFile._meta.get_field('muar_formato').verbose_name,[m
+[32m+[m[32m            'headerName': Gen_MultimediaFile._meta.get_field('muar_formato').verbose_name,[m
+[32m+[m[32m            'allowEditing': True,[m
+[32m+[m[32m            'validationRules': {'required': True},[m
+[32m+[m[32m            'visible': True,[m
+[32m+[m[32m            'width': 1,[m
+[32m+[m
+[32m+[m[32m            'edit': {[m
+[32m+[m[32m                'create': 'creartres',[m
+[32m+[m[32m                'read': 'leertres',[m
+[32m+[m[32m                'destroy': 'destruirtres',[m
+[32m+[m[32m                'write': 'escribirtres'[m
+[32m+[m[32m            },[m
+[32m+[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            'field': 'vista_previa',[m
+[32m+[m[32m            'headerText': 'Vista Previa',[m
+[32m+[m[32m            'headerName': 'Vista Previa',[m
+[32m+[m[32m            'width': 100,[m
+[32m+[m[32m            'visible': False,[m
+[32m+[m[32m            # 'template': '<h1>${arch}</h1>',[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            'field': '_action',[m
+[32m+[m[32m            'visible': True,[m
+[32m+[m[32m            'width': 1,[m
+[32m+[m[32m            'edit': {'params': {'value': 'N'}},[m
+[32m+[m[32m            'defaultValue': 'N',[m
+[32m+[m[32m        }[m
+[32m+[m[32m    ][m
+[32m+[m[32m    opts.gridOptions['toolbarClick'] = 'toolbarClick'[m
+[32m+[m[32m    opts.gridOptions['rowDataBound'] = 'rowDataBound'[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    if True:[m
+[32m+[m[32m        global ContadorControl[m
+[32m+[m[32m        ContadorControl = ContadorControl + 1[m
+[32m+[m[32m        with connection.cursor() as cursor:[m
+[32m+[m[32m            cursor.execute("""[m
+[32m+[m[32m                SELECT 	cart.cart_id, cart.cart_descripcion, mul_ar.muar_id, mul_ar.muar_ruta,[m[41m [m
+[32m+[m	[32m            mul_ar.muar_tipo, mul_ar.muar_formato, null vista_previa[m
+[32m+[m[32m                FROM gen.carta  AS cart[m
+[32m+[m[32m                LEFT JOIN gen.carta_mult  AS cart_mul ON cart.cart_id = cart_mul.camu_cart_id[m[41m [m
+[32m+[m[32m                LEFT join gen.multimedia_archivos AS mul_ar on cart_mul.camu_muar_id = mul_ar.muar_id[m[41m [m
+[32m+[m[32m                WHERE  cart.cart_id = %s AND cart.cart_estado = 1[m[41m [m
+[32m+[m[32m                ORDER BY cart.cart_id, mul_ar.muar_id""",[m
+[32m+[m[32m                           [cart_id])[m
+[32m+[m[32m            data = dictfetchall(cursor)[m
+[32m+[m
+[32m+[m[32m        # print('data ', jue_id, ContadorControl , data)[m
+[32m+[m
+[32m+[m[32m        data_list = [][m
+[32m+[m[32m        cont = 1[m
+[32m+[m
+[32m+[m[32m        for row in data:[m
+[32m+[m[32m            l_row_dict = row[m
+[32m+[m[32m            l_row_dict['_action'] = None[m
+[32m+[m[32m            l_row_dict['id'] = cont[m
+[32m+[m[32m            cont = cont + 1[m
+[32m+[m[32m            data_list.append(l_row_dict)[m
+[32m+[m[32m        opts.gridOptions['dataSource'] = data_list[m
+[32m+[m[32m        # opts.gridOptions['dataSource'] = data_list2[m
+[32m+[m
+[32m+[m[32m        # print('act_id tabla Respuesta : ', jue_id)[m
+[32m+[m[32m        # print(data_list)[m
+[32m+[m[32m        # print(data_list2)[m
+[32m+[m[32m    else:[m
+[32m+[m[32m        opts.gridOptions['dataSource'] = [][m
+[32m+[m[32m    return opts[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m####################################################[m
+[32m+[m[32m# Autor: Kevin Campoverde[m
+[32m+[m[32m# Fecha: 28/12/2023[m
+[32m+[m[32m# Descripción: Formulario para la opción 'Juego Multimedia'.[m
+[32m+[m[32mclass Gen_CartaForm(ModelForm):[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    def __init__(self, *args, **kwargs):[m
+[32m+[m[32m        super(Gen_CartaForm, self).__init__(*args, **kwargs)[m
+[32m+[m[32m        # Cambiar atributos especificos[m
+[32m+[m[32m        self.fields['cart_descripcion'].required = True[m
+[32m+[m[32m        self.fields['cart_descripcion'].widget.attrs['autofocus'] = True[m
+[32m+[m
+[32m+[m[32m        # Cambiar atributos especificos[m
+[32m+[m[32m        rol_usuario_actual = self.initial.get('rol_id')[m
+[32m+[m[32m        usuario_actual = self.initial.get('usuario_id')[m
+[32m+[m
+[32m+[m[32m        # Cambiar atributos genericos[m
+[32m+[m[32m        for form in self.visible_fields():[m
+[32m+[m[32m            form.field.widget.attrs['placeholder'] = Form_CSS.fields_placeholder + form.field.label  # .lower()[m
+[32m+[m[32m            form.field.widget.attrs['autocomplete'] = Form_CSS.fields_autocomplete[m
+[32m+[m[32m            form.field.widget.attrs['class'] = Form_CSS.fields_attr_class[m
+[32m+[m[32m        self.helper = FormHelper(self)[m
+[32m+[m[32m        self.helper.form_method = 'post'[m
+[32m+[m[32m        self.helper.form_id = Form_CSS.getFormID(self)[m
+[32m+[m[32m        self.helper.attrs = Form_CSS.form_attrs[m
+[32m+[m[32m        self.helper.form_tag = True[m
+[32m+[m[32m        self.helper.form_error_title = Form_CSS.form_err_title[m
+[32m+[m[32m        self.helper.form_class = Form_CSS.form_class[m
+[32m+[m[32m        self.helper.label_class = 'col-sm-4 text-right form-control-sm'[m
+[32m+[m[32m        self.helper.field_class = 'col-sm-5'[m
+[32m+[m[32m        self.helper.layout = Layout([m
+[32m+[m[32m            Div([m
+[32m+[m[32m                # DivHeaderWithButtons(instance_pk=self.instance.pk, permisos=self.PERMISOS),[m
+[32m+[m[32m                DivHeaderWithButtons(instance_pk=self.instance.pk,[m
+[32m+[m[32m                                     permisos={'oro_agregar': 1, 'oro_modificar': 1, 'oro_eliminar': 1,[m
+[32m+[m[32m                                               'oro_imprimir': 0}),[m
+[32m+[m[32m                Div([m
+[32m+[m[32m                    Div([m
+[32m+[m[32m                        Div('cart_descripcion',[m
+[32m+[m[32m                            css_class='col-sm'[m
+[32m+[m[32m                            ),[m
+[32m+[m[32m                        css_class='row'[m
+[32m+[m[32m                    ),[m
+[32m+[m[32m                    css_class='card-body', id='body_id'[m
+[32m+[m[32m                ),[m
+[32m+[m[32m                css_class='card'[m
+[32m+[m[32m            ),[m
+[32m+[m[32m            Div([m
+[32m+[m[32m                TabHolder([m
+[32m+[m[32m                    Tab([m
+[32m+[m[32m                        'Archivo de Imagen',[m
+[32m+[m[32m                        DivGridHeaderWithButtons(instance_pk=self.instance.pk,[m
+[32m+[m[32m                                                 grid_opts=get_genMultimediaFileDetsForm(None)),[m
+[32m+[m[32m                    ),[m
+[32m+[m[32m                ),[m
+[32m+[m[32m            )[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m    class Meta:[m
+[32m+[m[32m        model = Gen_Carta[m
+[32m+[m[32m        fields = '__all__'[m
+[32m+[m[32m        widgets = {}[m
+[32m+[m
+[32m+[m[32m    def clean(self):[m
+[32m+[m[32m        # super(Gen_AsignaturaForm, self).clean()[m
+[32m+[m[32m        form_data = self.cleaned_data[m
+[32m+[m[32m        return form_data[m
+[41m+[m
+[41m+[m
+[1mdiff --git a/apps/gen/forms2.py b/apps/gen/forms2.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..14a0272[m
+[1m--- /dev/null[m
+[1m+++ b/apps/gen/forms2.py[m
+[36m@@ -0,0 +1,103 @@[m
+[32m+[m[32mdef get_genRespuestaDetsForm(jue_id):[m
+[32m+[m[32m    # Instancia de la clase en donde estan las propiedades de la grid[m
+[32m+[m[32m    opts = SyncFusionGridOptions(allowEdit=False)[m
+[32m+[m[32m    opts.grid_id = 'respuesta_grid'[m
+[32m+[m[32m    opts.grid_title = 'Respuesta'[m
+[32m+[m[32m    vista_previa = CharField(label="Vista previa", required=False)[m
+[32m+[m
+[32m+[m[32m    # DropdownList para poner en una celda de la grid[m
+[32m+[m[32m    # print('hola buenas tardes')[m
+[32m+[m[32m    # Lista para selección[m
+[32m+[m[32m    lov_yes_no = [{'id': True, 'name': 'Sí'}, {'id': False, 'name': 'No'}][m
+[32m+[m[32m    opts.gridOptions['toolbar'] = ['Add', 'Edit', 'Delete', 'Update', 'Cancel'][m
+[32m+[m[32m    # opts.gridOptions['toolbarText'] = {[m
+[32m+[m[32m    #     Add: 'Añadir',[m
+[32m+[m[32m    #     edit: 'Editar',[m
+[32m+[m[32m    #     delete: 'Eliminar',[m
+[32m+[m[32m    #     update: 'Actualizar',[m
+[32m+[m[32m    #     cancel: 'Cancelar'[m
+[32m+[m[32m    # }[m
+[32m+[m
+[32m+[m[32m    # Aqui se puede modificar las propiedades de nuestra instancia opts[m
+[32m+[m[32m    opts.gridOptions['columns'] = [[m
+[32m+[m[32m        {[m
+[32m+[m[32m            # Este campo hace referencia al PK para la tabla[m
+[32m+[m[32m            'field': 'id',[m
+[32m+[m[32m            'visible': False,[m
+[32m+[m[32m            # 'visible': True,[m
+[32m+[m[32m            # 'width': 100,[m
+[32m+[m[32m            'isPrimaryKey': True,[m
+[32m+[m[32m            'editable': False,[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            # Este campo hace referencia a la PK de la BD[m
+[32m+[m[32m            'field': 'muar_id',[m
+[32m+[m[32m            'visible': True,[m
+[32m+[m[32m            'width': 1,[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            'field': 'muar_ruta',[m
+[32m+[m[32m            'isPrimaryKey': True,[m
+[32m+[m[32m            'headerText': Gen_Multimedia._meta.get_field('muar_ruta').verbose_name,[m
+[32m+[m[32m            'headerName': Gen_Multimedia._meta.get_field('muar_ruta').verbose_name,[m
+[32m+[m[32m            'allowEditing': True,[m
+[32m+[m[32m            'validationRules': {'required': False},[m
+[32m+[m[32m            'width': 100,[m
+[32m+[m
+[32m+[m[32m            'edit': {[m
+[32m+[m[32m                'create': 'crear',[m
+[32m+[m[32m                'read': 'leer',[m
+[32m+[m[32m                'destroy': 'destruir',[m
+[32m+[m[32m                'write': 'escribir'[m
+[32m+[m[32m            },[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            'field': 'muar_tipo',[m
+[32m+[m[32m            'headerText': Gen_Multimedia._meta.get_field('muar_tipo').verbose_name,[m
+[32m+[m[32m            'headerName': Gen_Multimedia._meta.get_field('muar_tipo').verbose_name,[m
+[32m+[m[32m            'allowEditing': True,[m
+[32m+[m[32m            'validationRules': {'required': True},[m
+[32m+[m[32m            'width': 1,[m
+[32m+[m
+[32m+[m[32m            'edit': {[m
+[32m+[m[32m                'create': 'creardos',[m
+[32m+[m[32m                'read': 'leerdos',[m
+[32m+[m[32m                'destroy': 'destruirdos',[m
+[32m+[m[32m                'write': 'escribirdos'[m
+[32m+[m[32m            },[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            'field': 'muar_formato',[m
+[32m+[m[32m            'headerText': Gen_Multimedia._meta.get_field('muar_formato').verbose_name,[m
+[32m+[m[32m            'headerName': Gen_Multimedia._meta.get_field('muar_formato').verbose_name,[m
+[32m+[m[32m            'allowEditing': True,[m
+[32m+[m[32m            'validationRules': {'required': True},[m
+[32m+[m[32m            'width': 1,[m
+[32m+[m
+[32m+[m[32m            'edit': {[m
+[32m+[m[32m                'create': 'creartres',[m
+[32m+[m[32m                'read': 'leertres',[m
+[32m+[m[32m                'destroy': 'destruirtres',[m
+[32m+[m[32m                'write': 'escribirtres'[m
+[32m+[m[32m            },[m
+[32m+[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            'field': 'vista_previa',[m
+[32m+[m[32m            'headerText': 'Vista Previa',[m
+[32m+[m[32m            'headerName': 'Vista Previa',[m
+[32m+[m[32m            'width': 100,[m
+[32m+[m[32m            'visible': False,[m
+[32m+[m[32m            # 'template': '<h1>${arch}</h1>',[m
+[32m+[m[32m        },[m
+[32m+[m[32m        {[m
+[32m+[m[32m            'field': '_action',[m
+[32m+[m[32m            'visible': True,[m
+[32m+[m[32m            'width': 1,[m
+[32m+[m[32m            'edit': {'params': {'value': 'N'}},[m
+[32m+[m[32m            'defaultValue': 'N',[m
+[32m+[m[32m        }[m
+[32m+[m[32m    ][m
+[32m+[m[32m    opts.gridOptions['toolbarClick'] = 'toolbarClick'[m
+[32m+[m[32m    opts.gridOptions['rowDataBound'] = 'rowDataBound'[m
+[32m+[m[32m    return opts[m
+[1mdiff --git a/apps/gen/models.py b/apps/gen/models.py[m
+[1mindex 8403d5a..b3c2600 100644[m
+[1m--- a/apps/gen/models.py[m
+[1m+++ b/apps/gen/models.py[m
+[36m@@ -234,3 +234,98 @@[m [mclass Gen_Respuesta(ERPBaseModel):[m
+ [m
+     def __str__(self):[m
+         return str(self.res_id) + ": " + str(self.res_respuesta)[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m# Autor: Bryan Amaya[m
+[32m+[m[32m# Fecha: 09/05/2023 09:00[m
+[32m+[m[32m# Descripción: Modelo de multimedia.[m
+[32m+[m[32mclass Gen_MultimediaFile(ERPBaseModel):[m
+[32m+[m[32m    muar_id = models.BigAutoField(primary_key=True, verbose_name='ID_Multimedia')[m
+[32m+[m[32m    muar_ruta = models.FileField(upload_to=path_and_rename, verbose_name='Multimedia')[m
+[32m+[m[32m    muar_formato = models.CharField(max_length=10, blank=True, null=True, verbose_name='Formato')[m
+[32m+[m[32m    muar_estado = models.SmallIntegerField(default=True, verbose_name="Estado")[m
+[32m+[m[32m    muar_tipo = models.CharField(max_length=25, verbose_name='Tipo')[m
+[32m+[m
+[32m+[m[32m    def save(self, *args, **kwargs):[m
+[32m+[m[32m        super().save(*args, **kwargs)[m
+[32m+[m[32m        print(self.muar_ruta)[m
+[32m+[m[32m        filename = self.muar_ruta.name[m
+[32m+[m[32m        if not filename.startswith(settings.MEDIA_URL):[m
+[32m+[m[32m            filename = f'{settings.MEDIA_URL}{filename}'[m
+[32m+[m[32m        self.muar_ruta.name = filename[m
+[32m+[m[32m        if self.muar_formato:[m
+[32m+[m[32m            print(self.muar_formato)[m
+[32m+[m[32m            self.muar_formato = convertir_a_minusculas(self.muar_formato)[m
+[32m+[m[32m        super().save(*args, **kwargs)[m
+[32m+[m
+[32m+[m[32m    class Meta:[m
+[32m+[m[32m        managed = False[m
+[32m+[m[32m        verbose_name = 'Multimedia_File'[m
+[32m+[m[32m        verbose_name_plural = 'Multimedia_Files'[m
+[32m+[m[32m        db_table = 'gen\".\"multimedia_archivos'[m
+[32m+[m[32m        unique_together = (('muar_id'),)[m
+[32m+[m
+[32m+[m
+[32m+[m[32m# Autor: Kevin Campoverde[m
+[32m+[m[32m# Fecha: 27/12/2023 09:00[m
+[32m+[m[32m# Descripción: Modelo de juego (Cartas).[m
+[32m+[m[32mclass Gen_Carta(ERPBaseModel):[m
+[32m+[m[32m    cart_id = models.BigAutoField(primary_key=True, verbose_name='ID_Carta')[m
+[32m+[m[32m    cart_descripcion = models.CharField(max_length=500, verbose_name='Descripción')[m
+[32m+[m
+[32m+[m[32m    class Meta:[m
+[32m+[m[32m        managed = False[m
+[32m+[m[32m        verbose_name = 'Carta'[m
+[32m+[m[32m        verbose_name_plural = 'Cartas'[m
+[32m+[m[32m        db_table = 'gen\".\"carta'[m
+[32m+[m[32m    # def __str__(self):[m
+[32m+[m[32m    #     return str(self.act.act_id) + ": " + str(self.act.act_nombre)[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef path_and_rename(instance, filename):[m
+[32m+[m[32m    ext = filename.split('.')[-1][m
+[32m+[m[32m    print('rename')[m
+[32m+[m[32m    print('IMPORTTANTE ', filename)[m
+[32m+[m[32m    fecha_hora_actual = timezone.now().strftime('%Y-%m-%d_%H-%M-%S')[m
+[32m+[m[32m    filename = '{}.{}'.format(fecha_hora_actual, ext)[m
+[32m+[m[32m    return filename[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef convertir_a_minusculas(texto):[m
+[32m+[m[32m    return texto.lower()[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m# Autor: Kevin Campoverde[m
+[32m+[m[32m# Fecha: 27/12/2023 09:00[m
+[32m+[m[32m# Descripción: Modelo de juego (Cartas).[m
+[32m+[m[32mclass Gen_CartaMultimedia(ERPBaseModel):[m
+[32m+[m[32m    camu_id = models.BigAutoField(primary_key=True, db_column='camu_id', verbose_name='ID_Relacion')[m
+[32m+[m[32m    camu_cart_id = models.ForeignKey('Gen_Carta', models.DO_NOTHING, db_column='camu_cart_id')[m
+[32m+[m[32m    camu_muar_id = models.ForeignKey('Gen_MultimediaFile', models.DO_NOTHING,  db_column='camu_muar_id')[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    class Meta:[m
+[32m+[m[32m        managed = False[m
+[32m+[m[32m        verbose_name = 'Carta Multimedia'[m
+[32m+[m[32m        verbose_name_plural = 'Cartas Multimedia'[m
+[32m+[m[32m        db_table = 'gen\".\"carta_mult'[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef path_and_rename(instance, filename):[m
+[32m+[m[32m    ext = filename.split('.')[-1][m
+[32m+[m[32m    print('rename')[m
+[32m+[m[32m    print('IMPORTTANTE ', filename)[m
+[32m+[m[32m    fecha_hora_actual = timezone.now().strftime('%Y-%m-%d_%H-%M-%S')[m
+[32m+[m[32m    filename = '{}.{}'.format(fecha_hora_actual, ext)[m
+[32m+[m[32m    return filename[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef convertir_a_minusculas(texto):[m
+[32m+[m[32m    return texto.lower()[m
+[1mdiff --git a/apps/gen/templates/gen_carta/create-card.html b/apps/gen/templates/gen_carta/create-card.html[m
+[1mnew file mode 100644[m
+[1mindex 0000000..1240baf[m
+[1m--- /dev/null[m
+[1m+++ b/apps/gen/templates/gen_carta/create-card.html[m
+[36m@@ -0,0 +1,131 @@[m
+[32m+[m[32m{# Autor: Bryan Amaya #}[m
+[32m+[m[32m{% extends 'crud/bodyFormCrispy.html' %}[m
+[32m+[m[32m{% load static %}[m
+[32m+[m[32m{% load crispy_forms_tags %}[m
+[32m+[m
+[32m+[m[32m{% block headScriptsForm %}[m
+[32m+[m[32m    <script src="{% static 'js/syncfusion.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'js/util_dev.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/jquery/jquery.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'js/gen_manejador_archivo.js' %}"></script>[m
+[32m+[m[32m{% endblock %}[m
+[32m+[m
+[32m+[m[32m{% block contentForm %}[m
+[32m+[m
+[32m+[m[32m{% endblock %}[m
+[32m+[m
+[32m+[m[32m{% block bodyFooterScriptsForm %}[m
+[32m+[m[32m    {# Convierte el grid de texto a un json para maniuplarlo #}[m
+[32m+[m[32m    {{ grids_detalles|json_script:"gr_dets" }}[m
+[32m+[m
+[32m+[m[32m    <script>[m
+[32m+[m[32m        const gr_dets = get_json_from_script();[m
+[32m+[m[32m        const elem_respuestas = gr_dets[0];[m
+[32m+[m[32m        {#const elem_multimedia = gr_dets[1];#}[m
+[32m+[m[32m        console.log(elem_respuestas);[m
+[32m+[m[32m        //para eliminar y cambiar el estado en un campo de la grid segun corresponda[m
+[32m+[m[32m        eval("elem_respuestas.gridOptions.toolbarClick=" + elem_respuestas.gridOptions.toolbarClick);[m
+[32m+[m[32m        eval("elem_respuestas.gridOptions.rowDataBound=" + elem_respuestas.gridOptions.rowDataBound);[m
+[32m+[m[32m        console.log("Aqui ESTOY11");[m
+[32m+[m
+[32m+[m[32m         {#mul_archivo #}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[1].edit.create=" + elem_respuestas.gridOptions.columns[2].edit.create);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[1].edit.destroy=" + elem_respuestas.gridOptions.columns[2].edit.destroy);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[1].edit.read=" + elem_respuestas.gridOptions.columns[2].edit.read);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[1].edit.write=" + elem_respuestas.gridOptions.columns[2].edit.write);#}[m
+[32m+[m[32m        {##}[m
+[32m+[m[32m        {##}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[2].edit.create=" + elem_respuestas.gridOptions.columns[3].edit.create);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[2].edit.destroy=" + elem_respuestas.gridOptions.columns[3].edit.destroy);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[2].edit.read=" + elem_respuestas.gridOptions.columns[3].edit.read);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[2].edit.write=" + elem_respuestas.gridOptions.columns[3].edit.write);#}[m
+[32m+[m[32m        //Inicializa el grid (Detalle)[m
+[32m+[m[32m        var grid = [];[m
+[32m+[m[32m        ej.grids.Grid.Inject(ej.grids.Edit);[m
+[32m+[m[32m        {#const grid = new ej.grids.Grid(elem_unimeds.gridOptions);#}[m
+[32m+[m
+[32m+[m[32m        grid[0] = new ej.grids.Grid(elem_respuestas.gridOptions);[m
+[32m+[m[32m        grid[0].appendTo("#" + elem_respuestas.grid_id);[m
+[32m+[m[32m        console.log("Aqui ESTOY22");[m
+[32m+[m
+[32m+[m[32m        $("form#form_Gen_CartaForm_id button[type = 'submit']").click(function (e) {[m
+[32m+[m[32m            e.preventDefault();[m
+[32m+[m[32m            btnClicked = $(this).attr("name");[m
+[32m+[m[32m            {#alert(btnClicked);#}[m
+[32m+[m[32m            form = document.querySelector('#form_Gen_CartaForm_id');[m
+[32m+[m[32m            fields = new FormData(form);[m
+[32m+[m[32m            fields.append(btnClicked, '');[m
+[32m+[m[32m            fields.append(elem_respuestas.grid_id, JSON.stringify(elem_respuestas.gridOptions.dataSource));[m
+[32m+[m[32m            {#fields.append(elem_multimedia.grid_id, JSON.stringify(elem_multimedia.gridOptions.dataSource));#}[m
+[32m+[m[32m            sendToServer(url = form.action, data = fields, method = form.method)[m
+[32m+[m[32m                .then(data => {[m
+[32m+[m[32m                    console.log(data)[m
+[32m+[m[32m                    //recupera los errores ya mostrados en pantalla[m
+[32m+[m[32m                    let elms = document.querySelectorAll("[id='error']");[m
+[32m+[m[32m                    let elements = document.getElementsByClassName('is-invalid');[m
+[32m+[m[32m                    //borrar los errores en pantalla[m
+[32m+[m[32m                    for (let i = 0; i < elements.length; i++) {[m
+[32m+[m[32m                        document.getElementById(elements[i].id).classList.remove('is-invalid');[m
+[32m+[m[32m                        console.log("Aqui ESTOY33");[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                    // si la data = 1 significa que la petición no tiene errores[m
+[32m+[m
+[32m+[m[32m                    if (data.a != 1) {[m
+[32m+[m[32m                        for (let i = 0; i < elms.length; i++) {[m
+[32m+[m[32m                            elms[i].parentNode.removeChild(elms[i]); //borra los errores en pantalla[m
+[32m+[m[32m                            console.log("Aqui ESTOY44");[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                        imprimir_errores(data); //muestra los errores en pantalla[m
+[32m+[m[32m                    } else {[m
+[32m+[m[32m                        window.location.replace("{{url_list}}"); //redirecciona[m
+[32m+[m[32m                        console.log("Aqui ESTOY55");[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                });[m
+[32m+[m[32m        });[m
+[32m+[m[32m        console.log("Aqui ESTOY66");[m
+[32m+[m
+[32m+[m
+[32m+[m[32m        var cancelBtn = document.getElementById("cancel_id");[m
+[32m+[m
+[32m+[m[32m        // Agregar el evento de clic al botón[m
+[32m+[m[32m        cancelBtn.addEventListener("click", function (event) {[m
+[32m+[m[32m            // Prevenir el comportamiento predeterminado de navegación[m
+[32m+[m[32m            {#event.preventDefault();#}[m
+[32m+[m[32m            // Mostrar el mensaje de alerta[m
+[32m+[m[32m            if (contador > 0) {[m
+[32m+[m[32m                for (var i = 0; i < arreglo.length; i++) {[m
+[32m+[m[32m                    {#alert(arreglo[i]);#}[m
+[32m+[m[32m                    $.ajax({[m
+[32m+[m[32m                        type: "POST",[m
+[32m+[m[32m                        url: '/200/delete_file/',[m
+[32m+[m[32m                        // headers: {[m
+[32m+[m[32m                        //     'X-CSRFToken': csrfToken[m
+[32m+[m[32m                        // },[m
+[32m+[m[32m                        data: {[m
+[32m+[m[32m                            file_url: arreglo[i],[m
+[32m+[m[32m                        },[m
+[32m+[m[32m                        success: function (response) {[m
+[32m+[m[32m                            console.log('SE ELIMINO ');[m
+[32m+[m
+[32m+[m
+[32m+[m[32m                            // console.log(uploaded_file_url);[m
+[32m+[m[32m                            // ruta_archivo = response.uploaded_file_url;[m
+[32m+[m[32m                            // console.log(ruta_archivo);[m
+[32m+[m[32m                        },[m
+[32m+[m[32m                        error: function (error) {[m
+[32m+[m[32m                            console.log('fuenomasgg');[m
+[32m+[m[32m                            console.log(error);[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                    });[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m
+[32m+[m[32m        });[m
+[32m+[m[32m    </script>[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m{% endblock %}[m
+[32m+[m
+[32m+[m
+[1mdiff --git a/apps/gen/templates/gen_carta/list.html b/apps/gen/templates/gen_carta/list.html[m
+[1mnew file mode 100644[m
+[1mindex 0000000..2b77415[m
+[1m--- /dev/null[m
+[1m+++ b/apps/gen/templates/gen_carta/list.html[m
+[36m@@ -0,0 +1,12 @@[m
+[32m+[m[32m{% extends 'Juegos-Multimedia/bodyList.html' %}[m
+[32m+[m[32m{% load quichua_tags %}[m
+[32m+[m
+[32m+[m
+[32m+[m[32m{% block headScriptsList %}[m
+[32m+[m[32m{% endblock %}[m
+[32m+[m
+[32m+[m[32m{% block contentList %}[m
+[32m+[m[32m{% endblock %}[m
+[32m+[m
+[32m+[m[32m{% block bodyFooterScriptsList %}[m
+[32m+[m[32m{% endblock %}[m
+\ No newline at end of file[m
+[1mdiff --git a/apps/gen/views/vw_gen_juego.py b/apps/gen/views/vw_gen_juego.py[m
+[1mindex 6edb793..ce93d41 100644[m
+[1m--- a/apps/gen/views/vw_gen_juego.py[m
+[1m+++ b/apps/gen/views/vw_gen_juego.py[m
+[36m@@ -273,12 +273,14 @@[m [mclass Gen_JuegoCreateView(CreateView):[m
+         extra_errors = [][m
+         request.POST._mutable = True[m
+         r = {'a': 1}[m
+[31m-        # print('ENTRE AL CREAR')[m
+[32m+[m[32m        print('ENTRE AL CREAR')[m
+         # Crear el registro[m
+         if 'CREATE' in request.POST and form.is_valid():[m
+             try:[m
+[32m+[m[32m                print("adentro   ", request.POST)[m
+                 data_grid_Respuesta = pd.DataFrame(json.loads(request.POST['respuesta_grid']))[m
+[31m-                # print('tab_respuesta0 :', data_grid_Respuesta)[m
+[32m+[m[32m                print('tab_respuesta0 :', data_grid_Respuesta)[m
+[32m+[m[32m                print('tab_respuesta1 :', json.loads(request.POST['respuesta_grid']))[m
+                 with transaction.atomic():[m
+                     # Guarda cabecera con commit false, esto con el objetivo[m
+                     # de poder acceder a los datos con los que se guardaria en la base[m
+[36m@@ -328,7 +330,9 @@[m [mclass Gen_JuegoCreateView(CreateView):[m
+                                 tab_multimedia.mul_formato = row.mul_formato[m
+                                 # print('PRINT MIXTOOOOO' , row.mul_archivo)[m
+                                 tab_multimedia.save()[m
+[32m+[m[32m                print("r ", r)[m
+                 messages.success(request, CRUD_MSG.CREATE)[m
+[32m+[m[32m                print("request", request)[m
+                 return JsonResponse(r)[m
+             except django.db.models.query_utils.InvalidQuery as e:[m
+                 extra_errors.append(str(e))[m
+[1mdiff --git a/core/models_card.py b/core/models_card.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..1244764[m
+[1m--- /dev/null[m
+[1m+++ b/core/models_card.py[m
+[36m@@ -0,0 +1,151 @@[m
+[32m+[m[32mfrom crum import get_current_request[m
+[32m+[m[32mfrom django.db import models, connection[m
+[32m+[m[32mfrom django.forms import model_to_dict[m
+[32m+[m[32mfrom django.utils import timezone[m
+[32m+[m
+[32m+[m[32m# Clase base para extender funcionalidades[m
+[32m+[m[32mclass ERPBaseModel(models.Model):[m
+[32m+[m[32m    #usuario_actual = None  # Definir la variable de clase[m
+[32m+[m[32m    # auto_now_add=True => hace que solo se agregue la fecha en de creación y en modificar no cambia[m
+[32m+[m[32m    #aud_fc = models.DateTimeField(null=True, blank=True, auto_now_add=True)[m
+[32m+[m[32m    # editable=False => hace que ese campo NO permita cambiar su valor en modificación[m
+[32m+[m[32m    #aud_uc = models.BigIntegerField(null=True, blank=True, editable=False)[m
+[32m+[m[32m    # auto_now=True => siempre agrega la hora por defecto[m
+[32m+[m[32m    #aud_fm = models.DateTimeField(null=True, blank=True, auto_now=True, verbose_name="Modificado el")[m
+[32m+[m[32m    #aud_um = models.BigIntegerField(null=True, blank=True)[m
+[32m+[m[32m    #aud_am = models.CharField(max_length=1, null=True, blank=True)[m
+[32m+[m
+[32m+[m[32m    class Meta:[m
+[32m+[m[32m        abstract = True[m
+[32m+[m
+[32m+[m[32m    # cambiando el metodo original "save()", para agregar el usuario[m
+[32m+[m[32m    def save_multimedia_game(self, force_insert=False, force_update=False, using=None, update_fields=None):[m
+[32m+[m[32m        req = get_current_request()[m
+[32m+[m[32m        # from appls.administracion.models import Adm_Tabla[m
+[32m+[m[32m        # Verificar si el modelo posee auditoría de nivel 2[m
+[32m+[m[32m        # nivel_auditoria = Adm_Tabla.objects.filter(tab_nombre=self.get_table_name()).values('tab_aud_nivel').get()[m
+[32m+[m
+[32m+[m[32m        # importante: ver comentarios de campos de auditoria, verificar si excluir campos de formularios[m
+[32m+[m[32m        if self.pk is None:[m
+[32m+[m
+[32m+[m[32m            super().save()[m
+[32m+[m[32m            # if nivel_auditoria['tab_aud_nivel'] == 1:[m
+[32m+[m[32m            # self.callBinnacle('CREAR', req.user.pk, req.user.emp.emp_id)[m
+[32m+[m[32m            self.callBinnacle('CREAR', 1, 1)[m
+[32m+[m[32m        else:[m
+[32m+[m
+[32m+[m[32m            self.callBinnacle('EDITAR', 1, 1)[m
+[32m+[m[32m            super().save()[m
+[32m+[m
+[32m+[m[32m    # obtiene el nombre de la tabla[m
+[32m+[m[32m    def get_table_name(self):[m
+[32m+[m[32m        return self._meta.db_table.replace('"', '')[m
+[32m+[m
+[32m+[m[32m    # eliminado lógico[m
+[32m+[m[32m    # def logical_delete(self):[m
+[32m+[m[32m    #     req = get_current_request()[m
+[32m+[m[32m    #     with connection.cursor() as cursor:[m
+[32m+[m[32m    #         cursor.execute("call adm.pr_eliminarregistro(%s, %s, %s);", (self.get_table_name(), self.pk, req.user.pk))[m
+[32m+[m[32m    #     from appls.administracion.models import Adm_Tabla[m
+[32m+[m[32m    #     # Verificar si el modelo posee auditoría de nivel 2[m
+[32m+[m[32m    #     nivel_auditoria = Adm_Tabla.objects.filter(tab_nombre=self.get_table_name()).values('tab_aud_nivel').get()[m
+[32m+[m[32m    #[m
+[32m+[m[32m    #     if nivel_auditoria['tab_aud_nivel'] == 1:[m
+[32m+[m[32m    #         self.callBinnacle('ELIMINAR', req.user.pk, req.user.emp.emp_id)[m
+[32m+[m
+[32m+[m[32m    # obtener el regostro(s) en formato JSON[m
+[32m+[m[32m    def toJson(self):[m
+[32m+[m[32m        return model_to_dict(self)[m
+[32m+[m
+[32m+[m[32m        #[m
+[32m+[m[32m        # Función setBinnacle(formulario, operacion, usuario, tabla, empresa, id_registro_value, modelo_actual[m
+[32m+[m[32m        # Autores: Diego Orellana y Jorge Peralta[m
+[32m+[m[32m        #[m
+[32m+[m[32m        # Esta función se encarga de llamar al método de la bitácora.[m
+[32m+[m[32m        #[m
+[32m+[m[32m        # :param self: modelo que se está utilizando.[m
+[32m+[m[32m        # :param operacion: operación que se está realizando.[m
+[32m+[m[32m        # :param usuario: usuario que realiza la acción.[m
+[32m+[m[32m        # :param empresa: empresa a la que pertenece el usuario.[m
+[32m+[m[32m        #[m
+[32m+[m[32m        # :return: Void.[m
+[32m+[m[32m        #[m
+[32m+[m
+[32m+[m[32m    def callBinnacle(self, operacion, usuario, empresa):[m
+[32m+[m[32m        setBinnacle(self.toJson(), operacion, usuario, self.get_table_name(), empresa, self.pk, self)[m
+[32m+[m
+[32m+[m[32m# Función setBinnacle(formulario, operacion, usuario, tabla, empresa, id_registro_value, modelo_actual[m
+[32m+[m[32m# Autores: Diego Orellana y Jorge Peralta[m
+[32m+[m[32m#[m
+[32m+[m[32m# Esta función se encarga de registrar en la bitácora la acción realizada por el usuario.[m
+[32m+[m[32m#[m
+[32m+[m[32m# :param formulario: formulario que se está utilizando.[m
+[32m+[m[32m# :param operacion: operación que se está realizando.[m
+[32m+[m[32m# :param usuario: usuario que realiza la acción.[m
+[32m+[m[32m# :param tabla: tabla que se está modificando.[m
+[32m+[m[32m# :param empresa: empresa a la que pertenece el usuario.[m
+[32m+[m[32m# :param id_registro_value: valor del id del registro.[m
+[32m+[m[32m# :param modelo_actual: modelo que se está modificando.[m
+[32m+[m[32m#[m
+[32m+[m[32m# :return: Void.[m
+[32m+[m[32m#[m
+[32m+[m[32mdef setBinnacle(formulario, operacion, usuario, tabla, empresa, id_registro_value, modelo_actual):[m
+[32m+[m[32m    campos = formulario[m
+[32m+[m[32m    valor_anterior = ''[m
+[32m+[m[32m    for columna, valor in campos.items():[m
+[32m+[m[32m        if operacion == 'CREAR':[m
+[32m+[m[32m            valor_anterior = None[m
+[32m+[m[32m            saveBinnacle(columna, operacion, valor_anterior, valor, tabla, usuario, empresa, id_registro_value)[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            # pk_column_value = getattr(modelo_actual.objects.get(pk=id_registro_value), columna)[m
+[32m+[m[32m            # pk_column_value = getattr(modelo_actual._class_.objects.get(pk=id_registro_value), columna)[m
+[32m+[m[32m            # if operacion == 'EDITAR':[m
+[32m+[m[32m            #     if pk_column_value != valor:[m
+[32m+[m[32m            #         valor_anterior = pk_column_value[m
+[32m+[m[32m            saveBinnacle(columna, operacion, valor_anterior, valor, tabla, usuario, empresa,[m
+[32m+[m[32m                                 id_registro_value)[m
+[32m+[m[32m                # else:[m
+[32m+[m[32m                #     valor_anterior = None[m
+[32m+[m[32m            # elif operacion == 'ELIMINAR':[m
+[32m+[m[32m            #     valor_anterior = pk_column_value[m
+[32m+[m[32m            #     saveBinnacle(columna, operacion, valor_anterior, None, tabla, usuario, empresa, id_registro_value)[m
+[32m+[m
+[32m+[m
+[32m+[m[32m#[m
+[32m+[m[32m# Función saveBinnacle(col, op, val_ant, val_nue, tab, usu, emp)[m
+[32m+[m[32m# Autores: Diego Orellana y Jorge Peralta[m
+[32m+[m[32m#[m
+[32m+[m[32m# Esta función se encarga de registrar en la base de datos la acción realizada por el usuario en la bitácora.[m
+[32m+[m[32m#[m
+[32m+[m[32m# :param col: nombre de la columna.[m
+[32m+[m[32m# :param op: operación que se está realizando.[m
+[32m+[m[32m# :param val_ant: valor anterior de la columna.[m
+[32m+[m[32m# :param val_nue: valor nuevo de la columna.[m
+[32m+[m[32m# :param tab: tabla a la que pertenece la columna.[m
+[32m+[m[32m# :param usu: usuario que realiza la acción.[m
+[32m+[m[32m# :param emp: empresa a la que pertenece el usuario.[m
+[32m+[m[32m#[m
+[32m+[m[32m# :return: Void.[m
+[32m+[m[32m#[m
+[32m+[m[32mdef saveBinnacle(col, op, val_ant, val_nue, tab, usu, emp, id_reg):[m
+[32m+[m[32m    # from appls.sesion.models import Adm_Auditoria_N2[m
+[32m+[m[32m    # last_value_aud = Adm_Auditoria_N2.objects.all().aggregate(Max('audn2_id'))[m
+[32m+[m[32m    # if last_value_aud['audn2_id__max'] is None:[m
+[32m+[m[32m    last_value_aud = 1[m
+[32m+[m[32m    # else:[m
+[32m+[m[32m    #     last_value_aud = last_value_aud['audn2_id__max'] + 1[m
+[32m+[m
+[32m+[m[32m    if "aud_" in col:[m
+[32m+[m[32m        pass[m
+[32m+[m[32m    # else:[m
+[32m+[m[32m    #     Adm_Auditoria_N2.objects.create([m
+[32m+[m[32m    #         audn2_id=last_value_aud,[m
+[32m+[m[32m    #         audn2_columna=col,[m
+[32m+[m[32m    #         audn2_operacion=op,[m
+[32m+[m[32m    #         audn2_valor_anterior=val_ant,[m
+[32m+[m[32m    #         audn2_valor_nuevo=val_nue,[m
+[32m+[m[32m    #         tab_nombre=tab,[m
+[32m+[m[32m    #         usu_id=usu,[m
+[32m+[m[32m    #         emp_id=emp,[m
+[32m+[m[32m    #         audn2_registro_id=id_reg[m
+[32m+[m[32m    #     )[m
+\ No newline at end of file[m
+[1mdiff --git a/core/urls.py b/core/urls.py[m
+[1mindex cf93d88..282df0f 100644[m
+[1m--- a/core/urls.py[m
+[1m+++ b/core/urls.py[m
+[36m@@ -9,6 +9,10 @@[m [mfrom django.contrib.auth.decorators import login_required[m
+ from django.urls import path, include  # add this[m
+ import apps.home.views.vw_home[m
+ from apps.home.views.vw_home import *[m
+[32m+[m
+[32m+[m[32mimport apps.api.views.vw_api_juego[m
+[32m+[m[32mfrom apps.api.views.vw_api_juego import *[m
+[32m+[m
+ urlpatterns = [[m
+     path('admin/', admin.site.urls),          # Django admin route[m
+     path("100/", include("apps.authentication.urls")), # Auth routes - login / register[m
+[36m@@ -16,6 +20,7 @@[m [murlpatterns = [[m
+     path('100/', include("apps.home.urls")),[m
+     path('200/', include("apps.gen.urls")),[m
+     path('300/', include("apps.sis.urls")),[m
+[32m+[m[32m    path('500/', include("apps.api.urls")),[m
+ [m
+ ][m
+ [m
+[1mdiff --git a/media/2023-12-28_21-48-14.png b/media/2023-12-28_21-48-14.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..31eb2b6[m
+Binary files /dev/null and b/media/2023-12-28_21-48-14.png differ
+[1mdiff --git a/media/2023-12-28_22-14-31.png b/media/2023-12-28_22-14-31.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-28_22-14-31.png differ
+[1mdiff --git a/media/2023-12-31_11-33-22.png b/media/2023-12-31_11-33-22.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_11-33-22.png differ
+[1mdiff --git a/media/2023-12-31_11-41-35.png b/media/2023-12-31_11-41-35.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_11-41-35.png differ
+[1mdiff --git a/media/2023-12-31_11-45-13.png b/media/2023-12-31_11-45-13.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_11-45-13.png differ
+[1mdiff --git a/media/2023-12-31_11-45-39.png b/media/2023-12-31_11-45-39.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_11-45-39.png differ
+[1mdiff --git a/media/2023-12-31_12-03-57.png b/media/2023-12-31_12-03-57.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_12-03-57.png differ
+[1mdiff --git a/media/2023-12-31_12-04-34.png b/media/2023-12-31_12-04-34.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_12-04-34.png differ
+[1mdiff --git a/media/2023-12-31_12-05-00.png b/media/2023-12-31_12-05-00.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_12-05-00.png differ
+[1mdiff --git a/media/2023-12-31_12-11-04.png b/media/2023-12-31_12-11-04.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_12-11-04.png differ
+[1mdiff --git a/media/2023-12-31_12-13-58.png b/media/2023-12-31_12-13-58.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_12-13-58.png differ
+[1mdiff --git a/media/2023-12-31_12-15-56.png b/media/2023-12-31_12-15-56.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_12-15-56.png differ
+[1mdiff --git a/media/2023-12-31_12-17-39.png b/media/2023-12-31_12-17-39.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_12-17-39.png differ
+[1mdiff --git a/media/2023-12-31_12-18-41.png b/media/2023-12-31_12-18-41.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_12-18-41.png differ
+[1mdiff --git a/media/2023-12-31_12-20-01.png b/media/2023-12-31_12-20-01.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_12-20-01.png differ
+[1mdiff --git a/media/2023-12-31_12-21-31.png b/media/2023-12-31_12-21-31.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_12-21-31.png differ
+[1mdiff --git a/media/2023-12-31_12-32-17.png b/media/2023-12-31_12-32-17.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_12-32-17.png differ
+[1mdiff --git a/media/2023-12-31_12-37-22.png b/media/2023-12-31_12-37-22.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_12-37-22.png differ
+[1mdiff --git a/media/2023-12-31_13-57-21.png b/media/2023-12-31_13-57-21.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_13-57-21.png differ
+[1mdiff --git a/media/2023-12-31_14-01-39.png b/media/2023-12-31_14-01-39.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_14-01-39.png differ
+[1mdiff --git a/media/2023-12-31_14-02-50.png b/media/2023-12-31_14-02-50.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2023-12-31_14-02-50.png differ
+[1mdiff --git a/media/2023-12-31_14-55-51.png b/media/2023-12-31_14-55-51.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_14-55-51.png differ
+[1mdiff --git a/media/2023-12-31_14-56-40.png b/media/2023-12-31_14-56-40.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_14-56-40.png differ
+[1mdiff --git a/media/2023-12-31_15-00-12.m4a b/media/2023-12-31_15-00-12.m4a[m
+[1mnew file mode 100644[m
+[1mindex 0000000..010fdc7[m
+Binary files /dev/null and b/media/2023-12-31_15-00-12.m4a differ
+[1mdiff --git a/media/2023-12-31_17-58-06.m4a b/media/2023-12-31_17-58-06.m4a[m
+[1mnew file mode 100644[m
+[1mindex 0000000..010fdc7[m
+Binary files /dev/null and b/media/2023-12-31_17-58-06.m4a differ
+[1mdiff --git a/media/2023-12-31_17-58-12.png b/media/2023-12-31_17-58-12.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..87e3ce7[m
+Binary files /dev/null and b/media/2023-12-31_17-58-12.png differ
+[1mdiff --git a/media/2023-12-31_17-58-21.m4a b/media/2023-12-31_17-58-21.m4a[m
+[1mnew file mode 100644[m
+[1mindex 0000000..010fdc7[m
+Binary files /dev/null and b/media/2023-12-31_17-58-21.m4a differ
+[1mdiff --git a/media/2023-12-31_19-09-35.png b/media/2023-12-31_19-09-35.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aa6c985[m
+Binary files /dev/null and b/media/2023-12-31_19-09-35.png differ
+[1mdiff --git a/media/2023-12-31_19-09-40.m4a b/media/2023-12-31_19-09-40.m4a[m
+[1mnew file mode 100644[m
+[1mindex 0000000..010fdc7[m
+Binary files /dev/null and b/media/2023-12-31_19-09-40.m4a differ
+[1mdiff --git a/media/2023-12-31_23-44-14.m4a b/media/2023-12-31_23-44-14.m4a[m
+[1mnew file mode 100644[m
+[1mindex 0000000..010fdc7[m
+Binary files /dev/null and b/media/2023-12-31_23-44-14.m4a differ
+[1mdiff --git a/media/2024-01-02_10-44-36.m4a b/media/2024-01-02_10-44-36.m4a[m
+[1mnew file mode 100644[m
+[1mindex 0000000..010fdc7[m
+Binary files /dev/null and b/media/2024-01-02_10-44-36.m4a differ
+[1mdiff --git a/media/2024-01-02_10-44-44.png b/media/2024-01-02_10-44-44.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..28f0e8c[m
+Binary files /dev/null and b/media/2024-01-02_10-44-44.png differ
+[1mdiff --git a/static/js/gen_actividad_archivo.js b/static/js/gen_actividad_archivo.js[m
+[1mindex cf6466b..0d48823 100644[m
+[1m--- a/static/js/gen_actividad_archivo.js[m
+[1m+++ b/static/js/gen_actividad_archivo.js[m
+[36m@@ -146,9 +146,12 @@[m [mfunction escribir() {[m
+                 fechaHoraActual = fechaHoraActual.replace(/ /g, '_');[m
+                 console.log('ESTOYHARTOOOOOO,FECHACTUAL ', fechaHoraActual);[m
+                 var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();[m
+[31m-                console.log('nombrearchivo: ', fileName);[m
+[32m+[m[32m                console.log('nombrearchivo: ', file.name);[m
+                 var response = args.e.currentTarget.response;[m
+                 var jsonResponse = JSON.parse(response);[m
+[32m+[m
+[32m+[m[32m                console.log("JSON ",jsonResponse)[m
+[32m+[m
+                 var url = jsonResponse.url;[m
+                 console.log('url', url);[m
+                 // fileName = url;[m
+[1mdiff --git a/static/js/gen_manejador_archivo.js b/static/js/gen_manejador_archivo.js[m
+[1mnew file mode 100644[m
+[1mindex 0000000..68cb1c7[m
+[1m--- /dev/null[m
+[1m+++ b/static/js/gen_manejador_archivo.js[m
+[36m@@ -0,0 +1,379 @@[m
+[32m+[m[32mvar elem[m
+[32m+[m[32mvar strm[m
+[32m+[m[32mvar ruta_archivo[m
+[32m+[m[32mvar extension[m
+[32m+[m[32mvar fileName[m
+[32m+[m[32mvar tipo_arch[m
+[32m+[m[32mvar formato_arch[m
+[32m+[m[32mvar contador = 0[m
+[32m+[m[32mvar arreglo = [][m
+[32m+[m
+[32m+[m[32m// Cantidad[m
+[32m+[m[32mfunction crear() {[m
+[32m+[m[32m    console.log('CREAR');[m
+[32m+[m[32m    elem = document.createElement('input');[m
+[32m+[m[32m    elem.setAttribute('name', 'myfile');[m
+[32m+[m
+[32m+[m[32m    return elem;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction creardos() {[m
+[32m+[m[32m    console.log('CREARdos');[m
+[32m+[m[32m    elem2 = document.createElement('input');[m
+[32m+[m[32m    elem2.setAttribute('name', 'mytipo');[m
+[32m+[m[32m    elem2.setAttribute('value', 'Suba el archivo para determinar la extension!'); // Configura el atributo de valor (value) del elemento con el valor "ejemplo"[m
+[32m+[m[32m    elem2.setAttribute('readonly', true);[m
+[32m+[m[32m    console.log('Nombre del elemento:', elem2.getAttribute('name')); // Agregar esta línea para imprimir el nombre del elemento[m
+[32m+[m[32m    return elem2;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction creartres() {[m
+[32m+[m[32m    console.log('CREARtres');[m
+[32m+[m[32m    elem3 = document.createElement('input');[m
+[32m+[m[32m    elem3.setAttribute('name', 'myformato');[m
+[32m+[m[32m    elem3.setAttribute('value', 'Suba el archivo para determinar el formato!'); // Configura el atributo de valor (value) del elemento con el valor "ejemplo"[m
+[32m+[m[32m    elem3.setAttribute('readonly', true);[m
+[32m+[m[32m    console.log('Nombre del elemento:', elem3.getAttribute('name')); // Agregar esta línea para imprimir el nombre del elemento[m
+[32m+[m[32m    return elem3;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction leer() {[m
+[32m+[m[32m    console.log('LEER');[m
+[32m+[m[32m    console.log(fileName);[m
+[32m+[m[32m    strm = fileName;[m
+[32m+[m
+[32m+[m[32m    return strm;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction leerdos() {[m
+[32m+[m[32m    console.log('LEERdos');[m
+[32m+[m[32m    strm = tipo_arch;[m
+[32m+[m[32m    return strm;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction leertres() {[m
+[32m+[m[32m    console.log('LEERtres');[m
+[32m+[m[32m    strm = formato_arch;[m
+[32m+[m[32m    return strm;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m
+[32m+[m[32mfunction destruir() {[m
+[32m+[m[32m    console.log('DESTRUIR');[m
+[32m+[m[32m    // onFileRemove();[m
+[32m+[m[32m    extension = undefined;[m
+[32m+[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction destruirdos() {[m
+[32m+[m[32m    console.log('DESTRUIRdos');[m
+[32m+[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction destruirtres() {[m
+[32m+[m[32m    console.log('DESTRUIRtres');[m
+[32m+[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m
+[32m+[m[32mfunction escribirtres() {[m
+[32m+[m[32m    console.log('escribirtres');[m
+[32m+[m[32m    console.log('extfinal:', extension);[m
+[32m+[m[32m    console.log('nombre:', fileName);[m
+[32m+[m[32m    var elem3 = document.querySelector('input[name="muar_formato"]'); // buscar el elemento por su atributo name[m
+[32m+[m[32m    if (extension) { // verificar si se encontró el elemento[m
+[32m+[m[32m        elem3.setAttribute('value', extension); // establecer el valor del elemento usando setAttribute[m
+[32m+[m[32m        // o bien, puedes asignar el valor a la propiedad "value" del elemento:[m
+[32m+[m[32m        // elem2.value = "ejemplo";[m
+[32m+[m[32m        console.log('valor del elemento:', elem3.getAttribute('value')); // acceder al valor del elemento usando getAttribute[m
+[32m+[m[32m    } else {[m
+[32m+[m[32m        console.log('No se encontró el elemento');[m
+[32m+[m[32m        fileName = undefined;[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m
+[32m+[m[32mfunction escribirdos() {[m
+[32m+[m[32m    console.log('escribirdos');[m
+[32m+[m[32m    console.log('extfinal:', extension);[m
+[32m+[m[32m    console.log('nombre:', fileName);[m
+[32m+[m[32m    var elem2 = document.querySelector('input[name="muar_tipo"]'); // buscar el elemento por su atributo name[m
+[32m+[m[32m    if (extension) { // verificar si se encontró el elemento[m
+[32m+[m[32m        elem2.setAttribute('value', tipo_arch); // establecer el valor del elemento usando setAttribute[m
+[32m+[m[32m        // o bien, puedes asignar el valor a la propiedad "value" del elemento:[m
+[32m+[m[32m        // elem2.value = "ejemplo";[m
+[32m+[m[32m        console.log('valor del elemento:', elem2.getAttribute('value')); // acceder al valor del elemento usando getAttribute[m
+[32m+[m[32m    } else {[m
+[32m+[m[32m        console.log('No se encontró el elemento');[m
+[32m+[m[32m        fileName = undefined;[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m
+[32m+[m[32mfunction escribir() {[m
+[32m+[m[32m    console.log('estoysubiendounarchivo');[m
+[32m+[m[32m    uploadObj = new ej.inputs.Uploader({[m
+[32m+[m[32m        asyncSettings: {[m
+[32m+[m[32m            saveUrl: '/500/upload_file/',[m
+[32m+[m[32m            removeUrl: '/500/delete_file/',[m
+[32m+[m[32m            autoUpload: false // deshabilitar la subida automática[m
+[32m+[m[32m        },[m
+[32m+[m[32m        //para que funcionen los metodos onupload[m
+[32m+[m[32m        success: onUploadSuccess,[m
+[32m+[m[32m        failure: onUploadFailure,[m
+[32m+[m[32m        removing: onFileRemove // agregar el evento de eliminación[m
+[32m+[m[32m    });[m
+[32m+[m[32m    uploadObj.appendTo(elem);[m
+[32m+[m
+[32m+[m[32m    function onUploadSuccess(args) {[m
+[32m+[m[32m        if (args.operation === 'upload') {[m
+[32m+[m[32m            var file = args.file.rawFile;[m
+[32m+[m[32m            var reader = new FileReader();[m
+[32m+[m[32m            var variable = file.type;[m
+[32m+[m[32m            var variable2 = file.name;[m
+[32m+[m[32m            var resultado = variable.split('/')[0];[m
+[32m+[m[32m            var resultado2 = variable.split('/')[1];[m
+[32m+[m[32m            console.log('........... pelao ' + resultado);[m
+[32m+[m[32m            console.log('........... imagen ' + variable2);[m
+[32m+[m
+[32m+[m[32m            reader.readAsDataURL(file);[m
+[32m+[m[32m            reader.onload = function () {[m
+[32m+[m[32m                var fileData = reader.result;[m
+[32m+[m[32m                var now = new Date();[m
+[32m+[m[32m                var fechaHoraActual = now.getFullYear() + '-' + (now.getMonth()) + '-' + now.getDate() + ' ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();[m
+[32m+[m
+[32m+[m[32m                fechaHoraActual = fechaHoraActual.replace(/:/g, '-');[m
+[32m+[m[32m                fechaHoraActual = fechaHoraActual.replace(/ /g, '_');[m
+[32m+[m[32m                console.log('ESTOYHARTOOOOOO,FECHACTUAL ', fechaHoraActual);[m
+[32m+[m[32m                var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();[m
+[32m+[m[32m                console.log('nombrearchivo: ', file.name);[m
+[32m+[m[32m                var response = args.e.currentTarget.response;[m
+[32m+[m[32m                var jsonResponse = JSON.parse(response);[m
+[32m+[m
+[32m+[m[32m                console.log("JSON ",jsonResponse)[m
+[32m+[m
+[32m+[m[32m                var url = jsonResponse.url;[m
+[32m+[m[32m                console.log('url', url);[m
+[32m+[m[32m                // fileName = url;[m
+[32m+[m[32m                ruta_archivo = url;[m
+[32m+[m[32m                console.log('nombrearchivop: ', fileName);[m
+[32m+[m
+[32m+[m[32m                const partes = url.split("/"); // dividir la URL por "/"[m
+[32m+[m[32m                extension = ruta_archivo.split('.').pop();[m
+[32m+[m[32m                //Define un objeto que mapea las extensiones de archivo a tipos de archivo[m
+[32m+[m[32m                // var tiposArchivo = {[m
+[32m+[m[32m                //     "jpg": 'Imagen',[m
+[32m+[m[32m                //     "jpeg": 'Imagen',[m
+[32m+[m[32m                //     "jpe": 'Imagen',[m
+[32m+[m[32m                //     "jif": 'Imagen',[m
+[32m+[m[32m                //     "jfif": 'Imagen',[m
+[32m+[m[32m                //     "jfi": 'Imagen',[m
+[32m+[m[32m                //     "png": 'Imagen',[m
+[32m+[m[32m                //     "gif": 'Imagen',[m
+[32m+[m[32m                //     "bmp": 'Imagen',[m
+[32m+[m[32m                //     "webp": 'Imagen',[m
+[32m+[m[32m                //     "tiff": 'Imagen',[m
+[32m+[m[32m                //     "tif": 'Imagen',[m
+[32m+[m[32m                //     "svg": 'Imagen',[m
+[32m+[m[32m                //     "mp3": 'Audio',[m
+[32m+[m[32m                //     "wav": 'Audio',[m
+[32m+[m[32m                //     "aiff": 'Audio',[m
+[32m+[m[32m                //     "m4a": 'Audio',[m
+[32m+[m[32m                //     "aif": 'Audio',[m
+[32m+[m[32m                //     "flac": 'Audio',[m
+[32m+[m[32m                //     "ogg": 'Audio',[m
+[32m+[m[32m                //     "mp4": 'Video',[m
+[32m+[m[32m                //     "mov": 'Video',[m
+[32m+[m[32m                //     "avi": 'Video',[m
+[32m+[m[32m                //     "wmv": 'Video',[m
+[32m+[m[32m                //     "mkv": 'Video',[m
+[32m+[m[32m                //     "mpeg": 'Video',[m
+[32m+[m[32m                //     "mpg": 'Video',[m
+[32m+[m[32m                //     "webm": 'Video',[m
+[32m+[m[32m                //     "flv": 'Video',[m
+[32m+[m[32m                //     "pdf": 'Documento',[m
+[32m+[m[32m                //     "doc": 'Documento',[m
+[32m+[m[32m                //     "docx": 'Documento',[m
+[32m+[m[32m                //     "xls": 'Documento',[m
+[32m+[m[32m                //     "xlsx": 'Documento',[m
+[32m+[m[32m                //     "ppt": 'Documento',[m
+[32m+[m[32m                //     "pptx": 'Documento',[m
+[32m+[m[32m                //     "txt": 'Documento',[m
+[32m+[m[32m                //     "rtf": 'Documento',[m
+[32m+[m[32m                //     "zip": 'Archivo comprimido',[m
+[32m+[m[32m                //     "rar": 'Archivo comprimido',[m
+[32m+[m[32m                //     "tar": 'Archivo comprimido',[m
+[32m+[m[32m                //     "7z": 'Archivo comprimido',[m
+[32m+[m[32m                //     "gz": 'Archivo comprimido',[m
+[32m+[m[32m                //     "bz2": 'Archivo comprimido'[m
+[32m+[m[32m                // };[m
+[32m+[m[32m                // var tiposArchivo = {[m
+[32m+[m[32m                //     "image": 'Imagen',[m
+[32m+[m[32m                //     "video": 'Video',[m
+[32m+[m[32m                //     "audio": 'Audiox',[m
+[32m+[m[32m                //     "document": 'Documentox'[m
+[32m+[m[32m                // };[m
+[32m+[m
+[32m+[m[32m                //Obtén el tipo de archivo a partir de la extensión[m
+[32m+[m[32m                var tipoArchivo = resultado;[m
+[32m+[m[32m                tipo_arch = tipoArchivo;[m
+[32m+[m[32m                formato_arch = "." + extension;[m
+[32m+[m[32m                //Imprime el tipo de archivo en la consola[m
+[32m+[m[32m                console.log("Tipo de archivo: " + tipoArchivo);[m
+[32m+[m[32m                console.log("Parteeeeeeees: " + partes[2]);[m
+[32m+[m[32m                fileName = partes[2];[m
+[32m+[m[32m                arreglo[contador]=fileName;[m
+[32m+[m[32m                contador=contador+1;[m
+[32m+[m[32m                console.log('EL URL PELAOOOO:', ruta_archivo, ' extension : ', extension);[m
+[32m+[m[32m                escribirdos();[m
+[32m+[m[32m                escribirtres();[m
+[32m+[m[32m                // $.ajax({[m
+[32m+[m[32m                //     type: "POST",[m
+[32m+[m[32m                //     url: '/200/upload_file/',[m
+[32m+[m[32m                //     headers: {[m
+[32m+[m[32m                //         'X-CSRFToken': csrfToken[m
+[32m+[m[32m                //     },[m
+[32m+[m[32m                //     data: {[m
+[32m+[m[32m                //         file_name: fileName,[m
+[32m+[m[32m                //         file_data: fileData[m
+[32m+[m[32m                //     },[m
+[32m+[m[32m                //     success: function(response) {[m
+[32m+[m[32m                //         console.log('archivoensuccessajax: ', fileName);[m
+[32m+[m[32m                //         console.log(response);[m
+[32m+[m[32m                //         console.log('pelao');[m
+[32m+[m[32m                //[m
+[32m+[m[32m                //         // console.log(uploaded_file_url);[m
+[32m+[m[32m                //         // ruta_archivo = response.uploaded_file_url;[m
+[32m+[m[32m                //         // console.log(ruta_archivo);[m
+[32m+[m[32m                //     },[m
+[32m+[m[32m                //     error: function(error) {[m
+[32m+[m[32m                //         console.log('fuenomas');[m
+[32m+[m[32m                //         console.log(error);[m
+[32m+[m[32m                //     }[m
+[32m+[m[32m                // });[m
+[32m+[m[32m            };[m
+[32m+[m[32m            reader.onerror = function (error) {[m
+[32m+[m[32m                console.log('Error: ', error);[m
+[32m+[m[32m            };[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    function onUploadFailure(args) {[m
+[32m+[m[32m        console.log('File failed to upload');[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction onFileRemove(args) {[m
+[32m+[m
+[32m+[m[32m    // obtener la URL del archivo[m
+[32m+[m[32m    var fileUrl = ruta_archivo;[m
+[32m+[m
+[32m+[m[32m    console.log('ESTOY HACIENDO LA ELIMINACION ', fileUrl);[m
+[32m+[m[32m    console.log('QUERECIBOOOOOOOOOOOOOOO¿?: ', fileName);[m
+[32m+[m[32m    // enviar una solicitud para eliminar el archivo[m
+[32m+[m[32m    //  if (confirm("¿Estás seguro de que deseas eliminar el archivo " + fileName + "?")) {[m
+[32m+[m[32m    $.ajax({[m
+[32m+[m[32m        type: "POST",[m
+[32m+[m[32m        url: '/200/delete_file/',[m
+[32m+[m[32m        // headers: {[m
+[32m+[m[32m        //     'X-CSRFToken': csrfToken[m
+[32m+[m[32m        // },[m
+[32m+[m[32m        data: {[m
+[32m+[m[32m            file_url: fileName,[m
+[32m+[m[32m        },[m
+[32m+[m[32m        success: function (response) {[m
+[32m+[m[32m            console.log('SE ELIMINO ', fileName);[m
+[32m+[m
+[32m+[m
+[32m+[m[32m            // console.log(uploaded_file_url);[m
+[32m+[m[32m            // ruta_archivo = response.uploaded_file_url;[m
+[32m+[m[32m            // console.log(ruta_archivo);[m
+[32m+[m[32m        },[m
+[32m+[m[32m        error: function (error) {[m
+[32m+[m[32m            console.log('fuenomasgg');[m
+[32m+[m[32m            console.log(error);[m
+[32m+[m[32m        }[m
+[32m+[m[32m    });[m
+[32m+[m[32m    // } else {[m
+[32m+[m[32m    // console.log("La eliminación del archivo " + fileName + " fue cancelada.");[m
+[32m+[m[32m// }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction handleDeleteButtonClick(args) {[m
+[32m+[m[32m    console.log('botonborrargrilla');[m
+[32m+[m[32m    alert('test');[m
+[32m+[m[32m    // if (confirm("¿Estás seguro de que deseas eliminar el archivo " + fileName + "?")) {[m
+[32m+[m[32m    if (args.item.id === "multimedia_grid_delete") {[m
+[32m+[m[32m        // Obtener el objeto de la cuadrícula[m
+[32m+[m[32m        var gridObj = document.getElementById('multimedia_grid').ej2_instances[0];[m
+[32m+[m
+[32m+[m[32m        // Obtener la fila seleccionada[m
+[32m+[m[32m        var selectedRecords = gridObj.getSelectedRecords();[m
+[32m+[m
+[32m+[m[32m        // Comprobar si se ha seleccionado una fila[m
+[32m+[m[32m        if (selectedRecords.length > 0) {[m
+[32m+[m[32m            // Obtener los valores de muar_ruta y muar_tipo de la fila seleccionada[m
+[32m+[m[32m            var mulArchivo = selectedRecords[0].muar_ruta;[m
+[32m+[m[32m            var mulTipo = selectedRecords[0].muar_tipo;[m
+[32m+[m
+[32m+[m[32m            // Hacer lo que necesites con los valores[m
+[32m+[m[32m            console.log("Archivo: ", mulArchivo);[m
+[32m+[m[32m            console.log("Tipo: ", mulTipo);[m
+[32m+[m[32m            ruta_archivo = mulArchivo;[m
+[32m+[m[32m            var mulArchivoNombre = mulArchivo.split('/').pop();[m
+[32m+[m[32m            fileName = mulArchivoNombre;[m
+[32m+[m[32m            onFileRemove();[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m[32m    // } else {[m
+[32m+[m[32m    // console.log("La eliminación del archivo " + fileName + " fue cancelada.");[m
+[32m+[m[32m// }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m//[m
+[32m+[m[32m// function Save()[m
+[32m+[m[32m// {[m
+[32m+[m[32m//     try[m
+[32m+[m[32m//     {[m
+[32m+[m[32m//         if (HttpContext.Current.Request.Files.AllKeys.Length > 0)[m
+[32m+[m[32m//         {[m
+[32m+[m[32m//             var httpPostedFile = HttpContext.Current.Request.Files["UploadFiles"];[m
+[32m+[m[32m//[m
+[32m+[m[32m//             if (httpPostedFile != null)[m
+[32m+[m[32m//             {[m
+[32m+[m[32m//                 var fileSave = HttpContext.Current.Server.MapPath("UploadedFiles");[m
+[32m+[m[32m//                 var fileSavePath = Path.Combine(fileSave, httpPostedFile.FileName);[m
+[32m+[m[32m//                 if (!File.Exists(fileSavePath))[m
+[32m+[m[32m//                 {[m
+[32m+[m[32m//                     httpPostedFile.SaveAs(fileSavePath);[m
+[32m+[m[32m//                     HttpResponse Response = HttpContext.Current.Response;[m
+[32m+[m[32m//                     Response.Clear();[m
+[32m+[m[32m//                     Response.ContentType = "application/json; charset=utf-8";[m
+[32m+[m[32m//                     Response.StatusDescription = "File uploaded succesfully";[m
+[32m+[m[32m//                     Response.End();[m
+[32m+[m[32m//                 }[m
+[32m+[m[32m//                 else[m
+[32m+[m[32m//                 {[m
+[32m+[m[32m//                     HttpResponse Response = HttpContext.Current.Response;[m
+[32m+[m[32m//                     Response.Clear();[m
+[32m+[m[32m//                     Response.Status = "400 File already exists";[m
+[32m+[m[32m//                     Response.StatusCode = 400;[m
+[32m+[m[32m//                     Response.StatusDescription = "File already exists";[m
+[32m+[m[32m//                     Response.End();[m
+[32m+[m[32m//                 }[m
+[32m+[m[32m//             }[m
+[32m+[m[32m//         }[m
+[32m+[m[32m//     }[m
+[32m+[m[32m//     catch (Exception e)[m
+[32m+[m[32m//     {[m
+[32m+[m[32m//         HttpResponse Response = System.Web.HttpContext.Current.Response;[m
+[32m+[m[32m//         Response.Clear();[m
+[32m+[m[32m//         Response.ContentType = "application/json; charset=utf-8";[m
+[32m+[m[32m//         Response.StatusCode = 400;[m
+[32m+[m[32m//         Response.Status = "400 No Content";[m
+[32m+[m[32m//         Response.StatusDescription = e.Message;[m
+[32m+[m[32m//         Response.End();[m
+[32m+[m[32m//     }[m
+[32m+[m[32m// }[m
+\ No newline at end of file[m
+[1mdiff --git a/static/js/util_dev.js b/static/js/util_dev.js[m
+[1mindex 98ce473..8261f0a 100644[m
+[1m--- a/static/js/util_dev.js[m
+[1m+++ b/static/js/util_dev.js[m
+[36m@@ -1,5 +1,7 @@[m
+ function get_json_from_script(script_id = "gr_dets") {[m
+     //transforma un scritp tag a JSON[m
+[32m+[m[32m    console.log("amogus ", script_id)[m
+[32m+[m
+     if (!!script_id) {[m
+         let x = (document.getElementById(script_id) ? JSON.parse(document.getElementById(script_id).textContent) : null)[m
+         return (x != null && Object.keys(x).length > 0 ? x : null)[m
+[1mdiff --git a/static/css/memory-game.css b/static/memory_game/css/memory-game.css[m
+[1msimilarity index 99%[m
+[1mrename from static/css/memory-game.css[m
+[1mrename to static/memory_game/css/memory-game.css[m
+[1mindex 9db672d..d3485f0 100644[m
+[1m--- a/static/css/memory-game.css[m
+[1m+++ b/static/memory_game/css/memory-game.css[m
+[36m@@ -1,3 +1,5 @@[m
+[32m+[m
+[32m+[m
+ body {[m
+   align-items: center;[m
+   background-image: radial-gradient(circle 448px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%);[m
+[36m@@ -16,7 +18,7 @@[m [mbody {[m
+   position: relative;[m
+   top: 20px;[m
+   transform-style: preserve-3d;[m
+[31m-  transform: rotateX(50deg) rotateZ(22deg);[m
+[32m+[m[32m  transform: rotateX(0deg) rotateZ(0deg);[m
+   -webkit-user-select: none;[m
+      -moz-user-select: none;[m
+       -ms-user-select: none;[m
+[1mdiff --git a/static/memory_game/js/cardsExample.js b/static/memory_game/js/cardsExample.js[m
+[1mnew file mode 100644[m
+[1mindex 0000000..a48e490[m
+[1m--- /dev/null[m
+[1m+++ b/static/memory_game/js/cardsExample.js[m
+[36m@@ -0,0 +1,119 @@[m
+[32m+[m[32mconst board = document.querySelector('.board');[m
+[32m+[m[32mconst clone = document.querySelector('.clone');[m
+[32m+[m[32mconst overlay = document.querySelector('.overlay');[m
+[32m+[m[32mconst reset = document.querySelector('.reset');[m
+[32m+[m[32mconst tileOptions = ['erupt', 'ptero', 'tri', 'ahahah', 'egg', 'dino'];[m
+[32m+[m
+[32m+[m[32mconst state = {[m
+[32m+[m[32m  selections: [],[m
+[32m+[m[32m  boardLocked: false,[m
+[32m+[m[32m  matches: 0[m
+[32m+[m[32m};[m
+[32m+[m
+[32m+[m[32mreset.addEventListener('click', () => {[m
+[32m+[m[32m  if (state.boardLocked) return;[m
+[32m+[m[32m  resetGame();[m
+[32m+[m[32m});[m
+[32m+[m
+[32m+[m[32mfunction resetGame() {[m
+[32m+[m[32m  state.boardLocked = true;[m
+[32m+[m[32m  state.selections = [];[m
+[32m+[m[32m  state.matches = 0;[m
+[32m+[m
+[32m+[m[32m  document.querySelectorAll('.cube').forEach(tile => {[m
+[32m+[m[32m    tile.removeEventListener('click', () => selectTile(tile));[m
+[32m+[m[32m    tile.remove();[m
+[32m+[m[32m  });[m
+[32m+[m
+[32m+[m[32m  overlay.classList.add('hidden');[m
+[32m+[m[32m  createBoard();[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction createBoard() {[m
+[32m+[m[32m  const tiles = shuffleArray([...tileOptions, ...tileOptions]);[m
+[32m+[m[32m  const length = tiles.length;[m
+[32m+[m
+[32m+[m[32m  for (let i = 0; i < length; i++) {[m
+[32m+[m[32m    window.setTimeout(() => {[m
+[32m+[m[32m      board.appendChild(buildTile(tiles.pop(), i));[m
+[32m+[m[32m    }, i * 100);[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  window.setTimeout(() => {[m
+[32m+[m[32m    document.querySelectorAll('.cube').forEach(tile => {[m
+[32m+[m[32m      tile.addEventListener('click', () => selectTile(tile));[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m    state.boardLocked = false;[m
+[32m+[m[32m  }, tiles.length * 100);[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction buildTile(option, id) {[m
+[32m+[m[32m  const tile = clone.cloneNode(true);[m
+[32m+[m[32m  tile.classList.remove('clone');[m
+[32m+[m[32m  tile.classList.add('cube');[m
+[32m+[m[32m  tile.setAttribute('data-tile', option);[m
+[32m+[m[32m  tile.setAttribute('data-id', id);[m
+[32m+[m[32m  return tile;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction selectTile(selectedTile) {[m
+[32m+[m[32m  if (state.boardLocked || selectedTile.classList.contains('flipped')) return;[m
+[32m+[m
+[32m+[m[32m  state.boardLocked = true;[m
+[32m+[m
+[32m+[m[32m  if (state.selections.length <= 1) {[m
+[32m+[m[32m    selectedTile.classList.add('flipped');[m
+[32m+[m[32m    state.selections.push({[m
+[32m+[m[32m      id: selectedTile.dataset.id,[m
+[32m+[m[32m      tile: selectedTile.dataset.tile,[m
+[32m+[m[32m      el: selectedTile[m
+[32m+[m[32m    });[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  /* =================================*[m
+[32m+[m[32m   *      Welcome to Timeout City     *[m
+[32m+[m[32m   *  Time since last incident: 300ms *[m
+[32m+[m[32m   * =================================*/[m
+[32m+[m[32m  if (state.selections.length === 2) {[m
+[32m+[m[32m    if (state.selections[0].tile === state.selections[1].tile) {[m
+[32m+[m[32m      window.setTimeout(() => {[m
+[32m+[m[32m        state.selections[0].el.classList.add('matched');[m
+[32m+[m[32m        state.selections[1].el.classList.add('matched');[m
+[32m+[m
+[32m+[m[32m        state.boardLocked = false;[m
+[32m+[m[32m        state.matches = state.matches + 1;[m
+[32m+[m
+[32m+[m[32m        if (state.matches === tileOptions.length) {[m
+[32m+[m[32m          window.setTimeout(() => {[m
+[32m+[m[32m            overlay.classList.remove('hidden');[m
+[32m+[m[32m            document.querySelector('.audio-win').play();[m
+[32m+[m[32m          }, 600);[m
+[32m+[m[32m        }[m
+[32m+[m[32m        state.selections = [];[m
+[32m+[m[32m        document.querySelector(`.audio-${selectedTile.dataset.tile}`).play();[m
+[32m+[m[32m      }, 600);[m
+[32m+[m[32m    } else {[m
+[32m+[m[32m      setTimeout(() => {[m
+[32m+[m[32m        document.querySelectorAll('.cube').forEach(tile => {[m
+[32m+[m[32m          tile.classList.remove('flipped');[m
+[32m+[m[32m        });[m
+[32m+[m[32m        state.boardLocked = false;[m
+[32m+[m[32m      }, 800);[m
+[32m+[m[32m      state.selections = [];[m
+[32m+[m[32m    }[m
+[32m+[m[32m  } else {[m
+[32m+[m[32m    state.boardLocked = false;[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// 🍝 Copy-Pasta - "ain't nobody got time for that"[m
+[32m+[m[32mfunction shuffleArray(array) {[m
+[32m+[m[32m  for (let i = array.length - 1; i > 0; i--) {[m
+[32m+[m[32m    const j = Math.floor(Math.random() * (i + 1));[m
+[32m+[m[32m    [array[i], array[j]] = [array[j], array[i]];[m
+[32m+[m[32m  }[m
+[32m+[m[32m  return array;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mcreateBoard();[m
+[1mdiff --git a/templates/Juegos-Multimedia/bodyList.html b/templates/Juegos-Multimedia/bodyList.html[m
+[1mnew file mode 100644[m
+[1mindex 0000000..bcbffe8[m
+[1m--- /dev/null[m
+[1m+++ b/templates/Juegos-Multimedia/bodyList.html[m
+[36m@@ -0,0 +1,207 @@[m
+[32m+[m[32m{% extends 'crud/body.html' %}[m
+[32m+[m[32m{% load static %}[m
+[32m+[m[32m{% load quichua_tags %}[m
+[32m+[m
+[32m+[m[32m{% block headScripts %}[m
+[32m+[m[32m    <!-- DataTables  & Plugins -->[m
+[32m+[m[32m    <link rel="stylesheet"[m
+[32m+[m[32m          href="{% static 'lib/adminlte-3.1.0/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">[m
+[32m+[m[32m    <link rel="stylesheet"[m
+[32m+[m[32m          href="{% static 'lib/adminlte-3.1.0/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">[m
+[32m+[m[32m    <link rel="stylesheet"[m
+[32m+[m[32m          href="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">[m
+[32m+[m
+[32m+[m[32m    <link rel="stylesheet"[m
+[32m+[m[32m          href="{% static 'lib/adminlte-3.1.0/js/datatable_spanish.json' %}">[m
+[32m+[m[32m    <style>[m
+[32m+[m[32m        table.dataTable thead tr {[m
+[32m+[m[32m            background-color: #f7f7f7;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        table {[m
+[32m+[m[32m            border-collapse: collapse;[m
+[32m+[m[32m            border-radius: 1em;[m
+[32m+[m[32m            overflow: hidden;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .table-edit-pencil {[m
+[32m+[m[32m            display: inline-block;[m
+[32m+[m[32m            width: 16px;[m
+[32m+[m[32m            height: 16px;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .btn {[m
+[32m+[m[32m            font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .my-custom-scrollbar {[m
+[32m+[m[32m            position: relative;[m
+[32m+[m[32m            height: 300px;[m
+[32m+[m[32m            overflow: auto;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .table-wrapper-scroll-y {[m
+[32m+[m[32m            display: block;[m
+[32m+[m[32m        }[m
+[32m+[m[32m    </style>[m
+[32m+[m[32m    {% block headScriptsList %}[m
+[32m+[m[32m    {% endblock %}[m
+[32m+[m[32m{% endblock %}[m
+[32m+[m
+[32m+[m[32m{% block content %}[m
+[32m+[m[32m    <div class="card">[m
+[32m+[m[32m        <div class="card-header">[m
+[32m+[m[32m            <h3 class="card-title"><b>{{ page_title }}</b></h3>[m
+[32m+[m[32m            <div class="card-tools">[m
+[32m+[m
+[32m+[m[32m{#                {% if url_form_add and permisos == 1 %}#}[m
+[32m+[m
+[32m+[m[32m                    <a href="{{ url_form_add }}" class="btn btn-outline-primary btn-sm" style="width: 100px;">[m
+[32m+[m[32m                        <i class="fas fa-file-medical"></i> Agregar[m
+[32m+[m[32m                    </a>[m
+[32m+[m[32m{#                {% endif %}#}[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m        <!-- /.card-header -->[m
+[32m+[m[32m        <div class="card-body">[m
+[32m+[m[32m            <table id="{{ datatable_id }}"[m
+[32m+[m[32m                   class="table table-sm table-hover table-bordered table-striped dataTable dtr-inline"[m
+[32m+[m[32m                   style="border-collapse: collapse; border-radius: 0.5em; overflow: hidden;">[m
+[32m+[m[32m                <thead>[m
+[32m+[m[32m                <tr>[m
+[32m+[m[32m                    {% if url_form_edit %}[m
+[32m+[m[32m                        <th style="text-align:center"></th>[m
+[32m+[m[32m                    {% endif %}[m
+[32m+[m[32m                    {% if url_form_print %}[m
+[32m+[m[32m                        <th style="text-align:center"></th>[m
+[32m+[m[32m                    {% endif %}[m
+[32m+[m[32m                    {% for field in show_fields %}[m
+[32m+[m[32m                        <th style="font-size: .85rem!important; text-align:center; ">[m
+[32m+[m[32m                            {% get_verbose_field_name object_list.model field %}[m
+[32m+[m[32m                        </th>[m
+[32m+[m[32m                    {% endfor %}[m
+[32m+[m[32m                        <th style="font-size: .85rem!important; text-align:center; width: 100px">[m
+[32m+[m[32m                            Imagen[m
+[32m+[m[32m                        </th>[m
+[32m+[m[32m                </tr>[m
+[32m+[m[32m                </thead>[m
+[32m+[m[32m                <tbody>[m
+[32m+[m[32m                {% for obj in object_list %}[m
+[32m+[m[32m                    <tr>[m
+[32m+[m[32m                        {% if url_form_edit %}[m
+[32m+[m[32m                            <td style="text-align:center; vertical-align: middle; padding: 2px 8px;">[m
+[32m+[m[32m                                <a href="{% url url_form_edit obj.pk %}">[m
+[32m+[m[32m                                    <img id ="icono_editar" src="{% static '/img/list-edit-pencil.png' %}" alt="Edit"[m
+[32m+[m[32m                                         class="table-edit-pencil"></a>[m
+[32m+[m[32m                            </td>[m
+[32m+[m[32m                        {% endif %}[m
+[32m+[m[32m                        {% if url_form_print %}[m
+[32m+[m[32m                            <td style="text-align:center; vertical-align: middle; padding: 8px 12px;">[m
+[32m+[m[32m                                <a id="{{ obj.pk }}" href="#" onClick="downloadReport('{{ obj.pk }}')">[m
+[32m+[m[32m                                    <i class="fas fa-download"></i>[m
+[32m+[m[32m                                </a>[m
+[32m+[m[32m                            </td>[m
+[32m+[m[32m                        {% endif %}[m
+[32m+[m[32m                        {% for field in show_fields %}[m
+[32m+[m[32m                            <td style="font-size: .86rem!important; vertical-align: middle; padding: 8px 12px;">[m
+[32m+[m[32m                                {% setvar show_fields|get_value_from_dict:field as field_method %}[m
+[32m+[m[32m                                {% if field_method is None %}[m
+[32m+[m[32m                                    {{ obj|get_object_attr:field }}[m
+[32m+[m[32m                                {% else %}[m
+[32m+[m[32m                                    {{ obj|get_object_attr:field_method }}[m
+[32m+[m
+[32m+[m[32m                                {% endif %}[m
+[32m+[m[32m                            </td>[m
+[32m+[m[32m                        {% endfor %}[m
+[32m+[m[32m                    <!-- Agrega una celda para la ruta del archivo multimedia -->[m
+[32m+[m[32m                <td style="font-size: .86rem!important; vertical-align: middle; padding: 8px 12px;">[m
+[32m+[m[32m                    <img src="{{obj.ruta_archivo }}" alt="{{ obj.alt }}" style="width: 60px; height: auto; max-width: 100%;">[m
+[32m+[m[32m                </td>[m
+[32m+[m[32m                    </tr>[m
+[32m+[m[32m                {% endfor %}[m
+[32m+[m[32m                </tbody>[m
+[32m+[m[32m                <tfoot>[m
+[32m+[m[32m                            {% block tabfooter %}[m
+[32m+[m[32m                {% endblock %}[m
+[32m+[m[32m                </tfoot>[m
+[32m+[m[32m            </table>[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m        <!-- /.card-body -->[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    {% block contentList %}[m
+[32m+[m[32m    {% endblock %}[m
+[32m+[m[32m{% endblock %}[m
+[32m+[m
+[32m+[m[32m{% block bodyFooterScripts %}[m
+[32m+[m[32m    <!-- Toastr messages -->[m
+[32m+[m[32m    <link rel="stylesheet" type="text/css" href="{% static 'lib/adminlte-3.1.0/plugins/toastr/toastr.css' %}"[m
+[32m+[m[32m          media="all">[m
+[32m+[m[32m    <script type="text/javascript" src="{% static 'lib/adminlte-3.1.0/plugins/toastr/toastr.min.js' %}"></script>[m
+[32m+[m[32m    {% if messages %}[m
+[32m+[m[32m        {% for message in messages %}[m
+[32m+[m[32m            {% if message.tags == 'success' %}[m
+[32m+[m[32m                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}')</script>[m
+[32m+[m[32m            {% elif message.tags == 'info' %}[m
+[32m+[m[32m                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}')</script>[m
+[32m+[m[32m            {% elif message.tags == 'warning' %}[m
+[32m+[m[32m                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}')</script>[m
+[32m+[m[32m            {% elif message.tags == 'error' %}[m
+[32m+[m[32m                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}')</script>[m
+[32m+[m[32m            {% endif %}[m
+[32m+[m[32m        {% endfor %}[m
+[32m+[m[32m    {% endif %}[m
+[32m+[m
+[32m+[m[32m    <!-- DataTables  & Plugins -->[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables/jquery.dataTables.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/jszip/jszip.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/pdfmake/pdfmake.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/pdfmake/vfs_fonts.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'json/adminlte.js' %}" type="text/javascript"></script>[m
+[32m+[m[32m    <script type="application/javascript">[m
+[32m+[m[32m        $(document).ready(function () {[m
+[32m+[m[32m            table_opts ={{ datatable_opts | js }};[m
+[32m+[m[32m            table_opts['language'] = table_es;[m
+[32m+[m[32m            if (table_opts.drawCallback != null) {[m
+[32m+[m[32m                eval("table_opts.drawCallback=" + fn_drawCallback);[m
+[32m+[m[32m            }[m
+[32m+[m[32m            $("#{{ datatable_id }}").DataTable(table_opts);[m
+[32m+[m[32m        });[m
+[32m+[m[32m    </script>[m
+[32m+[m[32m    <!-- Print method -->[m
+[32m+[m[32m    <script src="{% static 'js/util_dev.js' %}"></script>[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    {% csrf_token %}[m
+[32m+[m
+[32m+[m[32m    <script type="text/javascript">[m
+[32m+[m[32m        //btnDownload_id[m
+[32m+[m[32m        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;[m
+[32m+[m
+[32m+[m[32m        //download specific report with pk[m
+[32m+[m[32m        // funciona solo para listas en donde se necesite un reporte con una llave primaria[m
+[32m+[m[32m        // se mostrara en la segunda columna dela fila[m
+[32m+[m[32m        function downloadReport(pk) {[m
+[32m+[m[32m            fields = new FormData();[m
+[32m+[m[32m            fields.append('pk', pk);[m
+[32m+[m[32m            fields.append('PRINT', '');[m
+[32m+[m[32m            /*sendToServer(url = "{{ url_list }}", data = fields, method = 'POST', returntype = 2)[m
+[32m+[m[32m                .then(data => {[m
+[32m+[m[32m                    fn_generateDownloadPdf(data, "{{ page_title }}")[m
+[32m+[m[32m                });*/[m
+[32m+[m[32m            sendToServer(url = "{{ url_list }}", data = fields, method = 'POST', returntype = 3)[m
+[32m+[m[32m                .then(data => {name=data.name; return data.blob}).then(data2 => {[m
+[32m+[m[32m                    fn_generateDownloadPdf(data2, name);[m
+[32m+[m[32m            });[m
+[32m+[m[32m        }[m
+[32m+[m[32m    </script>[m
+[32m+[m[32m    {% block bodyFooterScriptsList %}[m
+[32m+[m[32m    {% endblock %}[m
+[32m+[m[32m{% endblock %}[m
+[1mdiff --git a/templates/Juegos-Multimedia/create-card.html b/templates/Juegos-Multimedia/create-card.html[m
+[1mnew file mode 100644[m
+[1mindex 0000000..16d9d02[m
+[1m--- /dev/null[m
+[1m+++ b/templates/Juegos-Multimedia/create-card.html[m
+[36m@@ -0,0 +1,131 @@[m
+[32m+[m[32m{# Autor: Bryan Amaya #}[m
+[32m+[m[32m{% extends 'crud/bodyFormCrispy.html' %}[m
+[32m+[m[32m{% load static %}[m
+[32m+[m[32m{% load crispy_forms_tags %}[m
+[32m+[m
+[32m+[m[32m{% block headScriptsForm %}[m
+[32m+[m[32m    <script src="{% static 'js/syncfusion.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'js/util_dev.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'lib/adminlte-3.1.0/plugins/jquery/jquery.min.js' %}"></script>[m
+[32m+[m[32m    <script src="{% static 'js/gen_actividad_archivo.js' %}"></script>[m
+[32m+[m[32m{% endblock %}[m
+[32m+[m
+[32m+[m[32m{% block contentForm %}[m
+[32m+[m
+[32m+[m[32m{% endblock %}[m
+[32m+[m
+[32m+[m[32m{% block bodyFooterScriptsForm %}[m
+[32m+[m[32m    {# Convierte el grid de texto a un json para maniuplarlo #}[m
+[32m+[m[32m    {{ grids_detalles|json_script:"gr_dets" }}[m
+[32m+[m
+[32m+[m[32m    <script>[m
+[32m+[m[32m        const gr_dets = get_json_from_script();[m
+[32m+[m[32m        const elem_respuestas = gr_dets[0];[m
+[32m+[m[32m        {#const elem_multimedia = gr_dets[1];#}[m
+[32m+[m[32m        console.log(elem_respuestas);[m
+[32m+[m[32m        //para eliminar y cambiar el estado en un campo de la grid segun corresponda[m
+[32m+[m[32m        eval("elem_respuestas.gridOptions.toolbarClick=" + elem_respuestas.gridOptions.toolbarClick);[m
+[32m+[m[32m        eval("elem_respuestas.gridOptions.rowDataBound=" + elem_respuestas.gridOptions.rowDataBound);[m
+[32m+[m[32m        console.log("Aqui ESTOY11");[m
+[32m+[m
+[32m+[m[32m         {#mul_archivo #}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[1].edit.create=" + elem_respuestas.gridOptions.columns[2].edit.create);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[1].edit.destroy=" + elem_respuestas.gridOptions.columns[2].edit.destroy);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[1].edit.read=" + elem_respuestas.gridOptions.columns[2].edit.read);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[1].edit.write=" + elem_respuestas.gridOptions.columns[2].edit.write);#}[m
+[32m+[m[32m        {##}[m
+[32m+[m[32m        {##}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[2].edit.create=" + elem_respuestas.gridOptions.columns[3].edit.create);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[2].edit.destroy=" + elem_respuestas.gridOptions.columns[3].edit.destroy);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[2].edit.read=" + elem_respuestas.gridOptions.columns[3].edit.read);#}[m
+[32m+[m[32m        {#eval("elem_respuestas.gridOptions.columns[2].edit.write=" + elem_respuestas.gridOptions.columns[3].edit.write);#}[m
+[32m+[m[32m        //Inicializa el grid (Detalle)[m
+[32m+[m[32m        var grid = [];[m
+[32m+[m[32m        ej.grids.Grid.Inject(ej.grids.Edit);[m
+[32m+[m[32m        {#const grid = new ej.grids.Grid(elem_unimeds.gridOptions);#}[m
+[32m+[m
+[32m+[m[32m        grid[0] = new ej.grids.Grid(elem_respuestas.gridOptions);[m
+[32m+[m[32m        grid[0].appendTo("#" + elem_respuestas.grid_id);[m
+[32m+[m[32m        console.log("Aqui ESTOY22");[m
+[32m+[m
+[32m+[m[32m        $("form#form_Gen_JuegoForm_id button[type = 'submit']").click(function (e) {[m
+[32m+[m[32m            e.preventDefault();[m
+[32m+[m[32m            btnClicked = $(this).attr("name");[m
+[32m+[m[32m            {#alert(btnClicked);#}[m
+[32m+[m[32m            form = document.querySelector('#form_Gen_JuegoForm_id');[m
+[32m+[m[32m            fields = new FormData(form);[m
+[32m+[m[32m            fields.append(btnClicked, '');[m
+[32m+[m[32m            fields.append(elem_respuestas.grid_id, JSON.stringify(elem_respuestas.gridOptions.dataSource));[m
+[32m+[m[32m            {#fields.append(elem_multimedia.grid_id, JSON.stringify(elem_multimedia.gridOptions.dataSource));#}[m
+[32m+[m[32m            sendToServer(url = form.action, data = fields, method = form.method)[m
+[32m+[m[32m                .then(data => {[m
+[32m+[m[32m                    console.log(data)[m
+[32m+[m[32m                    //recupera los errores ya mostrados en pantalla[m
+[32m+[m[32m                    let elms = document.querySelectorAll("[id='error']");[m
+[32m+[m[32m                    let elements = document.getElementsByClassName('is-invalid');[m
+[32m+[m[32m                    //borrar los errores en pantalla[m
+[32m+[m[32m                    for (let i = 0; i < elements.length; i++) {[m
+[32m+[m[32m                        document.getElementById(elements[i].id).classList.remove('is-invalid');[m
+[32m+[m[32m                        console.log("Aqui ESTOY33");[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                    // si la data = 1 significa que la petición no tiene errores[m
+[32m+[m
+[32m+[m[32m                    if (data.a != 1) {[m
+[32m+[m[32m                        for (let i = 0; i < elms.length; i++) {[m
+[32m+[m[32m                            elms[i].parentNode.removeChild(elms[i]); //borra los errores en pantalla[m
+[32m+[m[32m                            console.log("Aqui ESTOY44");[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                        imprimir_errores(data); //muestra los errores en pantalla[m
+[32m+[m[32m                    } else {[m
+[32m+[m[32m                        window.location.replace("{{url_list}}"); //redirecciona[m
+[32m+[m[32m                        console.log("Aqui ESTOY55");[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                });[m
+[32m+[m[32m        });[m
+[32m+[m[32m        console.log("Aqui ESTOY66");[m
+[32m+[m
+[32m+[m
+[32m+[m[32m        var cancelBtn = document.getElementById("cancel_id");[m
+[32m+[m
+[32m+[m[32m        // Agregar el evento de clic al botón[m
+[32m+[m[32m        cancelBtn.addEventListener("click", function (event) {[m
+[32m+[m[32m            // Prevenir el comportamiento predeterminado de navegación[m
+[32m+[m[32m            {#event.preventDefault();#}[m
+[32m+[m[32m            // Mostrar el mensaje de alerta[m
+[32m+[m[32m            if (contador > 0) {[m
+[32m+[m[32m                for (var i = 0; i < arreglo.length; i++) {[m
+[32m+[m[32m                    {#alert(arreglo[i]);#}[m
+[32m+[m[32m                    $.ajax({[m
+[32m+[m[32m                        type: "POST",[m
+[32m+[m[32m                        url: '/200/delete_file/',[m
+[32m+[m[32m                        // headers: {[m
+[32m+[m[32m                        //     'X-CSRFToken': csrfToken[m
+[32m+[m[32m                        // },[m
+[32m+[m[32m                        data: {[m
+[32m+[m[32m                            file_url: arreglo[i],[m
+[32m+[m[32m                        },[m
+[32m+[m[32m                        success: function (response) {[m
+[32m+[m[32m                            console.log('SE ELIMINO ');[m
+[32m+[m
+[32m+[m
+[32m+[m[32m                            // console.log(uploaded_file_url);[m
+[32m+[m[32m                            // ruta_archivo = response.uploaded_file_url;[m
+[32m+[m[32m                            // console.log(ruta_archivo);[m
+[32m+[m[32m                        },[m
+[32m+[m[32m                        error: function (error) {[m
+[32m+[m[32m                            console.log('fuenomasgg');[m
+[32m+[m[32m                            console.log(error);[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                    });[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m
+[32m+[m[32m        });[m
+[32m+[m[32m    </script>[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m{% endblock %}[m
+[32m+[m
+[32m+[m
+[1mdiff --git a/templates/Juegos-Multimedia/memory-game.html b/templates/Juegos-Multimedia/memory-game.html[m
+[1mindex fbeca7b..08269f7 100644[m
+[1m--- a/templates/Juegos-Multimedia/memory-game.html[m
+[1m+++ b/templates/Juegos-Multimedia/memory-game.html[m
+[36m@@ -6,9 +6,70 @@[m
+     <meta charset="utf-8">[m
+     <meta name="viewport" content="width=device-width, initial-scale=1">[m
+     <meta http-equiv="x-ua-compatible" content="ie=edge">[m
+[31m-    <link rel="stylesheet" href="{% static '/css/memory-game.css' %}" >[m
+[32m+[m[32m    <link rel="stylesheet" href="{% static 'memory_game/css/memory-game.css' %}" >[m
+[32m+[m
+ </head>[m
+ <body>[m
+[31m-    hola[m
+[32m+[m[32m<div class='board' tabindex="0" onkeydown="handleSpaceKey(event)"></div>[m
+[32m+[m[32m<div class='clone' tabindex="1" onkeydown="handleSpaceKey(event)">[m
+[32m+[m[32m  <div class='face' tabindex="2" onkeydown="handleSpaceKey(event)"></div>[m
+[32m+[m[32m  <div class='face' tabindex="3" onkeydown="handleSpaceKey(event)"></div>[m
+[32m+[m[32m  <div class='face' tabindex="4" onkeydown="handleSpaceKey(event)"></div>[m
+[32m+[m[32m  <div class='face' tabindex="5" onkeydown="handleSpaceKey(event)"></div>[m
+[32m+[m[32m  <div class='face' tabindex="6" onkeydown="handleSpaceKey(event)"></div>[m
+[32m+[m[32m  <div class='face' tabindex="7" onkeydown="handleSpaceKey(event)"></div>[m
+[32m+[m[32m</div>[m
+[32m+[m[32m<div class='overlay hidden' tabindex="8" onkeydown="handleSpaceKey(event)">[m
+[32m+[m[32m  <div class='gameover' tabindex="9" onkeydown="handleSpaceKey(event)">[m
+[32m+[m[32m    <p tabindex="10" onkeydown="handleSpaceKey(event)">YOU WON!</p>[m
+[32m+[m[32m    <button class='reset' tabindex="11" onkeydown="handleSpaceKey(event)">[m
+[32m+[m[32m      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M485.8 113.9L349.3 250.5c-3.5 3.5-3.5 9.1 0 12.6l136.6 136.6c5.6 5.6 15.2 1.6 15.2-6.3V120.2c-.1-7.9-9.7-11.9-15.3-6.3z" fill="#fff"/><path d="M500 194.8V317c125.9 0 228 102.1 228 228S625.9 773 500 773v121.8c193.3 0 350-156.7 350-350s-156.7-350-350-350zM272 545c0-55.1 19.6-105.7 52.1-145.1 6.5-7.9 5.9-19.5-1.4-26.8l-58.3-58.3c-8.2-8.2-21.7-7.7-29.3 1-53 61.5-85.1 141.5-85.1 229 0 193.3 156.7 350 350 350V773c-125.9 0-228-102.1-228-228z" fill="#fff"/></svg>[m
+[32m+[m[32m    </button>[m
+[32m+[m[32m  </div>[m
+[32m+[m[32m</div>[m
+[32m+[m
+[32m+[m[32m<!-- Preload Game Sounds -->[m
+[32m+[m[32m<audio preload="auto" class="audio-win" >[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-win.mp3">[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-win.ogg">[m
+[32m+[m[32m</audio>[m
+[32m+[m[32m<audio preload="auto" class="audio-ahahah" >[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-ahahah.mp3">[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-ahahah.ogg">[m
+[32m+[m[32m</audio>[m
+[32m+[m[32m<audio preload="auto" class="audio-dino" >[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audo-dino.mp3">[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-dino.ogg">[m
+[32m+[m[32m</audio>[m
+[32m+[m[32m<audio preload="auto" class="audio-egg" >[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-egg.mp3">[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-egg.ogg">[m
+[32m+[m[32m</audio>[m
+[32m+[m[32m<audio preload="auto" class="audio-erupt" >[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-erupt.mp3">[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-erupt.ogg">[m
+[32m+[m[32m</audio>[m
+[32m+[m[32m<audio preload="auto" class="audio-ptero" >[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-ptero.mp3">[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-ptero.ogg">[m
+[32m+[m[32m</audio>[m
+[32m+[m[32m<audio preload="auto" class="audio-tri" >[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-tri.mp3">[m
+[32m+[m[32m  <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/audio-tri.ogg">[m
+[32m+[m[32m</audio>[m
+[32m+[m
+[32m+[m[32m<a class="twitter__link" target="_blank" href="https://twitter.com/intent/tweet?text=Check%20out%20this%20dinosaur%20memory%20game%20by%20@dazulu&via=CodePen%20&hashtags=codepen%2cdinosaurs%2cfrontend&url=https://codepen.io/dazulu/details/rQQpgY/">[m
+[32m+[m[32m  <img class="twitter__icon" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/twitter.svg" />[m
+[32m+[m[32m  Share[m
+[32m+[m[32m</a>[m
+[32m+[m[32m<script>[m
+[32m+[m[32m  function handleSpaceKey(event) {[m
+[32m+[m[32m    if (event.key === ' ' || event.key === 'Spacebar') {[m
+[32m+[m[32m      event.preventDefault(); // Prevent the default action of the space key[m
+[32m+[m[32m      event.target.click(); // Simulate a click on the focused element[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }[m
+[32m+[m[32m</script>[m
+[32m+[m[32m<script src="{% static 'memory_game/js/cardsExample.js' %}"></script>[m
+ </body>[m
+ </html>[m

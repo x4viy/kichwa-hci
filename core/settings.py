@@ -4,6 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 import os, environ
+import socket
 
 env = environ.Env(
     # set casting, default value
@@ -31,8 +32,21 @@ DEBUG = env('DEBUG')
 ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets')
 
 # load production server from .env
-ALLOWED_HOSTS = ['localhost', 'localhost:85', '127.0.0.1', env('SERVER', default='127.0.0.1')]
+def get_ip_address():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
+ALLOWED_HOSTS = ['*', get_ip_address(),  'localhost', 'localhost:85', '127.0.0.1', env('SERVER', default='127.0.0.1')]
 CSRF_TRUSTED_ORIGINS = ['http://localhost:85', 'http://127.0.0.1', 'https://' + env('SERVER', default='127.0.0.1')]
+print('running on : ', get_ip_address() + ':8000/')
 
 # Application definition
 
@@ -99,9 +113,9 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('DB_NAME', 'postgres'),
+        'NAME': os.getenv('DB_NAME', 'quichua'),
         'USER': os.getenv('DB_USERNAME', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASS', 'kevinsil1.'),
+        'PASSWORD': os.getenv('DB_PASS', '3434'),
         # 'PASSWORD': os.getenv('DB_PASS', 'Erp2k19'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         # 'HOST': os.getenv('DB_HOST', '172.16.1.77'),
@@ -114,7 +128,7 @@ DATABASES = {
         },
         'NAME': os.getenv('DB_NAME', 'quichua'),
         'USER': os.getenv('DB_USERNAME', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASS', 'root'),
+        'PASSWORD': os.getenv('DB_PASS', '3434'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', 5432),
     },
@@ -125,7 +139,7 @@ DATABASES = {
         },
         'NAME': os.getenv('DB_NAME', 'quichua'),
         'USER': os.getenv('DB_USERNAME', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASS', 'root'),
+        'PASSWORD': os.getenv('DB_PASS', '3434'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', 5432),
     },
@@ -136,7 +150,7 @@ DATABASES = {
         },
         'NAME': os.getenv('DB_NAME', 'quichua'),
         'USER': os.getenv('DB_USERNAME', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASS', 'root'),
+        'PASSWORD': os.getenv('DB_PASS', '3434'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', 5432),
     },
@@ -228,3 +242,5 @@ SESSION_TIMEOUT_REDIRECT = '/'
 
 RECAPTCHA_PUBLIC_KEY = '6LfQdJwnAAAAAK56nWNTefh3jecVyyrWpVme77BB'
 RECAPTCHA_PRIVATE_KEY = '6LfQdJwnAAAAALAtxonM64CUY6k3r1oDe1dfy9va'
+
+# Get local IP address

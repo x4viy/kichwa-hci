@@ -49,3 +49,25 @@ class MultimediaGame(ListView):
 
     def secondView (request):
         return render(request, 'Juegos-Multimedia/memory-game.html')
+
+
+    def clasification_game_view(request):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """ SELECT c.cart_descripcion AS DESCRIPCION, ma.muar_ruta AS RUTA, ma.muar_tipo AS TIPO
+                    FROM gen.carta c 
+                    INNER JOIN gen.carta_mult cm ON cm.camu_cart_id = c.cart_id
+                    INNER JOIN gen.multimedia_archivos ma ON ma.muar_id = cm.camu_muar_id 
+                    WHERE c.cart_estado = 1
+                    """,
+            )
+
+            data = dictfetchall(cursor)
+
+        for i in data:
+            i['descripcion'] = i['descripcion'].replace(' ', '-')
+
+        context = {'segment': 'Juego de Memoria', 'datos': data }
+        html_template = loader.get_template('../templates/Juegos-Multimedia/clasification-game.html')
+        return HttpResponse(html_template.render(context, request))
+        # return render(request, 'Juegos-Multimedia/clasification-game.html')
