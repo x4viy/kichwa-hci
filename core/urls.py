@@ -20,7 +20,6 @@ urlpatterns = [
     path('200/', include("apps.gen.urls")),
     path('300/', include("apps.sis.urls")),
     path('500/', include("apps.api.urls")),
-    path('chat/', include("apps.clasificacion.urls")),
 
 ]
 

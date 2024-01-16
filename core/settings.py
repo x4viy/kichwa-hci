@@ -6,6 +6,8 @@ Copyright (c) 2019 - present AppSeed.us
 import os, environ
 import socket
 
+from utils.utils import get_ip_address
+
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, True)
@@ -32,17 +34,6 @@ DEBUG = env('DEBUG')
 ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets')
 
 # load production server from .env
-def get_ip_address():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        # doesn't even have to be reachable
-        s.connect(('10.255.255.255', 1))
-        IP = s.getsockname()[0]
-    except Exception:
-        IP = '127.0.0.1'
-    finally:
-        s.close()
-    return IP
 
 ALLOWED_HOSTS = ['*', get_ip_address(),  'localhost', 'localhost:85', '127.0.0.1', env('SERVER', default='127.0.0.1')]
 CSRF_TRUSTED_ORIGINS = ['http://localhost:85', 'http://127.0.0.1', 'https://' + env('SERVER', default='127.0.0.1')]
