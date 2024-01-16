@@ -10,7 +10,6 @@ from django.urls import path, include  # add this
 import apps.home.views.vw_home
 from apps.home.views.vw_home import *
 
-import apps.api.views.vw_api_juego
 from apps.api.views.vw_api_juego import *
 
 urlpatterns = [
@@ -21,6 +20,7 @@ urlpatterns = [
     path('200/', include("apps.gen.urls")),
     path('300/', include("apps.sis.urls")),
     path('500/', include("apps.api.urls")),
+    path('chat/', include("apps.clasificacion.urls")),
 
 ]
 
