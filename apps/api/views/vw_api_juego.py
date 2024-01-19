@@ -50,6 +50,11 @@ class MultimediaGame(ListView):
     def secondView (request):
         return render(request, 'Juegos-Multimedia/memory-game.html')
 
+    def classification_info (request):
+        return render(request, 'Juegos-Multimedia/memory-game.html')
+
+    def test (request):
+        return render(request, 'Juegos-Multimedia/-game.html')
 
     def clasification_game_view(request):
         with connection.cursor() as cursor:
@@ -71,3 +76,21 @@ class MultimediaGame(ListView):
         html_template = loader.get_template('../templates/Juegos-Multimedia/clasification-game.html')
         return HttpResponse(html_template.render(context, request))
         # return render(request, 'Juegos-Multimedia/clasification-game.html')
+
+
+    class SessionGame(ListView):
+        """
+        Contains methods to handle the game session
+        """
+        def get_sessoin_info(self,request):
+            """
+            Get the session information from the database
+
+            :param request:
+            :return: list[dict['url_socket', Any], [dict['options', Any], [dict['cards', Any]]
+            """
+            # TODO: Get the session info from the database
+            session_info = {"url_socket": "ws://localhost:8000/ws/chat/123456/"}
+
+            return JsonResponse(session_info)
+

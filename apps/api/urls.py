@@ -21,6 +21,7 @@ urlpatterns = [
     path("multimedia/game/", MultimediaGame.myFirstView, name="multimedia_game"),
     path("multimedia/game2/", MultimediaGame.secondView, name="multimedia_game2"),
     path('multimedia/classification/', include("apps.clasificacion.urls")),
+    path('multimedia/classification_info/', MultimediaGame.classification_info, name="game_info"),
 
     path("carta/list/", login_required(Gen_CartaListView.as_view()), name="gen_carta_list"),
     path("carta/add/", login_required(Gen_CartaCreateView.as_view()), name="gen_carta_add"),
