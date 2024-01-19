@@ -1,6 +1,6 @@
 function get_json_from_script(script_id = "gr_dets") {
     //transforma un scritp tag a JSON
-    console.log("amogus ", script_id)
+    //console.log("amogus ", script_id)
 
     if (!!script_id) {
         let x = (document.getElementById(script_id) ? JSON.parse(document.getElementById(script_id).textContent) : null)
@@ -79,6 +79,7 @@ async function sendToServer(url, data = null, method = null, returntype = 1) {
 }
 
 function imprimir_errores(data) {
+
     let elms = document.querySelectorAll("[id='error']");
     let selects = document.getElementsByClassName("is-invalid");
     for (let i = 0; i < elms.length; i++) {

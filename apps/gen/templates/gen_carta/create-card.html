@@ -12,6 +12,233 @@
 
 {% block contentForm %}
 
+    <script>
+
+
+
+        let categoriasSeleccionadas = [];
+
+            //Obtiene el token del form
+            const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+            //Obtiene la URL de acción del formulario
+            let url_ = $('#form_Gen_CartaForm_id').attr('action');
+
+            let data_ = new FormData();
+            data_.append('csrfmiddlewaretoken', csrfToken);
+            data_.append('CONSULT_CATEGORIA', 1);
+            const grilla_tabla = document.getElementById('categoria_grid')
+            //Se envia al servidor, para que retorne los valores del item
+            sendToServer(url = url_, data = data_, method='POST')
+                .then(data => {
+
+                    if(data['a'] !== 1){
+                        grilla_tabla.innerHTML = '';
+                        return;
+                    }
+                    console.log(data)
+                        const datos_tabla = data['datos_tabla']
+                        var htmlCode =
+                    `
+                    <input id="numero-categorias" type="hidden" name="numero-categorias" aria-controls="category_table_list" value="">
+                    <div class="card-body">
+                        <table id="category_table_list" class="table table-sm table-hover table-bordered table-striped dataTable dtr-inline"
+                        style="border-collapse: collapse; border-radius: 0.5em; overflow: hidden;">
+                            <thead>
+                                <tr>
+                                    <th style="font-size: .85rem!important; text-align:center; ">
+                                        Añadir/Eliminar
+                                    </th>
+                                    <th style="font-size: .85rem!important; text-align:center; ">
+                                        Nombre
+                                    </th>
+
+                                    <th style="font-size: .85rem!important; text-align:center; ">
+                                        Descripción
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filasData}
+
+                            </tbody>
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                    </div>`
+                    let filastabla = ``;
+                    for (var i = 0; i < datos_tabla.length; i++) {
+
+                        const identificador = datos_tabla[i][0];
+                        const nombre = datos_tabla[i][1];
+                        const descripcion = datos_tabla[i][2];
+
+                            filastabla+=`<tr>
+                                    <td style="font-size: .86rem!important; vertical-align: middle; padding: 8px 12px;">
+
+                                        <input id="categoria-${identificador}" type="hidden" name="categoria-${identificador}-no-seleccionada"  aria-controls="category_table_list" >
+
+                                        <img id="imagen-${identificador}" class="categoria-no-seleccionada" src="{% static '/sesion-juego/icono-anadir.png' %}" alt="Añadir" style="cursor: pointer;"
+                                            onclick="guardarIdentificador(${identificador})">
+                                    </td>
+                                    <td style="font-size: .86rem!important; vertical-align: middle; padding: 8px 12px;">
+                                        ${nombre}
+                                    </td>
+                                    <td style="font-size: .86rem!important; vertical-align: middle; padding: 8px 12px;">
+                                       ${descripcion}
+                                    </td>
+                                </tr>`
+
+
+                    }
+
+                    htmlCode = htmlCode.replace('{filasData}', filastabla);
+                    grilla_tabla.innerHTML = htmlCode;
+
+                    if(data.hasOwnProperty('categorias_seleccionada')){
+                        const categorias_seleccionada = data['categorias_seleccionada']
+                        mostrarCategoriasActuales(categorias_seleccionada)
+                    }
+
+                    mostrarElementosTabla();
+
+                }).catch(error =>{
+
+                    const tabla_datos = document.getElementById('category_table_list');
+
+                    // Se asegura de que el elemento existe antes de intentar eliminarlo
+                    if (tabla_datos !== null) {
+                        // Se obtiene el padre del elemento
+                        var padreElemento = tabla_datos.parentNode;
+
+                        // Elimina el elemento del DOM
+                        padreElemento.removeChild(tabla_datos);
+                    }
+
+                })
+
+
+        function mostrarCategoriasActuales(datos_tabla){
+
+            let numeroCategorias = document.getElementById("numero-categorias")
+
+                for (var i = 0; i < datos_tabla.length; i++) {
+                    const identificador = datos_tabla[i][0];
+                    const nombre = datos_tabla[i][1];
+                    const descripcion = datos_tabla[i][2];
+
+                    let imagen = document.getElementById(`imagen-${identificador}`);
+                    let categoria = document.getElementById(`categoria-${identificador}`);
+                    agregarElemento(identificador,imagen,categoria,numeroCategorias);
+                }
+        }
+
+
+        // Función para guardar el identificador cuando se hace clic en la imagen
+        function guardarIdentificador(identificador) {
+
+            let imagen = document.getElementById(`imagen-${identificador}`);
+            let categoria = document.getElementById(`categoria-${identificador}`);
+            let numeroCategorias = document.getElementById("numero-categorias")
+
+
+
+            if( imagen.classList.contains('categoria-seleccionada') ){
+
+                eliminarElemento(identificador,imagen,categoria,numeroCategorias);
+
+            }else{
+                agregarElemento(identificador,imagen,categoria,numeroCategorias);
+
+            }
+
+
+
+
+
+        }
+
+        function mostrarElementosTabla(){
+
+                datatable_opts = {
+                            'responsive': true,
+                            'lengthChange': true,
+                            'autoWidth': false,
+                            'paging': true,
+                            'searching': true,
+                            'ordering': true,
+                            'info': true,
+                            'order': [[1, "asc"]],
+                            'columnDefs': [
+                                {
+                                    'targets': [0],
+                                    'visible': true,
+                                    'orderable': false,
+                                    'searchable': false,
+                                    'width': '4%',
+                                }
+                            ],
+                            'drawCallback': null,
+                            'pageLength': 25,
+                            'pagingType': 'full_numbers',
+                        }
+
+
+
+                        $(document).ready(function () {
+                            table_opts = datatable_opts;
+                            table_opts['language'] = table_es;
+                            if (table_opts.drawCallback != null) {
+                                eval("table_opts.drawCallback=" + fn_drawCallback);
+                            }
+                            $('#category_table_list').DataTable(table_opts);
+                        });
+        }
+
+        // Función para agregar un elemento al array
+        function agregarElemento(identificador, imagen, categoria,numeroCategorias) {
+            // Verifica si el identificador ya existe en el array
+            if (categoriasSeleccionadas.some(elemento => elemento.identificador === identificador)) {
+                console.log(`El identificador ${identificador} ya está en el array.`);
+            } else {
+                // Agrega el nuevo elemento al array
+                categoriasSeleccionadas.push({ identificador: identificador });
+                console.log(`Elemento con identificador ${identificador} añadido.`);
+                imagen.src = "{% static '/sesion-juego/icono-quitar2.png' %}";
+                imagen.classList.remove('categoria-no-seleccionada');
+                imagen.classList.add('categoria-seleccionada');
+                imagen.name= `categoria-${identificador}-seleccionada`;
+                categoria.name = `categoria-${identificador}-seleccionada`;
+                categoria.value = true
+                const valorNumeroCategorias = numeroCategorias.value;
+                numeroCategorias.value = valorNumeroCategorias+identificador+"-"
+            }
+        }
+
+        // Función para eliminar un elemento del array
+        function eliminarElemento(identificador,imagen,categoria,numeroCategorias) {
+            // Busca el índice del elemento con el identificador proporcionado
+            const indice = categoriasSeleccionadas.findIndex(elemento => elemento.identificador === identificador);
+
+            // Verifica si se encontró el elemento
+            if (indice !== -1) {
+                // Elimina el elemento del array
+                categoriasSeleccionadas.splice(indice, 1);
+                console.log(`Elemento con identificador ${identificador} eliminado.`);
+                imagen.src = "{% static '/sesion-juego/icono-anadir.png' %}";
+                imagen.classList.remove('categoria-seleccionada');
+                imagen.classList.add('categoria-no-seleccionada');
+                imagen.name =`categoria-${identificador}-no-seleccionada`;
+                categoria.name = `categoria-${identificador}-no-seleccionada`
+                categoria.value = false
+                const valorNumeroCategorias = numeroCategorias.value;
+                numeroCategorias.value = valorNumeroCategorias.replaceAll(identificador+"-","");
+            } else {
+                console.log(`El identificador ${identificador} no existe en el array.`);
+            }
+        }
+
+    </script>
+
 {% endblock %}
 
 {% block bodyFooterScriptsForm %}
@@ -127,5 +354,31 @@
 
 
 {% endblock %}
+
+{% block scripts_tabla %}
+    <!-- Toastr messages -->
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/adminlte-3.1.0/plugins/toastr/toastr.css' %}"
+          media="all">
+    <script type="text/javascript" src="{% static 'lib/adminlte-3.1.0/plugins/toastr/toastr.min.js' %}"></script>
+
+    <!-- DataTables  & Plugins -->
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/jszip/jszip.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/pdfmake/pdfmake.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/pdfmake/vfs_fonts.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+    <script src="{% static 'json/adminlte.js' %}" type="text/javascript"></script>
+
+{% endblock %}
+
+
+
 
 

@@ -1,0 +1,421 @@
+{# Autor: Bryan Amaya #}
+{% extends 'crud/bodyFormCrispy.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block headScriptsForm %}
+    <script src="{% static 'js/syncfusion.js' %}"></script>
+    <script src="{% static 'js/util_dev.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/jquery/jquery.min.js' %}"></script>
+    <!-- DataTables  & Plugins -->
+    <link rel="stylesheet"
+          href="{% static 'lib/adminlte-3.1.0/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'lib/adminlte-3.1.0/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
+
+    <link rel="stylesheet"
+          href="{% static 'lib/adminlte-3.1.0/js/datatable_spanish.json' %}">
+{#    <script src="{% static 'js/gen_manejador_archivo.js' %}"></script>#}
+{% endblock %}
+
+
+
+{% block scripts_tabla %}
+
+{% endblock %}
+
+
+{% block contentForm %}
+
+    <script>
+
+        // Genera un código único de números
+        function generarCodigoUnico() {
+            // Obtiene la fecha actual
+            const fecha = new Date();
+
+            // Construye el código utilizando la fecha y un valor aleatorio
+            const codigoUnico = //fecha.getFullYear().toString() +
+                         //padLeft((fecha.getMonth() + 1).toString(), 2, '0') +
+                         //padLeft(fecha.getDate().toString(), 2, '0') +
+                         //padLeft(fecha.getHours().toString(), 2, '0') +
+                         //padLeft(fecha.getMinutes().toString(), 1, '0') +
+                         padLeft(fecha.getSeconds().toString(), 1, '0') +
+                         padLeft(fecha.getMilliseconds().toString(), 3, '0') +
+                         Math.floor(Math.random()).toString();
+
+            return codigoUnico;
+        }
+
+        // Función auxiliar para rellenar con ceros a la izquierda
+        function padLeft(str, length, char) {
+            while (str.length < length) {
+                str = char + str;
+            }
+            return str;
+        }
+
+        let codigoUnico = document.getElementById("id_seju_codigo");
+        //codigoUnico.disabled = true;
+        if(codigoUnico.value.length === 0){
+            codigoUnico.value=generarCodigoUnico();
+        }
+
+
+
+        let cartasSeleccionadas = [];
+        let categoriasSeleccionadas = [];
+
+        $('#id_seju_tip_id').trigger('change.select2');
+        $('#id_seju_tip_id').on("change", function (e) {
+            mostrarTabla(e)
+
+        })
+
+        // Obtén una referencia al elemento select
+        const selectElement = document.getElementById('id_seju_tip_id');
+
+        $(document).ready(function (e) {
+
+            if(selectElement.value == 5 || selectElement.value == 6){
+                mostrarTabla(e);
+            }
+
+        });
+
+        function mostrarTabla(e){
+            //e.preventDefault();
+            //Obtiene el token del form
+            const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+            //Obtiene la URL de acción del formulario
+            let url_ = $('#form_Gen_SesionJuegoForm_id').attr('action');
+
+            let data_ = new FormData();
+            data_.append('csrfmiddlewaretoken', csrfToken);
+            data_.append('tip', JSON.stringify(document.getElementById('id_seju_tip_id').value));
+            data_.append('CONSULT_CATE', 1);
+            const grilla_tabla = document.getElementById('card_category_grid')
+            //Se envia al servidor, para que retorne los valores del item
+            sendToServer(url = url_, data = data_, method='POST')
+                .then(data => {
+
+                    if(data['a'] !== 1){
+                        grilla_tabla.innerHTML = '';
+                        return;
+                    }
+                        const datos_tabla = data['datos_tabla']
+                        var htmlCode =
+                    `
+                    <input id="numero-cartas" type="hidden" name="numero-cartas" aria-controls="card_table_list" value="">
+                    <input id="numero-categorias" type="hidden" name="numero-categorias" aria-controls="card_table_list" value="">
+                    <div class="card-body">
+                        <table id="card_table_list" class="table table-sm table-hover table-bordered table-striped dataTable dtr-inline"
+                        style="border-collapse: collapse; border-radius: 0.5em; overflow: hidden;">
+                            <thead>
+                                <tr>
+                                    <th style="font-size: .85rem!important; text-align:center; ">
+                                        Añadir/Eliminar
+                                    </th>
+                                    <th style="font-size: .85rem!important; text-align:center; ">
+                                        Descripción
+                                    </th>
+                                    <th style="font-size: .85rem!important; text-align:center; ">
+                                        Categoría
+                                    </th>
+
+                                    <th style="font-size: .85rem!important; text-align:center; ">
+                                        Imagen
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filasData}
+
+                            </tbody>
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                    </div>`
+                    let filastabla = ``;
+                    for (var i = 0; i < datos_tabla.length; i++) {
+
+                        const identificador = datos_tabla[i][0];
+                        const identificador_carta = datos_tabla[i][1];
+                        const nombre = datos_tabla[i][2];
+                        const ruta = datos_tabla[i][3];
+                        const tipo = datos_tabla[i][4];
+                        const categoria = datos_tabla[i][5];
+                        const identificador_categoria = datos_tabla[i][6];
+
+                        if(tipo === "image"){
+                            filastabla+=`<tr>
+                                    <td style="font-size: .86rem!important; vertical-align: middle; padding: 8px 12px;">
+
+                                        <input id="carta-${identificador}-${identificador_carta}-${identificador_categoria}" type="hidden" name="carta-${identificador}-no-seleccionada"  aria-controls="card_table_list" >
+
+                                        <img id="imagen-${identificador}-${identificador_carta}-${identificador_categoria}" class="carta-no-seleccionada" src="{% static '/sesion-juego/icono-anadir.png' %}" alt="Añadir" style="cursor: pointer;"
+                                            onclick="guardarIdentificador(${identificador},${identificador_carta},${identificador_categoria})">
+                                    </td>
+                                    <td style="font-size: .86rem!important; vertical-align: middle; padding: 8px 12px;">
+                                        ${nombre}
+                                    </td>
+                                    <td style="font-size: .86rem!important; vertical-align: middle; padding: 8px 12px;">
+                                        ${categoria}
+                                    </td>
+                                    <td style="font-size: .86rem!important; vertical-align: middle; padding: 8px 12px;">
+                                        <img src="${ruta}" alt="${nombre}" style="width: 60px; height: auto; max-width: 100%;">
+                                    </td>
+                                </tr>`
+                        }
+
+                    }
+
+                    htmlCode = htmlCode.replace('{filasData}', filastabla);
+                    grilla_tabla.innerHTML = htmlCode;
+
+                    if(data.hasOwnProperty('cartas_seleccionada')){
+                        const cartas_seleccionada = data['cartas_seleccionada'];
+                        mostrarCartasActuales(cartas_seleccionada);
+                    }
+
+                    mostrarElementosTabla;
+
+                }).catch(error =>{
+
+                    const tabla_datos = document.getElementById('card_table_list');
+
+                    // Se asegura de que el elemento existe antes de intentar eliminarlo
+                    if (tabla_datos !== null) {
+                        // Se obtiene el padre del elemento
+                        var padreElemento = tabla_datos.parentNode;
+
+                        // Elimina el elemento del DOM
+                        padreElemento.removeChild(tabla_datos);
+                    }
+
+                })
+        }
+
+        function mostrarCartasActuales(datos_tabla){
+
+            let numeroCartas = document.getElementById("numero-cartas");
+            let numeroCategorias = document.getElementById("numero-categorias");
+
+                for (var i = 0; i < datos_tabla.length; i++) {
+                    const identificador = datos_tabla[i][0];
+                    const identificador_carta = datos_tabla[i][1];
+                    const descripcion = datos_tabla[i][2];
+                    const tipo = datos_tabla[i][4];
+                    const identificador_categoria = datos_tabla[i][6];
+
+                    if(tipo === "image"){
+                        let imagen = document.getElementById(`imagen-${identificador}-${identificador_carta}-${identificador_categoria}`);
+                        let carta = document.getElementById(`carta-${identificador}-${identificador_carta}-${identificador_categoria}`);
+
+                        agregarElemento(identificador,identificador_carta, cartasSeleccionadas, numeroCartas, imagen, carta);
+                        agregarElemento(identificador,identificador_categoria, categoriasSeleccionadas, numeroCategorias, imagen, carta);
+                    }
+
+
+                }
+        }
+
+        // Función para guardar el identificador cuando se hace clic en la imagen
+        function guardarIdentificador(identificador, identificador_carta,identificador_categoria) {
+
+            let imagen = document.getElementById(`imagen-${identificador}-${identificador_carta}-${identificador_categoria}`);
+            let carta = document.getElementById(`carta-${identificador}-${identificador_carta}-${identificador_categoria}`);
+            let numeroCartas = document.getElementById("numero-cartas");
+            let numeroCategorias = document.getElementById("numero-categorias");
+
+
+            if( imagen.classList.contains('carta-seleccionada') ){
+
+                eliminarElemento(identificador,identificador_carta, cartasSeleccionadas, numeroCartas, imagen, carta);
+                eliminarElemento(identificador,identificador_categoria, categoriasSeleccionadas, numeroCategorias, imagen, carta);
+            }else{
+
+                agregarElemento(identificador,identificador_carta, cartasSeleccionadas, numeroCartas, imagen, carta);
+                agregarElemento(identificador,identificador_categoria, categoriasSeleccionadas, numeroCategorias, imagen, carta);
+
+            }
+
+
+
+        }
+
+
+
+        // Función para agregar un elemento al array
+        function agregarElemento(identificador, identificador_elemento, arregloSeleccionado, elemento, imagen, carta) {
+            // Verifica si el identificador ya existe en el array
+            if (arregloSeleccionado.some(elemento => elemento.identificador === identificador)) {
+                console.log(`El identificador ${identificador} ya está en el array.`);
+            } else {
+                // Agrega el nuevo elemento al array
+                arregloSeleccionado.push({ identificador: identificador });
+                console.log(`Elemento con identificador ${identificador} añadido.`);
+
+                imagen.src = "{% static '/sesion-juego/icono-quitar2.png' %}";
+                imagen.classList.remove('carta-no-seleccionada');
+                imagen.classList.add('carta-seleccionada');
+                imagen.name= `carta-${identificador}-${identificador_elemento}-seleccionada`;
+                carta.name = `carta-${identificador}-${identificador_elemento}-seleccionada`;
+                carta.value = true
+
+                const valorNumero = elemento.value;
+                elemento.value = valorNumero+identificador+"-"
+            }
+        }
+
+        // Función para eliminar un elemento del array
+        function eliminarElemento(identificador, identificador_elemento, arregloSeleccionado, elemento,imagen, carta) {
+            // Busca el índice del elemento con el identificador proporcionado
+            const indice = arregloSeleccionado.findIndex(elemento => elemento.identificador === identificador);
+
+            // Verifica si se encontró el elemento
+            if (indice !== -1) {
+                // Elimina el elemento del array
+                arregloSeleccionado.splice(indice, 1);
+                console.log(`Elemento con identificador ${identificador} eliminado.`);
+
+                imagen.src = "{% static '/sesion-juego/icono-anadir.png' %}";
+                imagen.classList.remove('carta-seleccionada');
+                imagen.classList.add('carta-no-seleccionada');
+                imagen.name =`carta-${identificador}-${identificador_elemento}-no-seleccionada`;
+                carta.name = `carta-${identificador}-${identificador_elemento}-no-seleccionada`
+                carta.value = false
+
+                const valorNumero = elemento.value;
+                elemento.value = valorNumero.replaceAll(identificador+"-","");
+            } else {
+                console.log(`El identificador ${identificador} no existe en el array.`);
+            }
+        }
+
+    </script>
+
+    <!-- DataTables  & Plugins -->
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/jszip/jszip.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/pdfmake/pdfmake.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/pdfmake/vfs_fonts.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+    <script src="{% static 'json/adminlte.js' %}" type="text/javascript"></script>
+    <script type="application/javascript">
+    const mostrarElementosTabla = () =>{
+        
+
+                datatable_opts = {
+    'responsive': true,
+    'lengthChange': true,
+    'autoWidth': false,
+    'paging': true,
+    'searching': true,
+    'ordering': true,
+    'info': true,
+    'order': [[1, "asc"]],
+    'columnDefs': [
+        {
+            'targets': [0],
+            'visible': true,
+            'orderable': false,
+            'searchable': false,
+            'width': '4%',
+        }
+    ],
+    'drawCallback': null,
+    'pageLength': 25,
+    'pagingType': 'full_numbers',
+    'buttons': ["colvis", "copy", "excel", "pdf", "print"],
+    'dom':
+        "<'row'<'col-sm-3'l><'col-sm-5 text-center'B><'col-sm-4'f>>" +
+        "<'row'<'col-sm-12'tr>>" +
+        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+}
+
+                        $(document).ready(function () {
+                            datatable_opts['language'] = table_es;
+                            if (datatable_opts.drawCallback != null) {
+                                eval("datatable_opts.drawCallback=" + fn_drawCallback);
+                            }
+                            $('#card_table_list').DataTable(datatable_opts);
+                        });
+        }
+    </script>
+
+{% endblock %}
+
+
+
+{% block bodyFooterScriptsForm %}
+    {# Convierte el grid de texto a un json para maniuplarlo #}
+{#    {{ grids_detalles|json_script:"gr_dets" }}#}
+
+    <script>
+
+
+
+        console.log("aaaaa  ","{{url_list}}")
+
+        $("form#form_Gen_SesionJuegoForm_id button[type = 'submit']").click(function (e) {
+            e.preventDefault();
+            btnClicked = $(this).attr("name");
+            form = document.querySelector('#form_Gen_SesionJuegoForm_id');
+            fields = new FormData(form);
+            fields.append(btnClicked, '');
+            //fields.append(elem_respuestas.grid_id, JSON.stringify(elem_respuestas.gridOptions.dataSource));
+
+            sendToServer(url = form.action, data = fields, method = form.method)
+                .then(data => {
+
+                    //console.log(data)
+
+                    //recupera los errores ya mostrados en pantalla
+                    let elms = document.querySelectorAll("[id='error']");
+                    let elements = document.getElementsByClassName('is-invalid');
+                    //borrar los errores en pantalla
+                    for (let i = 0; i < elements.length; i++) {
+                        document.getElementById(elements[i].id).classList.remove('is-invalid');
+                        console.log("Aqui ESTOY33");
+                    }
+                    // si la data = 1 significa que la petición no tiene errores
+
+                    if (data.a !== 1) {
+                        for (let i = 0; i < elms.length; i++) {
+                            elms[i].parentNode.removeChild(elms[i]); //borra los errores en pantalla
+                            console.log("Aqui ESTOY44");
+                        }
+                        imprimir_errores(data); //muestra los errores en pantalla
+
+                    }else{
+                        location.replace("{{url_list}}"); //redirecciona
+                        console.log("Aqui ESTOY55");
+                     }
+
+                }).catch(error => {
+                    console.log('error  ',error)
+                });
+
+        });
+        console.log("Aqui ESTOY66");
+
+    </script>
+
+
+
+{% endblock %}
+
+
+
+
+

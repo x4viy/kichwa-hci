@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <link rel="stylesheet" href="{% static 'memory_game/css/memory-game.css' %}" >
+    <script src="https://cdn.jsdelivr.net/npm/handtrackjs@latest/dist/handtrack.min.js"> </script>
 
     <style>
 
@@ -16,12 +17,14 @@
                     [data-tile={{ i.descripcion }}] div:nth-child(3) {
                       background: #fff8e7 url( {{ i.ruta }} ) center center no-repeat;
                       background-size: 85px;
+
                     }
                 {% endif %}
         {% endfor %}
     {% endif %}
 
     </style>
+
 
 </head>
 <body>
@@ -43,6 +46,10 @@
   </div>
 </div>
 
+<audio preload="auto" class="audio-win" >
+        <source src="{% static '/audios/juego-finalizado.mp3' %} ">
+</audio>
+
 {% if datos %}
     {% for i in datos %}
             {% if i.tipo == "audio" %}
@@ -53,7 +60,92 @@
     {% endfor %}
 {% endif %}
 
+
+
+<video id="camara21312" width="640" height="480" style="display: none;"></video>
+
+<img id="hola" src="{% static 'sesion-juego/mano-abierta.png' %}" alt="a">
 <script>
+
+document.addEventListener('click', (e) => {
+
+})
+
+      async function handTracking(){
+
+          const video = document.getElementById('camara21312');
+          const imagen = document.getElementById('hola');
+
+          const defaultParams = {
+            flipHorizontal: true,
+            outputStride: 16,
+            imageScaleFactor: 1,
+            maxNumBoxes: 20,
+            iouThreshold: 0.2,
+            scoreThreshold: 0.6,
+            modelType: "ssd320fpnlite",
+            modelSize: "small",
+            bboxLineWidth: "1",
+            fontSize: 17,
+          };
+
+          const model = await handTrack.load(defaultParams);
+          await handTrack.startVideo(video);
+
+           const detectHand = async () => {
+               const predictions = await model.detect(video);
+
+
+               console.log(predictions);
+
+               predictions.forEach((prediction) => {
+                   const {label, bbox} = prediction;
+                   let [x, y] = bbox;
+
+                   x=x+400;
+                   y=y+150;
+
+                   if (label === "point") {
+
+                        imagen.style.left = x + "px";
+                        imagen.style.top= y + "px";
+                        imagen.src = "{% static 'sesion-juego/mano-senalar.png' %}"
+
+                        const click = (x, y) => {
+                          const ev = new MouseEvent('click', {
+                            'view': window,
+                            'bubbles': true,
+                            'cancelable': true,
+                            'screenX': x,
+                            'screenY': y
+                          });
+                          const el = document.elementFromPoint(x, y);
+                          el.dispatchEvent(ev);
+                        }
+                        click(x, y)
+
+                   } else if (label === "open") {
+                        imagen.style.left = x + "px";
+                        imagen.style.top= y + "px";
+                        imagen.src = "{% static 'sesion-juego/mano-abierta.png' %}"
+
+                   }
+               });
+
+           }
+
+           setInterval(detectHand, 100);
+      }
+
+      handTracking()
+
+
+
+</script>
+
+<script>
+
+
   function handleSpaceKey(event) {
     if (event.key === ' ' || event.key === 'Spacebar') {
       event.preventDefault(); // Prevent the default action of the space key
@@ -87,11 +179,7 @@ function quitarDuplicadosArray(array) {
 }
 
 const tileOptions = quitarDuplicadosArray(descripciones)
-console.table(tileOptions)
 
-
-//const tileOptions = ['erupt', 'ptero', 'tri', 'ahahah', 'egg', 'dino'];
-console.table(tileOptions)
 const state = {
   selections: [],
   boardLocked: false,

@@ -8,6 +8,14 @@ body {
   perspective: 1200px;
 }
 
+.selected {
+  border: 2px solid red; /* Adjust border thickness as desired */
+}
+
+#hola{
+  position: absolute;
+}
+
 .board {
   display: grid;
   grid-gap: 20px;

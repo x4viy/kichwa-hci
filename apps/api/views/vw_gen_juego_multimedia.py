@@ -64,6 +64,8 @@ class Gen_CartaListView(ListView):
         # Agregar boton 'Agregar' lista
         context['show_fields'] = {
             'cart_descripcion': None,
+            'cart_traduccion': None,
+
         }
         # # ecriptacion del id
         for r in context['object_list']:
@@ -114,6 +116,40 @@ class Gen_CartaCreateView(CreateView):
         usuario_id = self.request.session['AIGN_USERID']
         return {'rol_id': rol_id, 'usuario_id': usuario_id}
 
+
+    def find_categorias_seleccionadas(self, resultado_post, cabecera):
+
+        if 'numero-categorias' in resultado_post:
+
+            valores_cartas = resultado_post['numero-categorias']
+
+            # Utiliza el método split para dividir la cadena por el carácter "-"
+            numeros = valores_cartas.split("-")
+
+            # Filtra los elementos no vacíos (por si hay un guion al final)
+            numeros = [int(numero) for numero in numeros if numero]
+
+            for numero_categoria in numeros:
+
+                categoria = Gen_Categoria.objects.filter(cat_id=numero_categoria)
+
+                for categoria_carta in categoria:
+
+                    cart_cate = Gen_CartaCategoria()
+
+                    cart_cate.carca_cat_id = categoria_carta
+                    cart_cate.carca_cart_id = cabecera
+
+                    cart_cate.save()
+
+    def loadDataToTable(self):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """ SELECT c.cat_id as IDENTIFICADOR, c.cat_nombre AS NOMBRE, c.cat_descripcion AS DESCRIPCION  
+                    from gen.categoria c """,
+                )
+            return cursor.fetchall()
+
     # Autor: Bryan Amaya
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -122,9 +158,14 @@ class Gen_CartaCreateView(CreateView):
         r = {'a': 1}
         print('ENTRE AL CREAR')
         # Crear el registro
-        if 'CREATE' in request.POST and form.is_valid():
+        if 'CONSULT_CATEGORIA' in request.POST:
+            r['datos_tabla'] = self.loadDataToTable()
+            return JsonResponse(r)
+
+        elif 'CREATE' in request.POST and form.is_valid():
             try:
                 print("adentro   ", request.POST)
+                print("cabeza   ", form)
                 archivo_imagen = pd.DataFrame(json.loads(request.POST['multimedia_file_grid']))
                 with transaction.atomic():
                     # Guarda cabecera con commit false, esto con el objetivo
@@ -133,7 +174,10 @@ class Gen_CartaCreateView(CreateView):
                     usuario_actual = self.request.session['AIGN_USERID']
                     cabecera.usuario_actual = usuario_actual
                     cabecera.save()
-                    print('ultimo ingresado',cabecera.cart_id)
+                    resultado_post = request.POST
+
+                    print('ultimo ingresado', cabecera.cart_id)
+                    self.find_categorias_seleccionadas(resultado_post, cabecera)
                     for index, row in archivo_imagen.iterrows():
                         tab_imagen = Gen_MultimediaFile()
                         if 'muar_ruta' in row:
@@ -219,6 +263,62 @@ class Gen_CartaUpdateView(UpdateView):
         usuario_id = self.request.session['AIGN_USERID']
         return {'rol_id': rol_id, 'usuario_id': usuario_id}
 
+    def loadDataToTable(self):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """ SELECT c.cat_id as IDENTIFICADOR, c.cat_nombre AS NOMBRE, c.cat_descripcion AS DESCRIPCION  
+                    from gen.categoria c """,
+                )
+            return cursor.fetchall()
+
+    def loadCategoriasToTable(self,cart_id):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """ SELECT  c2.cat_id AS IDENTIFICADOR, c2.cat_nombre AS NOMBRE, c2.cat_descripcion AS DESCRIPCION
+                    FROM gen.carta c 
+                    INNER JOIN gen.carta_categoria cc ON cc.carca_cart_id = c.cart_id 
+                    INNER JOIN gen.categoria c2 ON c2.cat_id = cc.carca_cat_id 
+                    WHERE c.cart_id = %s """,
+                [cart_id])
+            return cursor.fetchall()
+
+    def find_categorias_seleccionadas(self, resultado_post, cabecera):
+
+        if 'numero-categorias' in resultado_post:
+
+            # Utiliza el método split para dividir la cadena por el carácter "-"
+            numeros = resultado_post['numero-categorias'].split("-")
+
+
+            # Filtra los elementos no vacíos (por si hay un guion al final)
+            identificadores_categoria = [int(numero) for numero in numeros if numero]
+
+            cartas_cate_comparar = Gen_CartaCategoria.objects.filter(carca_cart_id=cabecera.cart_id)
+
+            for carta_cate_comparar in cartas_cate_comparar:
+
+                if carta_cate_comparar.carca_cat_id_id not in identificadores_categoria:
+                    carta_cate_comparar.delete()
+
+                elif len(identificadores_categoria) == 0:
+                    carta_cate_comparar.delete()
+
+                elif carta_cate_comparar.carca_cat_id_id in identificadores_categoria:
+                    identificadores_categoria.remove(carta_cate_comparar.carca_cat_id_id)
+
+            if len(identificadores_categoria) == 0:
+                return
+
+            for identificador_categoria in identificadores_categoria:
+                categoria = Gen_Categoria.objects.filter(cat_id=identificador_categoria)
+
+                for categoria_carta in categoria:
+                    cart_cate = Gen_CartaCategoria()
+
+                    cart_cate.carca_cat_id = categoria_carta
+                    cart_cate.carca_cart_id = cabecera
+                    cart_cate.save()
+
     #Autor: Bryan Amaya
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -226,121 +326,104 @@ class Gen_CartaUpdateView(UpdateView):
         request.POST._mutable = True
         r = {'a': 1}
 
-        print("adentro   ", request.POST['multimedia_file_grid'])
-        print("json   ", pd.DataFrame(json.loads(request.POST['multimedia_file_grid'])))
+        print("adentro   ", request.POST)
+        #print("adentro   ", request.POST['multimedia_file_grid'])
+        #print("json   ", pd.DataFrame(json.loads(request.POST['multimedia_file_grid'])))
 
-        data_grid_multimedia = pd.DataFrame(json.loads(request.POST['multimedia_file_grid']))
+        # Aqui se invoca a la grid para obtener los datos que se encuentran en ella.
 
-        # # Editar
-        # if 'SAVE' in request.POST and form.is_valid():
-        #     try:
-        #         # Aqui se invoca a la grid para obtener los datos que se encuentran en ella.
-        #         data_grid_Respuesta = pd.DataFrame(json.loads(request.POST['multimedia_file_grid']))
-        #         with transaction.atomic():
-        #             # Guarda cabecera y detalle
-        #             cabecera = form.save(commit=False)
-        #             usuario_actual = self.request.session['AIGN_USERID']
-        #             cabecera.usuario_actual = usuario_actual
-        #             cabecera.save()
-        #             # print('CABECERAAAAAAAAAAAAA ', cabecera.pk)
-        #             for index, row in data_grid_Respuesta.iterrows():
-        #                 tab_respuesta = Gen_Respuesta()
-        #                 # Valida si el registro ingresado es uno nuevo, o es uno existente que fue modificado
-        #                 if 'res_id' in data_grid_Respuesta:
-        #                     # Si se edita, es decir si existe un valor
-        #                     if not pd.isna(row.res_id):
-        #                         print('MULTIMPORTANTE1.2 ', row.res_id, row.res_respuesta,
-        #                               row.res_escorrecta)
-        #                         tab_respuesta.res_id = row.res_id
-        #                         tab_respuesta.cart_id = cabecera.pk
-        #                         tab_respuesta.res_respuesta = row.res_respuesta
-        #                         tab_respuesta.res_escorrecta = row.res_escorrecta
-        #                         tab_respuesta.res_estado = 0 if row._action == 'E' else 1
-        #                         # EN CASO DE ELIMINAR UN REGISTRO DE LA GRILLA AL EDITAR
-        #                         if tab_respuesta.res_estado == 0:
-        #                             tab_multimedia = Gen_Multimedia()
-        #                             with transaction.atomic():
-        #                                 # Elimina de detalle. Se usa el Kwargs, que es el arreglo donde se almacena
-        #                                 # el pk desde el metodo dispach
-        #                                 with connection.cursor() as cursor:
-        #                                     cursor.execute(
-        #                                         """SELECT mul_archivo FROM gen.multimedia
-        #                                            WHERE cart_id = %s AND res_id = %s""",
-        #                                         [self.kwargs['pk'], tab_respuesta.res_id])
-        #                                     result = cursor.fetchall()
-        #                                     if result:
-        #                                         imagen_url = result[0]
-        #                                         # print(imagen_url)
-        #                                     else:
-        #                                         imagen_url = None
-        #
-        #                                 # print(self.kwargs['pk'])
-        #                                 # print(self.get_object())
-        #                                 with connection.cursor() as cursor:
-        #                                     cursor.execute(
-        #                                         """delete from gen.multimedia
-        #                                           where cart_id = %s AND res_id = %s""",
-        #                                         [self.kwargs['pk'], tab_respuesta.res_id])
-        #
-        #                                 if imagen_url:
-        #                                     # print('existe_imagen')
-        #                                     for row in result:
-        #                                         # print(row[0])
-        #                                         imagen_url = row[0]
-        #                                         file_path = os.path.join(settings.MEDIA_ROOT,
-        #                                                                  imagen_url[len(settings.MEDIA_URL):])
-        #                                         # print('yeyyyy ', file_path)
-        #                                         if os.path.exists(file_path):
-        #                                             os.remove(file_path)
-        #
-        #                     else:
-        #                         print('MULTIMPORTANTE1.3 ', row.res_id, row.res_respuesta,
-        #                               row.res_escorrecta)
-        #                         tab_respuesta.cart_id = cabecera.pk
-        #                         tab_respuesta.res_respuesta = row.res_respuesta
-        #                         tab_respuesta.res_escorrecta = row.res_escorrecta
-        #                         tab_respuesta.save()
-        #                         if not pd.isna(row.mul_archivo):
-        #                             tab_multimedia = Gen_Multimedia()
-        #                             tema_actividad = Gen_TemaActividad.objects.get(tac_id=cabecera.tac_id)
-        #                             tab_multimedia.tem_id = tema_actividad.tem_id
-        #                             tab_multimedia.act_id = tema_actividad.act_id
-        #                             tab_multimedia.res_id = tab_respuesta.res_id
-        #                             tab_multimedia.cart_id = cabecera.pk
-        #                             tab_multimedia.mul_archivo = row.mul_archivo
-        #                             tab_multimedia.mul_tipo = row.mul_tipo
-        #                             tab_multimedia.mul_formato = row.mul_formato
-        #                             # print('arch ', row.mul_archivo)
-        #                             # print('tip ', row.mul_tipo)
-        #                             # print('for ', row.mul_formato)
-        #                             tab_multimedia.save()
-        #                 else:
-        #                     print('MULTIMPORTANTE1.4 ', row.res_respuesta,
-        #                           row.res_escorrecta)
-        #                     tab_respuesta.cart_id = cabecera.pk
-        #                     tab_respuesta.res_respuesta = row.res_respuesta
-        #                     tab_respuesta.res_escorrecta = row.res_escorrecta
-        #                     tab_respuesta.save()
-        #                     if not pd.isna(row.mul_archivo):
-        #                         tab_multimedia = Gen_Multimedia()
-        #                         tema_actividad = Gen_TemaActividad.objects.get(tac_id=cabecera.tac_id)
-        #                         tab_multimedia.tem_id = tema_actividad.tem_id
-        #                         tab_multimedia.act_id = tema_actividad.act_id
-        #                         tab_multimedia.res_id = tab_respuesta.res_id
-        #                         tab_multimedia.cart_id = cabecera.pk
-        #                         tab_multimedia.mul_archivo = row.mul_archivo
-        #                         tab_multimedia.mul_tipo = row.mul_tipo
-        #                         tab_multimedia.mul_formato = row.mul_formato
-        #                         tab_multimedia.save()
-        #                 tab_respuesta.save()
-        #             messages.success(request, CRUD_MSG.CREATE)
-        #             return JsonResponse(r)
-        #     except django.db.models.query_utils.InvalidQuery as e:
-        #         extra_errors.append(str(e))
-        #
+        if 'CONSULT_CATEGORIA' in request.POST:
+            r['datos_tabla'] = self.loadDataToTable()
+            r['categorias_seleccionada'] = self.loadCategoriasToTable(self.kwargs['pk'])
+            return JsonResponse(r)
+        # Editar
+        elif 'SAVE' in request.POST and form.is_valid():
+            try:
+                data_grid_multimedia = pd.DataFrame(json.loads(request.POST['multimedia_file_grid']))
+
+                with transaction.atomic():
+                    # Guarda cabecera y detalle
+                    cabecera = form.save(commit=False)
+                    usuario_actual = self.request.session['AIGN_USERID']
+                    cabecera.usuario_actual = usuario_actual
+                    cabecera.save()
+                    resultado_post = request.POST
+                    self.find_categorias_seleccionadas(resultado_post,cabecera)
+                    # print('CABECERAAAAAAAAAAAAA ', cabecera.pk)
+                    for index, row in data_grid_multimedia.iterrows():
+                        carta = Gen_Carta()
+                        tab_archivos_multimedia = Gen_MultimediaFile()
+                        # Valida si el registro ingresado es uno nuevo, o es uno existente que fue modificado
+                        if 'muar_id' in data_grid_multimedia:
+                            # Si se edita, es decir si existe un valor
+                            if not pd.isna(row.muar_id):
+                                tab_archivos_multimedia.muar_estado = 0 if row._action == 'E' else 1
+                                tab_archivos_multimedia.muar_id = row.muar_id
+
+                                # EN CASO DE ELIMINAR UN REGISTRO DE LA GRILLA AL EDITAR
+                                if tab_archivos_multimedia.muar_estado == 0:
+                                    with transaction.atomic():
+                                        # Elimina de detalle. Se usa el Kwargs, que es el arreglo donde se almacena
+                                        # el pk desde el metodo dispach
+                                        with connection.cursor() as cursor:
+                                            cursor.execute(
+                                                """SELECT muar_ruta FROM gen.multimedia_archivos
+                                                   WHERE muar_id = %s""",
+                                                [tab_archivos_multimedia.muar_id])
+
+                                            result = cursor.fetchall()
+                                            if result:
+                                                imagen_url = result[0]
+                                                # print(imagen_url)
+                                            else:
+                                                imagen_url = None
+
+
+                                        # print(self.get_object())
+                                        with connection.cursor() as cursor:
+                                            cursor.execute(
+                                                """delete from gen.carta_mult            
+                                                   where carta_mult.camu_muar_id = %s""",
+                                                [tab_archivos_multimedia.muar_id])
+
+                                        with connection.cursor() as cursor:
+                                            cursor.execute(
+                                                """ DELETE FROM postgres.gen.multimedia_archivos ma
+                                                    WHERE ma.muar_id = %s""",
+                                                [tab_archivos_multimedia.muar_id])
+
+                                        if imagen_url:
+                                            # print('existe_imagen')
+                                            for row in result:
+                                                # print(row[0])
+                                                imagen_url = row[0]
+                                                file_path = os.path.join(settings.MEDIA_ROOT,
+                                                                         imagen_url[len(settings.MEDIA_URL):])
+                                                if os.path.exists(file_path):
+                                                    os.remove(file_path)
+
+
+##desde aqui
+                            else:
+                                carta.cart_id = row.cart_id
+                                carta.cart_descripcion = row.cart_descripcion
+                                carta.cart_traduccion = row.cart_traduccion
+                                carta.save()
+                        else:
+                            carta.cart_id = row.cart_id
+                            carta.cart_descripcion = row.cart_descripcion
+                            carta.cart_traduccion = row.cart_traduccion
+                            carta.save()
+
+                    messages.success(request, CRUD_MSG.CREATE)
+                    return JsonResponse(r)
+            except django.db.models.query_utils.InvalidQuery as e:
+                extra_errors.append(str(e))
+
         # Eliminar
         if 'DELETE' in request.POST and form.is_valid():
             try:
+                data_grid_multimedia = pd.DataFrame(json.loads(request.POST['multimedia_file_grid']))
 
                 identificador_carta = -1
                 with transaction.atomic():

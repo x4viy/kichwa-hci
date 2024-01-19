@@ -276,7 +276,8 @@ class Gen_MultimediaFile(ERPBaseModel):
 # Descripción: Modelo de juego (Cartas).
 class Gen_Carta(ERPBaseModel):
     cart_id = models.BigAutoField(primary_key=True, verbose_name='ID_Carta')
-    cart_descripcion = models.CharField(max_length=500, verbose_name='Descripción')
+    cart_descripcion = models.CharField(max_length=500, db_column='cart_descripcion', verbose_name='Descripción')
+    cart_traduccion = models.CharField(max_length=500,db_column='cart_traduccion', verbose_name='Traducción')
 
     class Meta:
         managed = False
@@ -325,6 +326,125 @@ def path_and_rename(instance, filename):
     fecha_hora_actual = timezone.now().strftime('%Y-%m-%d_%H-%M-%S')
     filename = '{}.{}'.format(fecha_hora_actual, ext)
     return filename
+
+
+def convertir_a_minusculas(texto):
+    return texto.lower()
+
+
+
+# Autor: Kevin Campoverde
+# Fecha: 06/01/2024 20:00
+# Descripción: Modelo de Categoria.
+class Gen_Categoria(ERPBaseModel):
+    cat_id = models.BigAutoField(primary_key=True, verbose_name='ID_Categoria')
+    cat_nombre = models.CharField(max_length=100, verbose_name='Nombre')
+    cat_descripcion = models.CharField(max_length=2000, verbose_name='Descripcion')
+
+    class Meta:
+        managed = False
+        verbose_name = 'Categoria'
+        verbose_name_plural = 'Categorias'
+        db_table = 'gen\".\"categoria'
+
+
+def convertir_a_minusculas(texto):
+    return texto.lower()
+
+
+
+
+# Autor: Kevin Campoverde
+# Fecha: 06/01/2024 20:00
+# Descripción: Modelo de relacion entre Categoria y Carta.
+class Gen_CartaCategoria(ERPBaseModel):
+    carca_id = models.BigAutoField(primary_key=True, verbose_name='ID_Categoria')
+    carca_cat_id = models.ForeignKey('Gen_Categoria', models.CASCADE, db_column='carca_cat_id')
+    carca_cart_id = models.ForeignKey('Gen_Carta', models.CASCADE, db_column='carca_cart_id')
+
+    class Meta:
+        managed = False
+        verbose_name = 'Carta Categoria'
+        verbose_name_plural = 'Carta Categorias'
+        db_table = 'gen\".\"carta_categoria'
+
+
+def convertir_a_minusculas(texto):
+    return texto.lower()
+
+
+
+
+# Autor: Kevin Campoverde
+# Fecha: 06/01/2024 20:00
+# Descripción: Modelo de Sesion de Juego.
+class Gen_SesionJuego(ERPBaseModel):
+    seju_id = models.BigAutoField(primary_key=True, verbose_name='ID_Sesion_Juego')
+    seju_introduccion = models.CharField(max_length=100, db_column='seju_introduccion', verbose_name='Introduccion')
+    seju_codigo = models.CharField(max_length=2000, db_column='seju_codigo', verbose_name='Codigo Único')
+    seju_tip_id = models.ForeignKey('Gen_Tipo', models.CASCADE, db_column='seju_tip_id', verbose_name='Tipo de Juego')
+    class Meta:
+        managed = False
+        verbose_name = 'Sesion de Juego'
+        verbose_name_plural = 'Sesiones de Juego'
+        db_table = 'gen\".\"sesion_juego'
+
+
+def convertir_a_minusculas(texto):
+    return texto.lower()
+
+
+# Autor: Kevin Campoverde
+# Fecha: 06/01/2024 20:00
+# Descripción: Modelo de relacion entre Categoria y Carta.
+class Gen_CartaSesion(ERPBaseModel):
+    case_id = models.BigAutoField(primary_key=True, db_column='case_id', verbose_name='ID_CartaSesion')
+    case_seju_id = models.ForeignKey('Gen_SesionJuego', models.CASCADE, db_column='case_seju_id')
+    case_cart_id = models.ForeignKey('Gen_Carta', models.CASCADE, db_column='case_cart_id')
+
+    class Meta:
+        managed = False
+        verbose_name = 'Carta Sesion'
+        verbose_name_plural = 'Carta Sesiones'
+        db_table = 'gen\".\"carta_sesion'
+
+
+def convertir_a_minusculas(texto):
+    return texto.lower()
+
+
+# Autor: Kevin Campoverde
+# Fecha: 06/01/2024 20:00
+# Descripción: Modelo de relacion entre Categoria y Carta.
+class Gen_CategoriaSesion(ERPBaseModel):
+    cats_id = models.BigAutoField(primary_key=True, db_column='cats_id', verbose_name='ID_CategoriaSesion')
+    cats_seju_id = models.ForeignKey('Gen_SesionJuego', models.CASCADE, db_column='cats_seju_id')
+    cats_cat_id = models.ForeignKey('Gen_Categoria', models.CASCADE, db_column='cats_cat_id')
+
+    class Meta:
+        managed = False
+        verbose_name = 'Categoria Sesion'
+        verbose_name_plural = 'Categoria Sesiones'
+        db_table = 'gen\".\"categoria_sesion'
+
+
+def convertir_a_minusculas(texto):
+    return texto.lower()
+
+
+# Autor: Kevin Campoverde
+# Fecha: 06/01/2024 20:00
+# Descripción: Modelo de relacion entre Categoria y Carta.
+class Gen_CartaCategoriaSesion(ERPBaseModel):
+    ccs_id = models.BigAutoField(primary_key=True, db_column='ccs_id', verbose_name='ID_CartaCategoriaSesion')
+    ccs_carca_id = models.ForeignKey('Gen_CartaCategoria', models.CASCADE, db_column='ccs_carca_id')
+    ccs_seju_id = models.ForeignKey('Gen_SesionJuego', models.CASCADE, db_column='ccs_seju_id')
+
+    class Meta:
+        managed = False
+        verbose_name = 'Carta Categoria Sesion'
+        verbose_name_plural = 'Carta Categoria Sesiones'
+        db_table = 'gen\".\"cart_cate_sesion'
 
 
 def convertir_a_minusculas(texto):

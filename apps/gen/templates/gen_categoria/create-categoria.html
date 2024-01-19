@@ -1,0 +1,102 @@
+{# Autor: Bryan Amaya #}
+{% extends 'crud/bodyFormCrispy.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block headScriptsForm %}
+    <script src="{% static 'js/syncfusion.js' %}"></script>
+    <script src="{% static 'js/util_dev.js' %}"></script>
+    <script src="{% static 'lib/adminlte-3.1.0/plugins/jquery/jquery.min.js' %}"></script>
+{% endblock %}
+
+{% block contentForm %}
+
+{% endblock %}
+
+{% block bodyFooterScriptsForm %}
+    {# Convierte el grid de texto a un json para maniuplarlo #}
+
+
+    <script>
+
+        $("form#form_Gen_CategoriaForm_id button[type = 'submit']").click(function (e) {
+            e.preventDefault();
+            btnClicked = $(this).attr("name");
+            {#alert(btnClicked);#}
+            form = document.querySelector('#form_Gen_CategoriaForm_id');
+            fields = new FormData(form);
+            fields.append(btnClicked, '');
+            {#fields.append(elem_multimedia.grid_id, JSON.stringify(elem_multimedia.gridOptions.dataSource));#}
+            sendToServer(url = form.action, data = fields, method = form.method)
+                .then(data => {
+                    console.log(data)
+                    //recupera los errores ya mostrados en pantalla
+                    let elms = document.querySelectorAll("[id='error']");
+                    let elements = document.getElementsByClassName('is-invalid');
+                    //borrar los errores en pantalla
+                    for (let i = 0; i < elements.length; i++) {
+                        document.getElementById(elements[i].id).classList.remove('is-invalid');
+                        console.log("Aqui ESTOY33");
+                    }
+                    // si la data = 1 significa que la petición no tiene errores
+
+                    if (data.a != 1) {
+                        for (let i = 0; i < elms.length; i++) {
+                            elms[i].parentNode.removeChild(elms[i]); //borra los errores en pantalla
+                            console.log("Aqui ESTOY44");
+                        }
+                        imprimir_errores(data); //muestra los errores en pantalla
+                    } else {
+                        window.location.replace("{{url_list}}"); //redirecciona
+                        console.log("Aqui ESTOY55");
+                    }
+                });
+        });
+        console.log("Aqui ESTOY66");
+
+
+        var cancelBtn = document.getElementById("cancel_id");
+
+        // Agregar el evento de clic al botón
+        cancelBtn.addEventListener("click", function (event) {
+            // Prevenir el comportamiento predeterminado de navegación
+            {#event.preventDefault();#}
+            // Mostrar el mensaje de alerta
+            if (contador > 0) {
+                for (var i = 0; i < arreglo.length; i++) {
+                    {#alert(arreglo[i]);#}
+                    $.ajax({
+                        type: "POST",
+                        url: '/200/delete_file/',
+                        // headers: {
+                        //     'X-CSRFToken': csrfToken
+                        // },
+                        data: {
+                            file_url: arreglo[i],
+                        },
+                        success: function (response) {
+                            console.log('SE ELIMINO ');
+
+
+                            // console.log(uploaded_file_url);
+                            // ruta_archivo = response.uploaded_file_url;
+                            // console.log(ruta_archivo);
+                        },
+                        error: function (error) {
+                            console.log('fuenomasgg');
+                            console.log(error);
+                        }
+                    });
+                }
+            }
+
+
+        });
+    </script>
+
+
+
+{% endblock %}
+
+
+

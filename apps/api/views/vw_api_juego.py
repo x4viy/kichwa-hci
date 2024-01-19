@@ -30,7 +30,9 @@ class MultimediaGame(ListView):
                     FROM gen.carta c 
                     INNER JOIN gen.carta_mult cm ON cm.camu_cart_id = c.cart_id
                     INNER JOIN gen.multimedia_archivos ma ON ma.muar_id = cm.camu_muar_id 
-                    WHERE c.cart_estado = 1
+                    INNER JOIN gen.carta_sesion cs ON cs.case_cart_id = c.cart_id 
+                    INNER JOIN gen.sesion_juego sj ON sj.seju_id =cs.case_seju_id 
+                    WHERE c.cart_estado = 1 and sj.seju_estado =1
                     """,
                 )
 
@@ -45,7 +47,3 @@ class MultimediaGame(ListView):
         html_template = loader.get_template('../templates/Juegos-Multimedia/memory-game_connection_with_db.html')
         return HttpResponse(html_template.render(context, request))
         #return render(request, 'Juegos-Multimedia/memory-game_connection_with_db.html')
-
-
-    def secondView (request):
-        return render(request, 'Juegos-Multimedia/memory-game.html')

@@ -24,12 +24,14 @@ import string
 from contextlib import contextmanager
 import sys
 
+
 @contextmanager
 def suppress_console_errors():
     original_stderr = sys.stderr
     sys.stderr = open('NUL', 'w')  # Redirige los errores a un archivo ficticio
     yield
     sys.stderr = original_stderr
+
 
 # *** Grids *** #
 
@@ -103,11 +105,11 @@ def get_genTemaActividadDetsForm(tem_id):
     return opts
 
 
-
 # Autor: Dre
 # Fecha: 17/12/2022 11:00
 # Descripción: Grids para Respuestas de la opcion Actividad..
 ContadorControl = 0
+
 
 def get_genRespuestaDetsForm(jue_id):
     # Instancia de la clase en donde estan las propiedades de la grid
@@ -273,7 +275,6 @@ def get_genRespuestaDetsForm(jue_id):
             data = dictfetchall(cursor)
 
         # print('data ', jue_id, ContadorControl , data)
-
 
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -565,6 +566,7 @@ class Gen_TipoForm(ModelForm):
     mul_id = CharField(label="ID_Multimedia", widget=HiddenInput())
     mul_archivo = FileField(label="Imagen")
     vista_previa = CharField(label="Vista previa", required=False)
+
     def __init__(self, *args, **kwargs):
         super(Gen_TipoForm, self).__init__(*args, **kwargs)
         mul_archivo = self.initial.get('mul_archivo')
@@ -668,7 +670,7 @@ class Gen_JuegoForm(ModelForm):
         self.helper.form_class = Form_CSS.form_class
         self.helper.label_class = 'col-sm-4 text-right form-control-sm'
         self.helper.field_class = 'col-sm-5'
-        print('pk ',self.instance.pk)
+        print('pk ', self.instance.pk)
         self.helper.layout = Layout(
             Div(
                 # DivHeaderWithButtons(instance_pk=self.instance.pk, permisos=self.PERMISOS),
@@ -770,9 +772,11 @@ class Gen_PuntajeForm(ModelForm):
                 Div(
                     Div(
                         Div('pun_fecha', css_class='col-sm-6 mb-4'),  # Fecha
-                        Div('pun_emailprofesor',css_class='col-sm-6 mb-4'),  # Espacio en blanco
-                        Div('pun_nombre', 'pun_apellido', 'pun_email', css_class='col-sm-6 mb-4'),  # Nombre e Institución
-                        Div('pun_institucion', 'pun_curso', 'pun_materia', css_class='col-sm-6 mb-4'),  # Apellido y Curso
+                        Div('pun_emailprofesor', css_class='col-sm-6 mb-4'),  # Espacio en blanco
+                        Div('pun_nombre', 'pun_apellido', 'pun_email', css_class='col-sm-6 mb-4'),
+                        # Nombre e Institución
+                        Div('pun_institucion', 'pun_curso', 'pun_materia', css_class='col-sm-6 mb-4'),
+                        # Apellido y Curso
                         Div('tac', css_class='col-sm-6 mb-4'),  # Edad
                         Div('pun_puntaje', css_class='col-sm-6 mb-4'),  # Puntaje
                         css_class='row'
@@ -782,6 +786,7 @@ class Gen_PuntajeForm(ModelForm):
                 css_class='card'
             )
         )
+
     class Meta:
         model = Gen_Puntaje
         fields = '__all__'
@@ -853,11 +858,11 @@ class Gen_ActividadForm(ModelForm):
     mul_id = CharField(label="ID_Multimedia", widget=HiddenInput())
     mul_archivo = FileField(label="Imagen")
     vista_previa = CharField(label="Vista previa", required=False)
+
     # mul_id = CharField(label="mul_id", widget=HiddenInput())
     # mul_archivo = FileField(label="mul_archivo")
     # vista_previa = CharField(label="Vista previa", required=False, widget=TextInput(attrs={'readonly': 'readonly'}))
     # vista_previa = CharField(label="Vista previa")
-
 
     def __init__(self, *args, **kwargs):
         super(Gen_ActividadForm, self).__init__(*args, **kwargs)
@@ -941,7 +946,8 @@ class ImagePreviewWidget(TextInput):
     def render(self, name, value, attrs=None, renderer=None):
         if value:
             # print('AYAYAYAYAY ', value)
-            return mark_safe(f'<img src={value} alt="Vista previa de la imagen" style="max-width: 150%; max-height: 275px;">')
+            return mark_safe(
+                f'<img src={value} alt="Vista previa de la imagen" style="max-width: 150%; max-height: 275px;">')
             # return mark_safe('<h1>teszt</h1>')
         return super().render(name, value, attrs, renderer)
 
@@ -1042,8 +1048,6 @@ class Gen_TemaForm(ModelForm):
         # super(Gen_AsignaturaForm, self).clean()
         form_data = self.cleaned_data
         return form_data
-
-
 
 
 ###################################################
@@ -1154,13 +1158,12 @@ def get_genMultimediaFileDetsForm(cart_id):
     opts.gridOptions['toolbarClick'] = 'toolbarClick'
     opts.gridOptions['rowDataBound'] = 'rowDataBound'
 
-
     if True:
         global ContadorControl
         ContadorControl = ContadorControl + 1
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT 	cart.cart_id, cart.cart_descripcion, mul_ar.muar_id, mul_ar.muar_ruta, 
+                SELECT 	cart.cart_id, cart.cart_descripcion, cart.cart_traduccion, mul_ar.muar_id, mul_ar.muar_ruta, 
 	            mul_ar.muar_tipo, mul_ar.muar_formato, null vista_previa
                 FROM gen.carta  AS cart
                 LEFT JOIN gen.carta_mult  AS cart_mul ON cart.cart_id = cart_mul.camu_cart_id 
@@ -1193,17 +1196,135 @@ def get_genMultimediaFileDetsForm(cart_id):
 
 
 
+
+def get_genCategoriaDetsForm(cart_id):
+    # Instancia de la clase en donde estan las propiedades de la grid
+    opts = SyncFusionGridOptions(allowEdit=False)
+    opts.grid_id = 'categoria_grid'
+    opts.grid_title = 'Respuesta'
+    vista_previa = CharField(label="Vista previa", required=False)
+
+    # DropdownList para poner en una celda de la grid
+    # print('hola buenas tardes')
+    # Lista para selección
+    lov_yes_no = [{'id': True, 'name': 'Sí'}, {'id': False, 'name': 'No'}]
+    opts.gridOptions['toolbar'] = ['Add', 'Edit', 'Delete', 'Update', 'Cancel']
+    # opts.gridOptions['toolbarText'] = {
+    #     Add: 'Añadir',
+    #     edit: 'Editar',
+    #     delete: 'Eliminar',
+    #     update: 'Actualizar',
+    #     cancel: 'Cancelar'
+    # }
+
+    # Aqui se puede modificar las propiedades de nuestra instancia opts
+    opts.gridOptions['columns'] = [
+        {
+            # Este campo hace referencia al PK para la tabla
+            'field': 'id',
+            'visible': False,
+            # 'visible': True,
+            # 'width': 100,
+            'isPrimaryKey': True,
+            'editable': False,
+        },
+        {
+            # Este campo hace referencia a la PK de la BD
+            'field': 'cat_id',
+            'visible': True,
+            'width': 1,
+        },
+        {
+            'field': 'cat_nombre',
+            'isPrimaryKey': True,
+            'headerText': Gen_Categoria._meta.get_field('cat_nombre').verbose_name,
+            'headerName': Gen_Categoria._meta.get_field('cat_nombre').verbose_name,
+            'allowEditing': True,
+            'validationRules': {'required': False},
+            'width': 100,
+
+            'edit': {
+                'create': 'crear',
+                'read': 'leer',
+                'destroy': 'destruir',
+                'write': 'escribir'
+            },
+        },
+        {
+            'field': 'cat_descripcion',
+            'headerText': Gen_Categoria._meta.get_field('cat_descripcion').verbose_name,
+            'headerName': Gen_Categoria._meta.get_field('cat_descripcion').verbose_name,
+            'allowEditing': True,
+            'validationRules': {'required': True},
+            'visible': True,
+            'width': 1,
+
+            'edit': {
+                'create': 'creardos',
+                'read': 'leerdos',
+                'destroy': 'destruirdos',
+                'write': 'escribirdos'
+            },
+        },
+        {
+            'field': '_action',
+            'visible': True,
+            'width': 1,
+            'edit': {'params': {'value': 'N'}},
+            'defaultValue': 'N',
+        }
+    ]
+    opts.gridOptions['toolbarClick'] = 'toolbarClick'
+    opts.gridOptions['rowDataBound'] = 'rowDataBound'
+
+    if True:
+        global ContadorControl
+        ContadorControl = ContadorControl + 1
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 	cart.cart_id, cart.cart_descripcion, cart.cart_traduccion, mul_ar.muar_id, mul_ar.muar_ruta, 
+	            mul_ar.muar_tipo, mul_ar.muar_formato, null vista_previa
+                FROM gen.carta  AS cart
+                LEFT JOIN gen.carta_mult  AS cart_mul ON cart.cart_id = cart_mul.camu_cart_id 
+                LEFT join gen.multimedia_archivos AS mul_ar on cart_mul.camu_muar_id = mul_ar.muar_id 
+                WHERE  cart.cart_id = %s AND cart.cart_estado = 1 
+                ORDER BY cart.cart_id, mul_ar.muar_id""",
+                           [cart_id])
+            data = dictfetchall(cursor)
+
+        # print('data ', jue_id, ContadorControl , data)
+
+        data_list = []
+        cont = 1
+
+        for row in data:
+            l_row_dict = row
+            l_row_dict['_action'] = None
+            l_row_dict['id'] = cont
+            cont = cont + 1
+            data_list.append(l_row_dict)
+        opts.gridOptions['dataSource'] = data_list
+        # opts.gridOptions['dataSource'] = data_list2
+
+        # print('act_id tabla Respuesta : ', jue_id)
+        # print(data_list)
+        # print(data_list2)
+    else:
+        opts.gridOptions['dataSource'] = []
+    return opts
+
+
 ####################################################
 # Autor: Kevin Campoverde
 # Fecha: 28/12/2023
 # Descripción: Formulario para la opción 'Juego Multimedia'.
 class Gen_CartaForm(ModelForm):
 
-
     def __init__(self, *args, **kwargs):
         super(Gen_CartaForm, self).__init__(*args, **kwargs)
         # Cambiar atributos especificos
         self.fields['cart_descripcion'].required = True
+        self.fields['cart_traduccion'].required = True
         self.fields['cart_descripcion'].widget.attrs['autofocus'] = True
 
         # Cambiar atributos especificos
@@ -1235,6 +1356,9 @@ class Gen_CartaForm(ModelForm):
                         Div('cart_descripcion',
                             css_class='col-sm'
                             ),
+                        Div('cart_traduccion',
+                            css_class='col-sm'
+                            ),
                         css_class='row'
                     ),
                     css_class='card-body', id='body_id'
@@ -1244,9 +1368,16 @@ class Gen_CartaForm(ModelForm):
             Div(
                 TabHolder(
                     Tab(
-                        'Archivo de Imagen',
+                        'Archivos para la carta',
                         DivGridHeaderWithButtons(instance_pk=self.instance.pk,
                                                  grid_opts=get_genMultimediaFileDetsForm(None)),
+                    ),
+                ),
+                TabHolder(
+                    Tab(
+                        'Categorías de la carta',
+                        DivGridHeaderWithButtons(instance_pk=self.instance.pk,
+                                                 grid_opts=get_genCategoriaDetsForm(None)),
                     ),
                 ),
             )
@@ -1262,4 +1393,247 @@ class Gen_CartaForm(ModelForm):
         form_data = self.cleaned_data
         return form_data
 
+
+########################################
+
+def get_genCartaDetsForm(cart_id):
+    # Instancia de la clase en donde estan las propiedades de la grid
+    opts = SyncFusionGridOptions(allowEdit=False)
+    opts.grid_id = 'card_category_grid'
+    opts.grid_title = 'Respuesta'
+    vista_previa = CharField(label="Vista previa", required=False)
+
+    # DropdownList para poner en una celda de la grid
+    # print('hola buenas tardes')
+    # Lista para selección
+    lov_yes_no = [{'id': True, 'name': 'Sí'}, {'id': False, 'name': 'No'}]
+    opts.gridOptions['toolbar'] = ['Add', 'Edit', 'Delete', 'Update', 'Cancel']
+    # opts.gridOptions['toolbarText'] = {
+    #     Add: 'Añadir',
+    #     edit: 'Editar',
+    #     delete: 'Eliminar',
+    #     update: 'Actualizar',
+    #     cancel: 'Cancelar'
+    # }
+
+    # Aqui se puede modificar las propiedades de nuestra instancia opts
+    opts.gridOptions['columns'] = [
+        {
+            # Este campo hace referencia al PK para la tabla
+            'field': 'id',
+            'visible': False,
+            # 'visible': True,
+            # 'width': 100,
+            'isPrimaryKey': True,
+            'editable': False,
+        },
+        {
+            # Este campo hace referencia a la PK de la BD
+            'field': 'cart_id',
+            'visible': True,
+            'width': 1,
+        },
+        {
+            'field': 'cat_descripcion',
+            'headerText': Gen_Carta._meta.get_field('cart_descripcion').verbose_name,
+            'headerName': Gen_Carta._meta.get_field('cart_descripcion').verbose_name,
+            'allowEditing': True,
+            'validationRules': {'required': True},
+            'visible': True,
+            'width': 1,
+
+            'edit': {
+                'create': 'creardos',
+                'read': 'leerdos',
+                'destroy': 'destruirdos',
+                'write': 'escribirdos'
+            },
+        },
+        {
+            'field': '_action',
+            'visible': True,
+            'width': 1,
+            'edit': {'params': {'value': 'N'}},
+            'defaultValue': 'N',
+        }
+    ]
+    opts.gridOptions['toolbarClick'] = 'toolbarClick'
+    opts.gridOptions['rowDataBound'] = 'rowDataBound'
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """ SELECT c.cart_descripcion AS DESCRIPCION, ma.muar_ruta AS RUTA, ma.muar_tipo AS TIPO
+                FROM gen.carta c 
+                INNER JOIN gen.carta_mult cm ON cm.camu_cart_id = c.cart_id
+                INNER JOIN gen.multimedia_archivos ma ON ma.muar_id = cm.camu_muar_id 
+                WHERE c.cart_estado = 1 and ma.muar_tipo = 'image'
+                """,
+        )
+
+        data = dictfetchall(cursor)
+
+        # print('data ', jue_id, ContadorControl , data)
+
+        data_list = []
+        cont = 1
+
+        for row in data:
+            l_row_dict = row
+            l_row_dict['_action'] = None
+            l_row_dict['id'] = cont
+            cont = cont + 1
+            data_list.append(l_row_dict)
+        opts.gridOptions['dataSource'] = data_list
+
+        # opts.gridOptions['dataSource'] = data_list2
+
+        # print('act_id tabla Respuesta : ', jue_id)
+        # print('data list',data_list)
+        # print(data_list2)
+    return opts
+
+
+########################################
+
+# Autor: Kevin Campoverde
+# Fecha: 28/12/2023
+# Descripción: Formulario para la opción 'Sesion Juego(Multimedia)'.
+class Gen_SesionJuegoForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Gen_SesionJuegoForm, self).__init__(*args, **kwargs)
+
+        self.fields['seju_introduccion'].required = True
+        self.fields['seju_tip_id'].required = True
+        self.fields['seju_codigo'].required = True
+        self.fields['seju_introduccion'].widget.attrs['autofocus'] = True
+
+        # Cambiar atributos especificos
+        rol_usuario_actual = self.initial.get('rol_id')
+        usuario_actual = self.initial.get('usuario_id')
+
+        # Cambiar atributos genericos
+        for form in self.visible_fields():
+            form.field.widget.attrs['placeholder'] = Form_CSS.fields_placeholder + form.field.label  # .lower()
+            form.field.widget.attrs['autocomplete'] = Form_CSS.fields_autocomplete
+            form.field.widget.attrs['class'] = Form_CSS.fields_attr_class
+        self.helper = FormHelper(self)
+        self.helper.form_method = 'post'
+        self.helper.form_id = Form_CSS.getFormID(self)
+        self.helper.attrs = Form_CSS.form_attrs
+        self.helper.form_tag = True
+        self.helper.form_error_title = Form_CSS.form_err_title
+        self.helper.form_class = Form_CSS.form_class
+        self.helper.label_class = 'col-sm-4 text-right form-control-sm'
+        self.helper.field_class = 'col-sm-5'
+        print('pk ', self.instance.pk)
+        self.helper.layout = Layout(
+            Div(
+                # DivHeaderWithButtons(instance_pk=self.instance.pk, permisos=self.PERMISOS),
+                DivHeaderWithButtons(instance_pk=self.instance.pk,
+                                     permisos={'oro_agregar': 1, 'oro_modificar': 1, 'oro_eliminar': 1,
+                                               'oro_imprimir': 0}),
+                Div(
+                    Div(
+                        Div('seju_introduccion',
+                            'seju_tip_id',
+                            'seju_codigo',
+                            css_class='col-sm'
+                            ),
+                        css_class='row'
+                    ),
+                    css_class='card-body', id='body_id'
+                ),
+
+                css_class='card'
+            ),
+            Div(
+                TabHolder(
+                    Tab(
+                        'Escoger Cartas',
+                        DivGridHeaderWithButtons(instance_pk=self.instance.pk,
+                                                 grid_opts=get_genCartaDetsForm(None)),
+                    ),
+
+                ),
+            )
+        )
+
+    class Meta:
+        model = Gen_SesionJuego
+        fields = '__all__'
+        # exclude = ['jue_estado']
+        widgets = {}
+
+    def clean(self):
+        # super(Gen_AsignaturaForm, self).clean()
+        form_data = self.cleaned_data
+        return form_data
+
+
+
+########################################
+
+# Autor: Kevin Campoverde
+# Fecha: 28/12/2023
+# Descripción: Formulario para la opción 'Sesion Juego(Multimedia)'.
+class Gen_CategoriaForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Gen_CategoriaForm, self).__init__(*args, **kwargs)
+
+        self.fields['cat_nombre'].required = True
+        self.fields['cat_descripcion'].required = True
+        self.fields['cat_nombre'].widget.attrs['autofocus'] = True
+
+        # Cambiar atributos especificos
+        rol_usuario_actual = self.initial.get('rol_id')
+        usuario_actual = self.initial.get('usuario_id')
+
+        # Cambiar atributos genericos
+        for form in self.visible_fields():
+            form.field.widget.attrs['placeholder'] = Form_CSS.fields_placeholder + form.field.label  # .lower()
+            form.field.widget.attrs['autocomplete'] = Form_CSS.fields_autocomplete
+            form.field.widget.attrs['class'] = Form_CSS.fields_attr_class
+        self.helper = FormHelper(self)
+        self.helper.form_method = 'post'
+        self.helper.form_id = Form_CSS.getFormID(self)
+        self.helper.attrs = Form_CSS.form_attrs
+        self.helper.form_tag = True
+        self.helper.form_error_title = Form_CSS.form_err_title
+        self.helper.form_class = Form_CSS.form_class
+        self.helper.label_class = 'col-sm-4 text-right form-control-sm'
+        self.helper.field_class = 'col-sm-5'
+        print('pk ', self.instance.pk)
+        self.helper.layout = Layout(
+            Div(
+                # DivHeaderWithButtons(instance_pk=self.instance.pk, permisos=self.PERMISOS),
+                DivHeaderWithButtons(instance_pk=self.instance.pk,
+                                     permisos={'oro_agregar': 1, 'oro_modificar': 1, 'oro_eliminar': 1,
+                                               'oro_imprimir': 0}),
+                Div(
+                    Div(
+                        Div('cat_nombre',
+                            'cat_descripcion',
+                            css_class='col-sm'
+                            ),
+                        css_class='row'
+                    ),
+                    css_class='card-body', id='body_id'
+                ),
+
+                css_class='card'
+            ),
+        )
+
+    class Meta:
+        model = Gen_Categoria
+        fields = '__all__'
+        # exclude = ['jue_estado']
+        widgets = {}
+
+    def clean(self):
+        # super(Gen_AsignaturaForm, self).clean()
+        form_data = self.cleaned_data
+        return form_data
 
