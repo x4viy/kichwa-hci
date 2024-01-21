@@ -1572,6 +1572,64 @@ class Gen_SesionJuegoForm(ModelForm):
 
 
 
+class Gen_SesionJuegoIntroduccionForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Gen_SesionJuegoIntroduccionForm, self).__init__(*args, **kwargs)
+
+        self.fields['seju_codigo'].required = True
+        self.fields['seju_codigo'].widget.attrs['autofocus'] = True
+
+        # Cambiar atributos especificos
+        rol_usuario_actual = self.initial.get('rol_id')
+        usuario_actual = self.initial.get('usuario_id')
+
+        # Cambiar atributos genericos
+        for form in self.visible_fields():
+            form.field.widget.attrs['placeholder'] = Form_CSS.fields_placeholder + form.field.label  # .lower()
+            form.field.widget.attrs['autocomplete'] = Form_CSS.fields_autocomplete
+            form.field.widget.attrs['class'] = Form_CSS.fields_attr_class
+        self.helper = FormHelper(self)
+        self.helper.form_method = 'post'
+        self.helper.form_id = Form_CSS.getFormID(self)
+        self.helper.attrs = Form_CSS.form_attrs
+        self.helper.form_tag = True
+        self.helper.form_error_title = Form_CSS.form_err_title
+        self.helper.form_class = Form_CSS.form_class
+        self.helper.label_class = 'col-sm-4 text-right form-control-sm'
+        self.helper.field_class = 'col-sm-5'
+        print('pk ', self.instance.pk)
+        self.helper.layout = Layout(
+            Div(
+                # DivHeaderWithButtons(instance_pk=self.instance.pk, permisos=self.PERMISOS),
+                DivHeaderWithButtons(instance_pk=self.instance.pk,
+                                     permisos={'oro_agregar': 1, 'oro_modificar': 1, 'oro_eliminar': 1,
+                                               'oro_imprimir': 0}),
+                Div(
+                    Div(
+                        Div('seju_codigo',
+                            css_class='col-sm'
+                            ),
+                        css_class='row'
+                    ),
+                    css_class='card-body', id='body_id'
+                ),
+
+                css_class='card'
+            ),
+        )
+
+    class Meta:
+        model = Gen_SesionJuego
+        fields = '__all__'
+        # exclude = ['jue_estado']
+        widgets = {}
+
+    def clean(self):
+        # super(Gen_AsignaturaForm, self).clean()
+        form_data = self.cleaned_data
+        return form_data
+
 ########################################
 
 # Autor: Kevin Campoverde

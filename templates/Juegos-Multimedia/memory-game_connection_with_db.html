@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <link rel="stylesheet" href="{% static 'memory_game/css/memory-game.css' %}" >
+<!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'lib/adminlte-3.1.0/plugins/fontawesome-free/css/all.min.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://cdn.jsdelivr.net/npm/handtrackjs@latest/dist/handtrack.min.js"> </script>
 
     <style>
@@ -28,6 +31,14 @@
 
 </head>
 <body>
+
+<div id="cameraToggleContainer">
+
+  <button id="toggleCamera" class="fas fa-camera nav-icon">
+      <p>Activar/Desactivar Cámara</p>
+  </button>
+</div>
+
 <div class='board' onkeydown="handleSpaceKey(event)"></div>
 <div class='clone' tabindex="1" onkeydown="handleSpaceKey(event)">
   <div class='face' tabindex="2" onkeydown="handleSpaceKey(event)"></div>
@@ -64,19 +75,41 @@
 
 <video id="camara21312" width="640" height="480" style="display: none;"></video>
 
-<img id="hola" src="{% static 'sesion-juego/mano-abierta.png' %}" alt="a">
+<img id="hola" src="{% static 'sesion-juego/mano-abierta.png' %}" alt="a" style="visibility: hidden">
 <script>
+
+    let cameraEnabled = false;
+
+    document.getElementById('toggleCamera').addEventListener('click', () => {
+
+      cameraEnabled = !cameraEnabled; // Invierte el estado de la cámara al hacer clic en el botón
+      startLoadCamera(); // Llama a la función para activar/desactivar la cámara
+    });
 
 document.addEventListener('click', (e) => {
 
 })
 
-      async function handTracking(){
+
+
+      async function startLoadCamera(){
 
           const video = document.getElementById('camara21312');
           const imagen = document.getElementById('hola');
 
-          const defaultParams = {
+          console.log(cameraEnabled)
+
+           if (!cameraEnabled) {
+               handTrack.stopVideo(video);
+               imagen.style.visibility = "hidden";
+                return;
+           }
+
+           //video.addEventListener('loadeddata', async () => {
+
+               imagen.style.visibility = "visible"
+
+                const defaultParams = {
             flipHorizontal: true,
             outputStride: 16,
             imageScaleFactor: 1,
@@ -130,14 +163,17 @@ document.addEventListener('click', (e) => {
                         imagen.src = "{% static 'sesion-juego/mano-abierta.png' %}"
 
                    }
+
                });
 
            }
-
            setInterval(detectHand, 100);
-      }
+           //})
 
-      handTracking()
+
+
+
+      }
 
 
 

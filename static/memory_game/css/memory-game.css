@@ -1,3 +1,4 @@
+@import url(https://fonts.googleapis.com/css?family=Luckiest+Guy);
 body {
   align-items: center;
   background-image: radial-gradient(circle 448px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%);
@@ -8,12 +9,29 @@ body {
   perspective: 1200px;
 }
 
+/* Agrega estos estilos al final de tu archivo CSS o en la sección de estilos de tu HTML */
+#cameraToggleContainer {
+  position: fixed;
+  top: 10px; /* Ajusta la distancia desde la parte superior según tus necesidades */
+  right: 10px; /* Ajusta la distancia desde la derecha según tus necesidades */
+  z-index: 1000; /* Ajusta la elevación según sea necesario para que esté por encima de otros elementos */
+}
+
+#toggleCamera {
+  padding: 10px;
+  font-size: 24px;
+}
+
 .selected {
   border: 2px solid red; /* Adjust border thickness as desired */
 }
 
 #hola{
   position: absolute;
+}
+
+p{
+  font-family: "Luckiest Guy", sans-serif;
 }
 
 .board {
