@@ -3,6 +3,7 @@
 # Descripción: METODOS Y FUNCIONES ESTANDARIZADAS QUE SE USAN CON FRECUENCIA
 
 import json
+import socket
 import smtplib
 import requests
 from bunch import Bunch
@@ -128,3 +129,21 @@ def notificar_caducidad_firma(correos, tempo_vigencia):
     except Exception as e:
         print(e)
         print('Error en la alerta!')
+
+
+def get_ip_address():
+    '''
+    Get the ip address of the running server
+    :return: String representing the server's IP address.
+    '''
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+

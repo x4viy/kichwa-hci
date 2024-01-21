@@ -210,4 +210,54 @@ function validarIdentificacion() {
         );
     }
 
+
+}
+
+// Function to shake and turn red an element by id or class
+function shakeAndTurnRed(selector) {
+    const element = document.querySelector(selector);
+    if (element) {
+        element.classList.add('shake');
+        setTimeout(function() {
+            element.classList.remove('shake');
+        }, 1000); // remove the shake class after 1 second
+    }
+}
+
+// Function to show a red nav bar at the bottom of the page with an error message
+function showError(message, displayTime , color) {
+    var navBar = document.createElement('nav');
+    navBar.style.position = 'fixed';
+    navBar.style.bottom = '-50px'; // start from outside of the view
+    navBar.style.width = '100%';
+    navBar.style.backgroundColor = color;
+    navBar.style.color = 'white';
+    navBar.style.textAlign = 'center';
+    navBar.style.padding = '10px';
+    navBar.style.transition = 'bottom 0.5s ease-out'; // add transition
+    navBar.style.fontSize = '2rem'; // Add some space between the icon and the text
+
+    // Create an icon element and append it to the navBar
+    var icon = document.createElement('i');
+    icon.className = 'fa fa-exclamation-circle'; // Set this to the class for your desired icon
+    icon.style.marginRight = '2rem'; // Add some space between the icon and the text
+    navBar.appendChild(icon);
+
+    // Append the message as a text node to preserve the icon element
+    navBar.appendChild(document.createTextNode(message));
+
+    document.body.appendChild(navBar);
+
+    // After the navBar is appended, change its bottom property to animate it into view
+    setTimeout(function() {
+        navBar.style.bottom = '0';
+    }, 0);
+
+    // After displayTime, animate the navBar out of view and then remove it
+    setTimeout(function() {
+        navBar.style.bottom = '-50px';
+        setTimeout(function() {
+            document.body.removeChild(navBar);
+        }, 500); // remove the nav bar after the transition ends
+    }, displayTime * 1000);
 }

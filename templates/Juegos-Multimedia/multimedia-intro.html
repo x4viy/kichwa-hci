@@ -1,0 +1,69 @@
+{% extends 'Juegos-Multimedia/base.html' %}
+{% load static %}
+
+{% block title %}Introducción{% endblock %}
+
+
+<!-- Custom block content -->
+{% block content %}
+    <form action="/500/multimedia/check/" method="POST" id="form_Gen_SesionJuegoForm_id">
+        {% csrf_token %}
+        <div class="wrapper">
+            <div class="square_intro">
+                <div id="qrcode"></div>
+                <div class="btnSound"><i class="fas fa-volume-up"></i></div>
+                <div class="title">Introducción</div>
+                <p>{{ intro }}</p>
+                <button type="submit" class="btnContinue" id="btnCode">Continuar</button>
+
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+
+
+<!-- Custom block for javascript -->
+{% block js_script %}
+
+    <script>
+        let jsonObject = {
+            key1: 'value1',
+            key2: 'value2'
+            // ... your JSON data ...
+        };
+
+        let jsonString = JSON.stringify(jsonObject);
+
+        new QRCode(document.getElementById("qrcode"), jsonString);
+
+        $(document).ready(function() {
+            $("form#form_Gen_SesionJuegoForm_id").submit(function (e) {
+                e.preventDefault();
+
+                const input = document.querySelector('.inputText');
+                if (input.value === '') {
+                    showError('El campo de entrada está vacío',2.5, '#F2676C');
+                    return;
+                }
+                console.log('{{ url_list }}')
+                console.log('{{ code }}')
+                let url_ = $(this).attr('action');
+                let fields = new FormData(this);
+                fields.append('code', '{{ code }}');
+
+                sendToServer(url = url_, data = fields, method = 'POST')
+                    .then(data => {
+                        if (data.message !== "ok") {
+                            shakeAndTurnRed('.inputText')
+                            showError(data.message,2.5, '#F2676C');
+                            return
+                        }
+                        {#window.location.href = '/500/multimedia/ingresoNombre/'#}
+                        window.location.replace("{{ url_list }}?code=" + input.value);
+                        console.log(data)
+                    })
+            });
+        });
+    </script>
+{% endblock %}

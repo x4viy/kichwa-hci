@@ -29,7 +29,10 @@ from django.shortcuts import redirect
 from django.db import connection
 from django.template import loader
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.generic import ListView, UpdateView, CreateView
+
+from apps.api.database import is_code_in_db
 from apps.gen.forms import *
 from django.http import HttpResponse, JsonResponse
 from core.encryption_util import *
@@ -38,12 +41,110 @@ from django.shortcuts import redirect
 
 _e = EncryptDES()
 
+
 # Autor: Kevin Campoverde
 class MultimediaGame(ListView):
 
+    def code(request):
+        """
+        TODO: verify if code session exist
+        Verify code
+        """
+        # context = {'segment': 'Juego de Memoria', 'datos': data }
+        # html_template = loader.get_template('../templates/Juegos-Multimedia/memory-game_connection_with_db.html')
+        # return HttpResponse(html_template.render(context, request))
+        print('entro en code')
+        # url_list = reverse('user_code')
+        return render(request, 'Juegos-Multimedia/multimedia-code.html')
+
+    def verify_code(request):
+        """
+        TODO: verify if code session exist
+        Verify code
+        """
+        if request.method != 'POST':
+            return JsonResponse({'message': 'Not a POST request'})
+
+        if not request.POST.get('code'):
+            return JsonResponse({'message': 'Not field code'})
+
+        code = request.POST.get('code')
+        print('code: ', code)
+
+        if not is_code_in_db(code):
+            return JsonResponse({'message': 'No se encontro el códio de sesión'})
+
+        # return reverse('user_code', args(code))
+        # user_url = 'multimedia/user/'
+        # return JsonResponse({'message': 'ok', 'url': user_url, 'code': code})
+        # return JsonResponse({'message': 'ok', 'code': code})
+        # return redirect('multimedia_game:user_code', code=code)
+        user_url = reverse('multimedia_game:user_code', args=[code])
+        return JsonResponse({'message': 'ok', 'url': user_url})
+
+    def user_code(request, code):
+        """
+        Display qr code and socket url with code session and name user
+        """
+
+        print('user', code)
+
+        # context = {'segment': 'Juego de Memoria', 'code': code, 'name': name}
+        html_template = loader.get_template('Juegos-Multimedia/multimedia-user.html')
+        context = {'segment': 'Juego de Memoria', 'code': code}
+        # user_url = reverse('multimedia_game:intro', args=[code])
+        # return JsonResponse({'message': 'ok', 'url': user_url, 'code': code, 'name': name})
+        # return JsonResponse({'message': 'no'})
+        return HttpResponse(html_template.render(context, request))
+
+    def to_intro(request):
+        """
+        Register user and code session , next redirect to introduction game
+        """
+        if request.method != 'POST':
+            return JsonResponse({'message': 'Not a POST request user_code'})
+        if not request.POST.get('code') and not request.POST.get('name'):
+            return JsonResponse({'message': 'No existe el usuario o el código de sesión'})
+        print('intro', request.POST.get('name'))
+        # TODO: GET THE INTRO OF THE SESSION
+        intro = 'Este es el intro del juego de cartas consultado en la base de datos con el codigo de sesion y el nombre del usuario'
+        name = request.POST.get('name')
+        enc_code = request.POST.get('code')
+        user_url = reverse('multimedia_game:intro', args=[enc_code, name, intro])
+        return JsonResponse({'message': 'ok', 'url': user_url})
+
+    def intro(request, code, name, text_intro):
+        """
+        Display qr code and socket url with code session and name user
+        """
+        print('code', code)
+        print('user', name)
+        # context = {'segment': 'Juego de Memoria', 'code': code, 'name': name}
+        html_template = loader.get_template('Juegos-Multimedia/multimedia-intro.html')
+        context = {'segment': 'Juego de Memoria', 'code': code, 'name': name, 'intro': text_intro}
+        # user_url = reverse('multimedia_game:intro', args=[code])
+        # return JsonResponse({'message': 'ok', 'url': user_url, 'code': code, 'name': name})
+        # return JsonResponse({'message': 'no'})
+        return HttpResponse(html_template.render(context, request))
+
+    def check_phone_connection(request):
+        """
+        Check if the phone is connected to the socket
+        """
+        if request.method != 'POST':
+            return JsonResponse({'message': 'Not a POST request'})
+        if not request.POST.get('code') and not request.POST.get('code'):
+            return JsonResponse({'message': 'Not field code'})
+        code = request.POST.get('code')
+        name = request.POST.get('username')
+        print('check', code, name)
+        return JsonResponse({'message': 'ckeck'})
+        # context = {'segment': 'Juego de Memoria', 'code': code, 'name': name}
+        # html_template = loader.get_template('Juegos-Multimedia/multimedia-intro.html')
+        # return HttpResponse(html_template.render(context, request))
 
     # Autor: Kevin Campoverde
-    def myFirstView (request):
+    def myFirstView(request):
         # Se establece la conección a la base de datos
         print('tas aqui')
 
@@ -58,104 +159,64 @@ class MultimediaGame(ListView):
                     INNER JOIN gen.sesion_juego sj ON sj.seju_id =ccs.ccs_seju_id 
                     WHERE c.cart_estado = 1 and sj.seju_estado =1
                     """,
-                )
+            )
 
             data = dictfetchall(cursor)
 
         for i in data:
             i['descripcion'] = i['descripcion'].replace(' ', '-')
 
-        context = {'segment': 'Juego de Memoria', 'datos': data }
+        context = {'segment': 'Juego de Memoria', 'datos': data}
         print('datitos ', data)
         # html_template = loader.get_template('home/juego1.html')
         html_template = loader.get_template('../templates/Juegos-Multimedia/memory-game_connection_with_db.html')
         return HttpResponse(html_template.render(context, request))
-        #return render(request, 'Juegos-Multimedia/memory-game_connection_with_db.html')
+        # return render(request, 'Juegos-Multimedia/memory-game_connection_with_db.html')
+
+    def secondView(request):
+        return render(request, 'Juegos-Multimedia/memory-game.html')
 
 
-# Autor: Bryan Amaya
-# Agregar
-class MultimediaGameCreateView(CreateView):
-    model = Gen_SesionJuego
-    form_class = Gen_SesionJuegoIntroduccionForm
-    template_name = 'sesion-juego/pablito_clavito.html'
-    success_url = reverse_lazy('multimedia_game:multimedia_game2')
+    def classification_info(request):
+        return render(request, 'Juegos-Multimedia/memory-game.html')
 
-    def get(self, request, *args, **kwargs):
-        rol_usuario_actual = self.request.session['AIGN_ROLID']
-        if rol_usuario_actual != 1:
-            if rol_usuario_actual != 2:
-                return redirect('/')
-            return super().get(request, *args, **kwargs)
-        else:
-            return super().get(request, *args, **kwargs)
+    def test(request):
+        return render(request, 'Juegos-Multimedia/-game.html')
 
-    # Asigna al kwargs la variable de session desde el formulario
-    def get_form_kwargs(self):
-        kwargs = super(MultimediaGameCreateView, self).get_form_kwargs()
-        # #Roles
-        # kwargs.update({'AIGN_OPCIONES': self.request.session['AIGN_OPCIONES']})
-        # kwargs.update({'AIGN_EMP_ID': self.request.session.get('AIGN_EMP_ID')})
-        return kwargs
+    def clasification_game_view(request):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """ SELECT c.cart_descripcion AS DESCRIPCION, ma.muar_ruta AS RUTA, ma.muar_tipo AS TIPO
+                    FROM gen.carta c 
+                    INNER JOIN gen.carta_mult cm ON cm.camu_cart_id = c.cart_id
+                    INNER JOIN gen.multimedia_archivos ma ON ma.muar_id = cm.camu_muar_id 
+                    WHERE c.cart_estado = 1
+                    """,
+            )
 
-    # # Iniciallizar el formulario
-    def get_initial(self):
-        rol_id = self.request.session['AIGN_ROLID']
-        usuario_id = self.request.session['AIGN_USERID']
-        return {'rol_id': rol_id, 'usuario_id': usuario_id}
+            data = dictfetchall(cursor)
 
-    # Autor: Bryan Amaya
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        extra_errors = []
-        request.POST._mutable = True
-        r = {'a': 1}
-        print('ENTRE AL CREAR')
+        for i in data:
+            i['descripcion'] = i['descripcion'].replace(' ', '-')
 
-        # Crear el registro
-        if 'CONSULT_CATE' in request.POST:
+        context = {'segment': 'Juego de Memoria', 'datos': data}
+        html_template = loader.get_template('../templates/Juegos-Multimedia/clasification-game.html')
+        return HttpResponse(html_template.render(context, request))
+        # return render(request, 'Juegos-Multimedia/clasification-game.html')
 
-            tipo = json.loads(request.POST['tip'])
-            if tipo != "5" and tipo != "6":
-                return JsonResponse(r)
+    class SessionGame(ListView):
+        """
+        Contains methods to handle the game session
+        """
 
-            r['datos_tabla'] = self.loadDataToTable()
-            return JsonResponse(r)
+        def get_sessoin_info(self, request):
+            """
+            Get the session information from the database
 
-        elif 'CREATE' in request.POST and form.is_valid():
-            try:
-                print("adentro   ", request.POST)
-                print("cabeza   ", form)
+            :param request:
+            :return: list[dict['url_socket', Any], [dict['options', Any], [dict['cards', Any]]
+            """
+            # TODO: Get the session info from the database
+            session_info = {"url_socket": "ws://localhost:8000/ws/chat/123456/"}
 
-                with transaction.atomic():
-                    # Guarda cabecera con commit false, esto con el objetivo
-                    # de poder acceder a los datos con los que se guardaria en la base
-                    cabecera = form.save(commit=False)
-                    usuario_actual = self.request.session['AIGN_USERID']
-                    cabecera.usuario_actual = usuario_actual
-                    cabecera.save()
-
-                    resultado_post = request.POST
-
-                    print('ultimo ingresado',cabecera.seju_id)
-                    self.find_cartas_seleccionadas(resultado_post, cabecera)
-
-                messages.success(request, CRUD_MSG.CREATE)
-                return JsonResponse(r)
-            except django.db.models.query_utils.InvalidQuery as e:
-                print("error ", str(e))
-                extra_errors.append(str(e))
-
-        self.object = None
-        context = self.get_context_data(**kwargs)
-        context['form'] = form
-        errors = form._errors.setdefault("__all__", ErrorList())
-        errors.extend(extra_errors)
-        return JsonResponse(dict(form._errors.items()))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_title'] = self.model._meta.verbose_name
-        context['url_list'] = self.success_url
-        # print('8')
-        return context
+            return JsonResponse(session_info)

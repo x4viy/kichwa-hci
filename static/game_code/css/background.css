@@ -1,0 +1,333 @@
+@import url('https://fonts.googleapis.com/css?family=Exo:400,700');
+
+*{
+    margin: 0px;
+    padding: 0px;
+}
+
+body{
+    font-family: 'Exo',  'Comic Sans MS', sans-serif;
+}
+
+
+/*.context {*/
+/*    width: 100%;*/
+/*    !*position: absolute;*!*/
+/*    top:50vh;*/
+
+/*}*/
+
+/*.context h1{*/
+/*    text-align: center;*/
+/*    color: #fff;*/
+/*    font-size: 50px;*/
+/*}*/
+
+
+.area{
+    background: #0085B8;
+    background: -webkit-linear-gradient(to left, #CBF7FF, #0085B8);
+    width: 100%;
+    height:100vh;
+    position: absolute;
+    z-index: -1;
+
+
+}
+
+.circles{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.circles li{
+    position: absolute;
+    display: block;
+    list-style: none;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    animation: animate 25s linear infinite;
+    bottom: -150px;
+
+}
+
+.circles li:nth-child(1){
+    left: 25%;
+    width: 80px;
+    height: 80px;
+    animation-delay: 0s;
+}
+
+
+.circles li:nth-child(2){
+    left: 10%;
+    width: 20px;
+    height: 20px;
+    animation-delay: 2s;
+    animation-duration: 12s;
+}
+
+.circles li:nth-child(3){
+    left: 70%;
+    width: 20px;
+    height: 20px;
+    animation-delay: 4s;
+}
+
+.circles li:nth-child(4){
+    left: 40%;
+    width: 60px;
+    height: 60px;
+    animation-delay: 0s;
+    animation-duration: 18s;
+}
+
+.circles li:nth-child(5){
+    left: 65%;
+    width: 20px;
+    height: 20px;
+    animation-delay: 0s;
+}
+
+.circles li:nth-child(6){
+    left: 75%;
+    width: 110px;
+    height: 110px;
+    animation-delay: 3s;
+}
+
+.circles li:nth-child(7){
+    left: 35%;
+    width: 150px;
+    height: 150px;
+    animation-delay: 7s;
+}
+
+.circles li:nth-child(8){
+    left: 50%;
+    width: 25px;
+    height: 25px;
+    animation-delay: 15s;
+    animation-duration: 45s;
+}
+
+.circles li:nth-child(9){
+    left: 20%;
+    width: 15px;
+    height: 15px;
+    animation-delay: 2s;
+    animation-duration: 35s;
+}
+
+.circles li:nth-child(10){
+    left: 85%;
+    width: 150px;
+    height: 150px;
+    animation-delay: 0s;
+    animation-duration: 11s;
+}
+
+
+
+@keyframes animate {
+
+    0%{
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+        border-radius: 0;
+    }
+
+    100%{
+        transform: translateY(-1000px) rotate(720deg);
+        opacity: 0;
+        border-radius: 50%;
+    }
+
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+.shake {
+    animation: shake 0.5s;
+    animation-iteration-count: 2;
+    border-color: #F2676C;
+    border-width: 3px;
+}
+
+.shake::after {
+    content: "\26A0"; /* Unicode for exclamation mark inside triangle */
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #F2676C;
+}
+.form-control {
+    text-align: center;
+}
+
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.square {
+    background-color: #ffffff;
+    padding: 3rem;
+    border-radius: 15px;
+    font-family: 'Exo', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-shadow : rgba(0, 0, 0, 0.15) 0px 2px 4px;
+    min-width: 200px;
+    max-width: 500px;
+}
+
+.square_intro{
+    background-color: #ffffff;
+    padding: 3rem;
+    border-radius: 15px;
+    font-family: 'Exo', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-shadow : rgba(0, 0, 0, 0.15) 0px 2px 4px;
+    min-width: 30vw;
+    max-width: 60vw;
+    margin-bottom: 1rem;
+}
+
+.btnText {
+    width: 100%;
+    margin-top: 10px;
+    min-height: 5.4rem;
+    max-height: 68px;
+    line-height: 2.375rem;
+    text-align: center;
+    max-width: 30rem;
+    min-width: 6.25rem;
+    color: #EDFBFF;
+    outline: none;
+    font-size: 1.5rem;
+    border-radius: 15px;
+    box-sizing: border-box;
+    font-weight: bold;
+    background-color: #00507F;
+
+}
+
+.btnContinue {
+    width: 100%;
+    min-height: 5.4rem;
+    max-height: 68px;
+    line-height: 2.375rem;
+    text-align: center;
+    max-width: 14rem;
+    min-width: 5.3rem;    color: #EDFBFF;
+    outline: none;
+    font-size: 1.5rem;
+    border-radius: 15px;
+    box-sizing: border-box;
+    font-weight: bold;
+    background-color: #00507F;
+    margin-top: 4rem;
+}
+
+.btnText:hover {
+    background-color: #59A3E9;
+}
+.inputText{
+    min-height: 69px;
+    max-height: 100px;
+    line-height: 2.375rem;
+    text-align: center;
+    max-width: 20rem;
+    min-width: 24.3rem;
+    color: rgb(51, 51, 51);
+    outline: none ;
+    font-size: 1.5rem;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-weight: bold;
+
+}
+
+/* when focus on input text make outline blue */
+.inputText:focus {
+    outline: solid;
+    border-color: #007ABE;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* when focus on the btnText make it focus*/
+.btnText:focus {
+    outline: solid;
+    border-color: #007ABE;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.title{
+font-size: 2rem;
+    font-weight: bold;
+    color: #00507F;
+    margin-bottom: 1rem;
+}
+
+p {
+    font-size: 1.5rem;
+    font-weight: normal;
+    color: #00507F;
+    margin-bottom: 1rem;
+    text-align: center;
+    width: 80%;
+
+}
+
+#qrcode img{
+    min-width: 9vw;
+    max-width: 12vw;
+    min-height: 9vw;
+    max-height: 12vw;
+    margin-bottom: 6vh;
+}
+
+.btnSound{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 3vw;
+    max-width: 5vw;
+    min-height: 3vw;
+    max-height: 5vw;
+    margin-bottom: 1rem;
+    background-color: #D8F3FF;
+    border-radius: 50%;
+    font-size: 2.5rem;
+}
+
+.btnSound:hover {
+    background-color: #59A3E9;
+}
