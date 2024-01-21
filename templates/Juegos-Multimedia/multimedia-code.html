@@ -1,0 +1,55 @@
+{% extends 'Juegos-Multimedia/base.html' %}
+{% load static %}
+
+{% block title %}Ingreso Codigo{% endblock %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'game_code/css/game_code.css' %}" >
+
+<!-- Custom block content -->
+{% block content %}
+        <form action="/500/multimedia/verify_code/" method="POST" id="form_Gen_SesionJuegoForm_id">
+            {% csrf_token %}
+              <div class="wrapper">
+            <div class="square">
+                    <input type="text" class="inputText" placeholder="Ingrese el código" name="code" id="id_code" autocomplete="off" >
+                    <button type="submit" class="btnText" id="btnCode">Ingresar</button>
+                </div>
+            </div>
+        </form>
+{% endblock %}
+
+<!-- Custom block for javascript -->
+{% block js_script %}
+    <script>
+        $(document).ready(function() {
+            $("form#form_Gen_SesionJuegoForm_id").submit(function (e) {
+                e.preventDefault();
+
+                const input = document.querySelector('.inputText');
+                if (input.value === '') {
+                    showError('El campo de entrada está vacío',2.5, '#F2676C');
+                    return;
+                }
+
+                let url_ = $(this).attr('action');
+                let fields = new FormData(this);
+                fields.append('code', input.value);
+
+                sendToServer(url = url_, data = fields, method = 'POST')
+                    .then(data => {
+                        if (data.message !== "ok") {
+                            shakeAndTurnRed('.inputText')
+                            showError(data.message,2.5, '#F2676C');
+                            return
+                        }
+                        {#window.location.assign(data.url);#}
+                        {#window.location.href = '/500/multimedia/user' + '?code=' + data.code ;#}
+                        # go to next page
+
+                    })
+
+            });
+        });
+    </script>
+{% endblock %}

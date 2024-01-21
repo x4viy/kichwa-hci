@@ -21,6 +21,7 @@ class ChatConsumer(WebsocketConsumer):
         json_text = json.loads(text_data)
         message = json_text["message"]
         motion = json_text["motion"]
+        isCorrect = json_text['isCorrect']
 
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
@@ -28,13 +29,15 @@ class ChatConsumer(WebsocketConsumer):
             {
                 "type": "chat_message",
                 "message": message,
-                "motion": motion
+                "motion": motion,
+                "isCorrect": isCorrect
             }
         )
 
     def chat_message(self, event):
         message = event['message']
         motion = event['motion']
+        isCorrect = event['isCorrect']
 
         # Send message to WebSocket
-        self.send(text_data=json.dumps({"message": message, "motion": motion}))
+        self.send(text_data=json.dumps({"message": message, "motion": motion, "isCorrect": isCorrect}))

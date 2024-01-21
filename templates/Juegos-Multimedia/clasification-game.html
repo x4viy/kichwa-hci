@@ -170,6 +170,11 @@
             return this.gameTurns;
           }
         }
+
+        class messagesSocket{
+            
+        }
+
         let sessionStats = new SessionStats();
         console.log(sessionStats);
 
@@ -298,6 +303,8 @@
                         card.style.transform = 'translate(-' + moveOutWidth + 'px, -100px) rotate(30deg)';
                     }
                     initCards();
+                }else{
+                    sendToPhone(null, null, false);
                 }
                 console.log(sessionStats);
                 {#event.preventDefault();#}
@@ -364,6 +371,17 @@
             messageInputDom.value = '';
         };
 
+        function sendToPhone(message, motion, isCorrect){
+            message  =  message ?? '';
+            motion =  motion ?? '';
+            isCorrect  =  isCorrect ?? '';
+
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'motion': motion,
+                'isCorrect': isCorrect
+            }));
+        }
         function moveCart(motion){
             // compare if the message is right or left
             if (motion === 'right' ) {

@@ -1,0 +1,85 @@
+{% extends 'Juegos-Multimedia/base.html' %}
+{% load static %}
+
+{% block title %}Ingreso Nombre{% endblock %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'game_code/css/game_code.css' %}" >
+
+<!-- Custom block content -->
+{% block content %}
+    <form action="/500/multimedia/verify_code/" method="POST" id="form_Gen_SesionJuegoForm_id">
+        {% csrf_token %}
+        <div class="wrapper">
+            <div class="square">
+                <input type="text" class="inputText" placeholder="Ingrese el código" name="code" id="id_code" autocomplete="off" >
+                <button type="submit" class="btnText" id="btnCode">Ingresar</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+
+
+<!-- Custom block for javascript -->
+{% block js_script %}
+    <script>
+        $(document).ready(function() {
+            $("form#form_Gen_SesionJuegoForm_id").submit(function (e) {
+                e.preventDefault();
+
+                const input = document.querySelector('.inputText');
+                if (input.value === '') {
+                    showError('El campo de entrada está vacío',2.5, '#F2676C');
+                    return;
+                }
+
+                let url_ = $(this).attr('action');
+                let fields = new FormData(this);
+                fields.append('code', input.value);
+
+                sendToServer(url = url_, data = fields, method = 'POST')
+                    .then(data => {
+                        if (data.message !== "ok") {
+                            shakeAndTurnRed('.inputText')
+                            showError(data.message,2.5, '#F2676C');
+                            return
+                        }
+                        {#window.location.href = '/500/multimedia/ingresoNombre/'#}
+                        window.location.replace("{{ url_list }}?code=" + input.value);
+                        console.log('go to next page')
+                    })
+            });
+        });
+
+        {##}
+        {#    document.getElementById("code_btn").addEventListener("submit", function(event){#}
+        {#    event.preventDefault()#}
+        {#    var input = document.querySelector('.form-control');#}
+        {#    if (input.value === '') {#}
+        {#        alert('El campo de entrada está vacío');#}
+        {#        return#}
+        {#    }#}
+        {#window.location.href = 'ingresoNombre.html';#}
+        {#    const requestObj = new XMLHttpRequest()#}
+        {#    requestObj.onreadystatechange = function(){#}
+        {#        if (this.readyState === 4 && this.status === 200){#}
+        {#            console.log(this.responseText)#}
+        {#if (this.responseText == "True"){#}
+        {#    window.location.href = '/500/multimedia/ingresoNombre/'#}
+        {#}else{#}
+            {#    alert("Codigo incorrecto")#}
+            {#}#}
+                {#        }#}
+                {#    }#}
+                {#    requestObj.open("POST", "/500/multimedia/verify_code/", true)#}
+                {#    requestObj.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")#}
+                {#requestObj.send(JSON.stringify({"code": input.value}))#}
+                {#    const data = new FormData()#}
+                {#    data.append("code", input.value)#}
+                {#    requestObj.send(data)#}
+                {#})#}
+    </script>
+{% endblock %}
+</body>
+</html>

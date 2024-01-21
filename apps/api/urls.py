@@ -18,8 +18,17 @@ urlpatterns = [
     # Autor: Kevin Campoverde
     # Fecha: 27/12/2022 16:00
     # Descripción: URLs para la opción 'Opcion'.
+
+    # game code init
+    # path("multimedia/code/", MultimediaGame.code, name="multimedia_code"),
+    # path("multimedia/verify_code/", MultimediaGame.verify_code, name="multimedia_code"),
+    # path("multimedia/user_code/<int:code>/", MultimediaGame.user, name="user_code"),
+
+    # card memery game
     path("multimedia/game/", MultimediaGame.myFirstView, name="multimedia_game"),
     path("multimedia/game2/", MultimediaGame.secondView, name="multimedia_game2"),
+
+    # classification game
     path('multimedia/classification/', include("apps.clasificacion.urls")),
     path('multimedia/classification_info/', MultimediaGame.classification_info, name="game_info"),
 
