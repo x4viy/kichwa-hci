@@ -8,11 +8,11 @@
 
 <!-- Custom block content -->
 {% block content %}
-    <form action="/500/multimedia/verify_code/" method="POST" id="form_Gen_SesionJuegoForm_id">
+    <form action="/500/multimedia/to_intro/" method="POST" id="form_Gen_SesionJuegoForm_id">
         {% csrf_token %}
         <div class="wrapper">
             <div class="square">
-                <input type="text" class="inputText" placeholder="Ingrese el código" name="code" id="id_code" autocomplete="off" >
+                <input type="text" class="inputText" placeholder="Ingrese su nombre" name="code" id="id_code" autocomplete="off" >
                 <button type="submit" class="btnText" id="btnCode">Ingresar</button>
             </div>
         </div>
@@ -33,21 +33,20 @@
                     showError('El campo de entrada está vacío',2.5, '#F2676C');
                     return;
                 }
-
+                console.log('{{ url_list }}')
+                console.log('{{ code }}')
                 let url_ = $(this).attr('action');
                 let fields = new FormData(this);
-                fields.append('code', input.value);
+                fields.append('code', '{{ code }}');
+                fields.append('name', input.value);
 
                 sendToServer(url = url_, data = fields, method = 'POST')
                     .then(data => {
                         if (data.message !== "ok") {
-                            shakeAndTurnRed('.inputText')
                             showError(data.message,2.5, '#F2676C');
                             return
                         }
-                        {#window.location.href = '/500/multimedia/ingresoNombre/'#}
-                        window.location.replace("{{ url_list }}?code=" + input.value);
-                        console.log('go to next page')
+                        window.location.href = data.url;
                     })
             });
         });

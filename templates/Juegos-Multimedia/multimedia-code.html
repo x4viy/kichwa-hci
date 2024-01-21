@@ -25,13 +25,11 @@
         $(document).ready(function() {
             $("form#form_Gen_SesionJuegoForm_id").submit(function (e) {
                 e.preventDefault();
-
                 const input = document.querySelector('.inputText');
                 if (input.value === '') {
                     showError('El campo de entrada está vacío',2.5, '#F2676C');
                     return;
                 }
-
                 let url_ = $(this).attr('action');
                 let fields = new FormData(this);
                 fields.append('code', input.value);
@@ -41,13 +39,10 @@
                         if (data.message !== "ok") {
                             shakeAndTurnRed('.inputText')
                             showError(data.message,2.5, '#F2676C');
-                            return
+                            return;
                         }
-                        {#window.location.assign(data.url);#}
-                        {#window.location.href = '/500/multimedia/user' + '?code=' + data.code ;#}
-                        # go to next page
-
-                    })
+                        window.location.href = data.url;
+                    });
 
             });
         });

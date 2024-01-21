@@ -3,9 +3,8 @@
 # Descripción: Vista para la opción opcion.
 #              En esta opción permite:
 #              listar, agregar, modificar, eliminar
-import json
 
-from certifi.__main__ import args
+
 from django.db import connection
 from django.template import loader
 from django.shortcuts import render
@@ -25,7 +24,6 @@ _e = EncryptDES()
 # Autor: Kevin Campoverde
 class MultimediaGame(ListView):
 
-    # function routes
     def code(request):
         """
         TODO: verify if code session exist
@@ -36,15 +34,13 @@ class MultimediaGame(ListView):
         # return HttpResponse(html_template.render(context, request))
         print('entro en code')
         # url_list = reverse('user_code')
-        return render(request, 'Juegos-Multimedia/multimedia-code.html', {'url_list': url_list})
+        return render(request, 'Juegos-Multimedia/multimedia-code.html')
 
     def verify_code(request):
         """
         TODO: verify if code session exist
         Verify code
         """
-        print('entro en verify')
-
         if request.method != 'POST':
             return JsonResponse({'message': 'Not a POST request'})
 
@@ -52,6 +48,7 @@ class MultimediaGame(ListView):
             return JsonResponse({'message': 'Not field code'})
 
         code = request.POST.get('code')
+        print('code: ', code)
 
         if not is_code_in_db(code):
             return JsonResponse({'message': 'No se encontro el códio de sesión'})
@@ -59,20 +56,71 @@ class MultimediaGame(ListView):
         # return reverse('user_code', args(code))
         # user_url = 'multimedia/user/'
         # return JsonResponse({'message': 'ok', 'url': user_url, 'code': code})
-        # return JsonResponse({'message': 'ok', 'url': user_url, 'code': code})
+        # return JsonResponse({'message': 'ok', 'code': code})
+        # return redirect('multimedia_game:user_code', code=code)
+        user_url = reverse('multimedia_game:user_code', args=[code])
+        return JsonResponse({'message': 'ok', 'url': user_url})
 
-    def user(request, code):
+    def user_code(request, code):
+        """
+        Display qr code and socket url with code session and name user
+        """
+
+        print('user', code)
+
+        # context = {'segment': 'Juego de Memoria', 'code': code, 'name': name}
+        html_template = loader.get_template('Juegos-Multimedia/multimedia-user.html')
+        context = {'segment': 'Juego de Memoria', 'code': code}
+        # user_url = reverse('multimedia_game:intro', args=[code])
+        # return JsonResponse({'message': 'ok', 'url': user_url, 'code': code, 'name': name})
+        # return JsonResponse({'message': 'no'})
+        return HttpResponse(html_template.render(context, request))
+
+    def to_intro(request):
         """
         Register user and code session , next redirect to introduction game
         """
-        # if request.method != 'POST':
-        #     return JsonResponse({'message': 'Not a POST request'})
+        if request.method != 'POST':
+            return JsonResponse({'message': 'Not a POST request user_code'})
+        if not request.POST.get('code') and not request.POST.get('name'):
+            return JsonResponse({'message': 'No existe el usuario o el código de sesión'})
+        print('intro', request.POST.get('name'))
+        # TODO: GET THE INTRO OF THE SESSION
+        intro = 'Este es el intro del juego de cartas consultado en la base de datos con el codigo de sesion y el nombre del usuario'
+        name = request.POST.get('name')
+        enc_code = request.POST.get('code')
+        user_url = reverse('multimedia_game:intro', args=[enc_code, name, intro])
+        return JsonResponse({'message': 'ok', 'url': user_url})
 
-        # code = request.POST.get('code')
-        # name = request.POST.get('name')
-        print('user', code)
-        return render(request, 'Juegos-Multimedia/multimedia-user.html')
-        # return render(request, 'Juegos-Multimedia/multimedia-code.html')
+    def intro(request, code, name, text_intro):
+        """
+        Display qr code and socket url with code session and name user
+        """
+        print('code', code)
+        print('user', name)
+        # context = {'segment': 'Juego de Memoria', 'code': code, 'name': name}
+        html_template = loader.get_template('Juegos-Multimedia/multimedia-intro.html')
+        context = {'segment': 'Juego de Memoria', 'code': code, 'name': name, 'intro': text_intro}
+        # user_url = reverse('multimedia_game:intro', args=[code])
+        # return JsonResponse({'message': 'ok', 'url': user_url, 'code': code, 'name': name})
+        # return JsonResponse({'message': 'no'})
+        return HttpResponse(html_template.render(context, request))
+
+    def check_phone_connection(request):
+        """
+        Check if the phone is connected to the socket
+        """
+        if request.method != 'POST':
+            return JsonResponse({'message': 'Not a POST request'})
+        if not request.POST.get('code') and not request.POST.get('code'):
+            return JsonResponse({'message': 'Not field code'})
+        code = request.POST.get('code')
+        name = request.POST.get('username')
+        print('check', code, name)
+        return JsonResponse({'message': 'ckeck'})
+        # context = {'segment': 'Juego de Memoria', 'code': code, 'name': name}
+        # html_template = loader.get_template('Juegos-Multimedia/multimedia-intro.html')
+        # return HttpResponse(html_template.render(context, request))
 
     # Autor: Kevin Campoverde
     def myFirstView(request):

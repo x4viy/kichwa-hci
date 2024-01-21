@@ -184,6 +184,13 @@ body{
     text-align: center;
 }
 
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
 .square {
     background-color: #ffffff;
     padding: 3rem;
@@ -198,6 +205,21 @@ body{
     max-width: 500px;
 }
 
+.square_intro{
+    background-color: #ffffff;
+    padding: 3rem;
+    border-radius: 15px;
+    font-family: 'Exo', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-shadow : rgba(0, 0, 0, 0.15) 0px 2px 4px;
+    min-width: 30vw;
+    max-width: 60vw;
+    margin-bottom: 1rem;
+}
+
 .btnText {
     width: 100%;
     margin-top: 10px;
@@ -210,11 +232,28 @@ body{
     color: #EDFBFF;
     outline: none;
     font-size: 1.5rem;
-    border-radius: 4px;
+    border-radius: 15px;
     box-sizing: border-box;
     font-weight: bold;
     background-color: #00507F;
 
+}
+
+.btnContinue {
+    width: 100%;
+    min-height: 5.4rem;
+    max-height: 68px;
+    line-height: 2.375rem;
+    text-align: center;
+    max-width: 14rem;
+    min-width: 5.3rem;    color: #EDFBFF;
+    outline: none;
+    font-size: 1.5rem;
+    border-radius: 15px;
+    box-sizing: border-box;
+    font-weight: bold;
+    background-color: #00507F;
+    margin-top: 4rem;
 }
 
 .btnText:hover {
@@ -250,10 +289,45 @@ body{
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
+.title{
+font-size: 2rem;
+    font-weight: bold;
+    color: #00507F;
+    margin-bottom: 1rem;
+}
 
-.wrapper {
+p {
+    font-size: 1.5rem;
+    font-weight: normal;
+    color: #00507F;
+    margin-bottom: 1rem;
+    text-align: center;
+    width: 80%;
+
+}
+
+#qrcode img{
+    min-width: 9vw;
+    max-width: 12vw;
+    min-height: 9vw;
+    max-height: 12vw;
+    margin-bottom: 6vh;
+}
+
+.btnSound{
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-width: 3vw;
+    max-width: 5vw;
+    min-height: 3vw;
+    max-height: 5vw;
+    margin-bottom: 1rem;
+    background-color: #D8F3FF;
+    border-radius: 50%;
+    font-size: 2.5rem;
+}
+
+.btnSound:hover {
+    background-color: #59A3E9;
 }

@@ -20,11 +20,14 @@ urlpatterns = [
     # Descripción: URLs para la opción 'Opcion'.
 
     # game code init
-    # path("multimedia/code/", MultimediaGame.code, name="multimedia_code"),
-    # path("multimedia/verify_code/", MultimediaGame.verify_code, name="multimedia_code"),
-    # path("multimedia/user_code/<int:code>/", MultimediaGame.user, name="user_code"),
+    path("multimedia/code/", MultimediaGame.code, name="multimedia_code"),
+    path("multimedia/verify_code/", MultimediaGame.verify_code, name="multimedia_code"),
+    path('multimedia/user_code/<str:code>/', MultimediaGame.user_code, name='user_code'),
+    path('multimedia/to_intro/', MultimediaGame.to_intro, name='to_intro'),
+    path('multimedia/intro/<str:code>/<str:name>/<str:text_intro>/', MultimediaGame.intro, name='intro'),
+    path('multimedia/check/', MultimediaGame.check_phone_connection, name='check_phone_connection'),
 
-    # card memery game
+    # card memory game
     path("multimedia/game/", MultimediaGame.myFirstView, name="multimedia_game"),
     path("multimedia/game2/", MultimediaGame.secondView, name="multimedia_game2"),
 

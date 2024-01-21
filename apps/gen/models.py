@@ -300,6 +300,17 @@ def convertir_a_minusculas(texto):
     return texto.lower()
 
 
+class PreInfoSession(ERPBaseModel):
+    pis_is = models.BigAutoField(primary_key=True, verbose_name='ID_Carta')
+    csrf_token = models.CharField(max_length=500, verbose_name='Descripción')
+    session_info = models.JSONField(verbose_name='session_info')
+    is_active = models.BooleanField(default=True, verbose_name='is_active')
+
+    class Meta:
+        managed = False
+        verbose_name = 'PreInfoSession'
+        verbose_name_plural = 'info_sessions'
+        db_table = 'gen\".\"pre_info_session'
 
 
 # Autor: Kevin Campoverde
