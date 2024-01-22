@@ -102,39 +102,49 @@ class MultimediaGame(ListView):
         enc_code = request.POST.get('code')
         intro = get_game_intro(enc_code)
         name = request.POST.get('name')
+        request.session['intro'] = intro
+        request.session['name'] = name
+        request.session['code'] = enc_code
         token = request.POST.get('token')
-
-        # TODO: SAVE PRE INFO ON DB
-        # Verify the type of the game by the code session
-        games_with_phone = ['6']
-        if get_game_type(enc_code) in games_with_phone:
-            data = get_game_data(enc_code)
+        # Verify the type of game session by the code session
+        if need_qr(enc_code):
+            data = get_game_data(enc_code, name)
             store_pre_session(token, data)
-        user_url = reverse('multimedia_game:intro', args=[enc_code, name, intro])
+        user_url = reverse('multimedia_game:intro', args=[token])
         return JsonResponse({'message': 'ok', 'url': user_url})
 
-    def intro(request, code, name, text_intro):
+    def intro(request, token):
         """
         Display qr code (byGame) and socket url with code session and name user
         """
-        print('intro:code', code)
+        code = request.session.get('code')
+        name = request.session.get('name')
+        intro = request.session.get('intro')
         print('intro:user', name)
-        need_qr = needQr(code)
+        qr_code = token if need_qr(code) else ''
         html_template = loader.get_template('Juegos-Multimedia/multimedia-intro.html')
-        context = {'segment': 'Juego de Memoria', 'code': code, 'name': name, 'intro': text_intro}
+        context = {'segment': 'Juego de Memoria', 'code': code, 'name': name, 'intro': intro, 'qr_code': qr_code}
         return HttpResponse(html_template.render(context, request))
 
-    def toGame(request):
+    def to_game(request):
         """
-        Register user and code session , next redirect to introduction game
+        Retrieve the game url by the code session
         """
         if request.method != 'POST':
             return JsonResponse({'message': 'Not a POST request user_code'})
         if not request.POST.get('code') and not request.POST.get('name'):
             return JsonResponse({'message': 'No existe el usuario o el código de sesión'})
-        print('intro', request.POST.get('name'))
-        enc_code = request.POST.get('code')
-        intro = get_game_intro(enc_code)
+        code = request.POST.get('code')
+        name = request.POST.get('name')
+        session_type = get_game_type(code)
+        user_url = None
+        if session_type == '5':
+            user_url = reverse('multimedia_game:memory_game')
+        if session_type == '6':
+            user_url = reverse('multimedia_game:clasification_game')
+        if user_url:
+            return JsonResponse({'message': 'ok', 'url': user_url, 'code': code})
+        return JsonResponse({'message': 'No existe el tipo de juego'})
 
     def check_phone_connection(request):
         """
@@ -153,7 +163,9 @@ class MultimediaGame(ListView):
         # return HttpResponse(html_template.render(context, request))
 
     # Autor: Kevin Campoverde
-    def myFirstView(request):
+    def memory(request):
+        code = request.session.get('code')
+        name = request.session.get('name')
         # Se establece la conección a la base de datos
         with connection.cursor() as cursor:
             cursor.execute(
@@ -173,7 +185,11 @@ class MultimediaGame(ListView):
         for i in data:
             i['descripcion'] = i['descripcion'].replace(' ', '-')
 
-        context = {'segment': 'Juego de Memoria', 'datos': data}
+        context = {'segment': 'Juego de Memoria',
+                   'datos': data,
+                   'code': code,
+                   'name': name
+                   }
         print('datitos ', data)
         # html_template = loader.get_template('home/juego1.html')
         html_template = loader.get_template('../templates/Juegos-Multimedia/memory-game_connection_with_db.html')

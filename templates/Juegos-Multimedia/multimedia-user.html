@@ -35,9 +35,6 @@
                     showError('El campo de entrada está vacío',2.5, '#F2676C');
                     return;
                 }
-                console.log('{{ url_list }}')
-                console.log('{{ code }}')
-                console.log('{{ csrf_token }}')
                 let url_ = $(this).attr('action');
                 let fields = new FormData(this);
                 fields.append('code', '{{ code }}');

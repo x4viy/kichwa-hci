@@ -1,5 +1,6 @@
 from django.db import connection
 
+from apps.clasificacion.models import get_session_info, get_option_cards
 from apps.gen.models import PreInfoSession
 from utils.utils import *
 
@@ -112,6 +113,24 @@ def _group_cards(cards):
     return cards_grouped
 
 
+def get_games_with_phone_connection():
+    """
+    Get the games code that can be played with phone connection (qr)
+    :return:
+    """
+    return ['6']
+
+
+def need_qr(code):
+    """
+    Get the games code that can be played with phone connection (qr)
+    :return:
+    """
+    if get_game_type(code) in get_games_with_phone_connection():
+        return True
+    return False
+
+
 def get_game_type(code):
     """
     Get the game type from the database
@@ -122,7 +141,7 @@ def get_game_type(code):
         cursor.execute(
             """ SELECT t.tip_codigo AS TYPEGAME
                 FROM gen.tipo t
-                INNER JOIN gen.sesion_juego s ON s.seju_id = t.tip_id
+                INNER JOIN gen.sesion_juego s ON s.seju_tip_id = t.tip_id
                 WHERE s.seju_codigo = %s
                 """,
             [code],
@@ -134,12 +153,22 @@ def get_game_type(code):
         return None
 
 
-def get_game_data(session_code):
+def get_game_data(session_code, name):
     """
     Get the game data from the database
     :param session_code:
+    :param name:
     :return: dict[Any, Any] or None if there are no cards
     """
+    cards = get_session_cards(session_code)
+    info = get_session_info(session_code, name)
+    options = get_option_cards(cards);
+    context = {'segment': 'Juego de Clasificacion',
+               'cards': cards,
+               'options': options,
+               'info': info
+               }
+    return context
 
 
 def store_pre_session(token, data):
@@ -154,3 +183,4 @@ def store_pre_session(token, data):
     var.session_info = data
     var.is_active = False
     var.save()
+

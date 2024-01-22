@@ -6,7 +6,7 @@
 
 <!-- Custom block content -->
 {% block content %}
-    <form action="/500/multimedia/check/" method="POST" id="form_Gen_SesionJuegoForm_id">
+    <form action="/500/multimedia/to_game/" method="POST" id="form_Gen_SesionJuegoForm_id">
         {% csrf_token %}
         <div class="wrapper">
             <div class="square_intro">
@@ -27,31 +27,17 @@
 {% block js_script %}
 
     <script>
-        let jsonObject = {
-            key1: 'value1',
-            key2: 'value2'
-            // ... your JSON data ...
-        };
+        let qr_code = '{{ qr_code }}';
 
-        let jsonString = JSON.stringify(jsonObject);
-
-        new QRCode(document.getElementById("qrcode"), jsonString);
-
+        if (qr_code !== '')
+            new QRCode(document.getElementById("qrcode"), qr_code);
         $(document).ready(function() {
             $("form#form_Gen_SesionJuegoForm_id").submit(function (e) {
                 e.preventDefault();
-
-                const input = document.querySelector('.inputText');
-                if (input.value === '') {
-                    showError('El campo de entrada está vacío',2.5, '#F2676C');
-                    return;
-                }
-                console.log('{{ url_list }}')
-                console.log('{{ code }}')
                 let url_ = $(this).attr('action');
                 let fields = new FormData(this);
                 fields.append('code', '{{ code }}');
-
+                fields.append('name', '{{ name }}');
                 sendToServer(url = url_, data = fields, method = 'POST')
                     .then(data => {
                         if (data.message !== "ok") {
@@ -59,9 +45,7 @@
                             showError(data.message,2.5, '#F2676C');
                             return
                         }
-                        {#window.location.href = '/500/multimedia/ingresoNombre/'#}
-                        window.location.replace("{{ url_list }}?code=" + input.value);
-                        console.log(data)
+                        window.location.href = data.url;
                     })
             });
         });

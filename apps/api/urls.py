@@ -26,14 +26,15 @@ urlpatterns = [
     path("multimedia/verify_code/", MultimediaGame.verify_code, name="multimedia_code"),
     path('multimedia/user_code/<str:code>/', MultimediaGame.user_code, name='user_code'),
     path('multimedia/to_intro/', MultimediaGame.to_intro, name='to_intro'),
-    path('multimedia/intro/<str:code>/<str:name>/<str:text_intro>/', MultimediaGame.intro, name='intro'),
+    path('multimedia/intro/<str:token>', MultimediaGame.intro, name='intro'),
+    path('multimedia/to_game/', MultimediaGame.to_game, name='to_game'),
     path('multimedia/check/', MultimediaGame.check_phone_connection, name='check_phone_connection'),
 
     # card memory game
-    path("multimedia/game/", MultimediaGame.myFirstView, name="multimedia_game"),
+    path("multimedia/memory/", MultimediaGame.memory, name="memory_game"),
 
     # classification game
-    path('multimedia/classification/<str:code>/<str:name>/', include("apps.clasificacion.urls")),
+    path('multimedia/classification/', include("apps.clasificacion.urls")),
     path('multimedia/classification_info/', MultimediaGame.classification_info, name="game_info"),
 
     path("carta/list/", login_required(Gen_CartaListView.as_view()), name="gen_carta_list"),
