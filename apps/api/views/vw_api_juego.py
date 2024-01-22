@@ -13,6 +13,7 @@ from django.forms.utils import ErrorList
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, UpdateView, CreateView
 from apps.gen.models import *
 from apps.gen.forms import *
@@ -148,19 +149,34 @@ class MultimediaGame(ListView):
 
     def check_phone_connection(request):
         """
-        Check if the phone is connected to the socket
+        Check if the phone is connected to the socket by cheking the isActive field in the database
+        for given token
         """
         if request.method != 'POST':
             return JsonResponse({'message': 'Not a POST request'})
-        if not request.POST.get('code') and not request.POST.get('code'):
-            return JsonResponse({'message': 'Not field code'})
-        code = request.POST.get('code')
-        name = request.POST.get('username')
-        print('check', code, name)
-        return JsonResponse({'message': 'ckeck'})
-        # context = {'segment': 'Juego de Memoria', 'code': code, 'name': name}
-        # html_template = loader.get_template('Juegos-Multimedia/multimedia-intro.html')
-        # return HttpResponse(html_template.render(context, request))
+        if not request.POST.get('token'):
+            return JsonResponse({'message': 'Not field token'})
+        token = request.POST.get('token')
+        if is_token_active(token):
+            user_url = reverse('multimedia_game:clasification_game')
+            return JsonResponse({'message': 'ok', 'url': user_url})
+        return JsonResponse({'message': 'Sin cambio'})
+
+    @csrf_exempt
+    def set_active(request):
+        """
+        Set active the session by the token
+        """
+        if request.method != 'POST':
+            return JsonResponse({'message': 'Not a POST request'})
+        if not json.loads(request.body).get('token'):
+            return JsonResponse({'message': 'Not field token'})
+        token = json.loads(request.body).get('token')
+        if set_token_active(token):
+            info = get_session_info_by_token(token)
+            return JsonResponse({'message': 'ok', 'info': info})
+        return JsonResponse({'message': 'Sin cambio'})
+
 
     # Autor: Kevin Campoverde
     def memory(request):

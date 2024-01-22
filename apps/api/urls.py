@@ -29,6 +29,7 @@ urlpatterns = [
     path('multimedia/intro/<str:token>', MultimediaGame.intro, name='intro'),
     path('multimedia/to_game/', MultimediaGame.to_game, name='to_game'),
     path('multimedia/check/', MultimediaGame.check_phone_connection, name='check_phone_connection'),
+    path('multimedia/active/', MultimediaGame.set_active, name='set_active'),
 
     # card memory game
     path("multimedia/memory/", MultimediaGame.memory, name="memory_game"),
@@ -36,6 +37,7 @@ urlpatterns = [
     # classification game
     path('multimedia/classification/', include("apps.clasificacion.urls")),
     path('multimedia/classification_info/', MultimediaGame.classification_info, name="game_info"),
+
 
     path("carta/list/", login_required(Gen_CartaListView.as_view()), name="gen_carta_list"),
     path("carta/add/", login_required(Gen_CartaCreateView.as_view()), name="gen_carta_add"),

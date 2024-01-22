@@ -27,7 +27,8 @@
 {% block js_script %}
 
     <script>
-        let qr_code = '{{ qr_code }}';
+        const qr_code = '{{ qr_code }}';
+        console.log('qrv : ' + qr_code)
 
         if (qr_code !== '')
             new QRCode(document.getElementById("qrcode"), qr_code);
@@ -49,5 +50,33 @@
                     })
             });
         });
+
+        //verify qr scann
+        function sendPostRequest() {
+            if (qr_code === '') return
+            const requestObj = new XMLHttpRequest();
+            requestObj.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    const jsonResponse = JSON.parse(this.responseText);
+                    if (jsonResponse.message === 'ok'){
+                        window.location.href = jsonResponse.url;
+                        {#console.log('cambio de url' + jsonResponse.url)#}
+                    }
+
+                }
+            };
+            requestObj.open("POST", "/500/multimedia/check/", true);
+            requestObj.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            const data = new FormData();
+            data.append('token', qr_code);
+            requestObj.send(data);
+        }
+        setInterval(sendPostRequest, 2000);
+
+        {#if (this.responseText == "True"){#}
+        {#    window.location.href = '/500/multimedia/ingresoNombre/'#}
+        {# }else{#}
+        {#        alert("Codigo incorrecto")#}
+        {#    }#}
     </script>
 {% endblock %}

@@ -152,6 +152,64 @@ def get_game_type(code):
             return data[0]['typegame']
         return None
 
+def is_token_active(token):
+    """
+    Verify in for given token if session is active
+    :param token:
+    :return: true if the session is active, false otherwise
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """ SELECT p.is_active AS ACTIVE
+                FROM gen.pre_info_session p
+                WHERE p.csrf_token = %s
+                """,
+            [token],
+        )
+
+        data = dictfetchall(cursor)
+        if data and data[0]['active']:
+            return True
+        return False
+
+def set_token_active(token):
+    """
+    Set the token to active
+    :param token:
+    :return: true if the token was set to active, false otherwise
+    """
+    with connection.cursor() as cursor:
+        try:
+            cursor.execute(
+                """ UPDATE gen.pre_info_session p
+                    SET is_active = true
+                    WHERE p.csrf_token = %s
+                    """,
+                [token],
+            )
+            return True
+        except Exception as e:
+            return False
+
+def get_session_info_by_token(token):
+    """
+    Get the session information from the database
+    :param token:
+    :return: the session information
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """ SELECT p.session_info AS INFO
+                FROM gen.pre_info_session p
+                WHERE p.csrf_token = %s
+                """,
+            [token],
+        )
+
+        data = dictfetchall(cursor)
+        if data:
+            return data[0]['info']
+        return None
 
 def get_game_data(session_code, name):
     """
@@ -183,4 +241,3 @@ def store_pre_session(token, data):
     var.session_info = data
     var.is_active = False
     var.save()
-
