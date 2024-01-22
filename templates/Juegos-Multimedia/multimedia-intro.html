@@ -28,10 +28,13 @@
 
     <script>
         const qr_code = '{{ qr_code }}';
-        console.log('qrv : ' + qr_code)
-
-        if (qr_code !== '')
+        var qr_decoded;
+        if (qr_code !== ''){
+            let decodedString = atob(qr_code);
+            let info_parts = decodedString.split('|');
+            qr_decoded = info_parts[1];
             new QRCode(document.getElementById("qrcode"), qr_code);
+        }
         $(document).ready(function() {
             $("form#form_Gen_SesionJuegoForm_id").submit(function (e) {
                 e.preventDefault();
@@ -68,7 +71,8 @@
             requestObj.open("POST", "/500/multimedia/check/", true);
             requestObj.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
             const data = new FormData();
-            data.append('token', qr_code);
+            data.append('token', qr_decoded);
+            console.log('doing request:'+ qr_decoded);
             requestObj.send(data);
         }
         setInterval(sendPostRequest, 2000);

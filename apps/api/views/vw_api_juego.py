@@ -121,10 +121,12 @@ class MultimediaGame(ListView):
         code = request.session.get('code')
         name = request.session.get('name')
         intro = request.session.get('intro')
-        print('intro:user', name)
-        qr_code = token if need_qr(code) else ''
+        # Add url and  qr_code and encode the concatenation of both
+        encoded_info = ''
+        if need_qr(code):
+            encoded_info = base64.b64encode((get_url_active() + '|' + token).encode('utf-8')).decode('utf-8')
         html_template = loader.get_template('Juegos-Multimedia/multimedia-intro.html')
-        context = {'segment': 'Juego de Memoria', 'code': code, 'name': name, 'intro': intro, 'qr_code': qr_code}
+        context = {'segment': 'Juego de Memoria', 'code': code, 'name': name, 'intro': intro, 'qr_code': encoded_info}
         return HttpResponse(html_template.render(context, request))
 
     def to_game(request):
@@ -176,7 +178,6 @@ class MultimediaGame(ListView):
             info = get_session_info_by_token(token)
             return JsonResponse({'message': 'ok', 'info': info})
         return JsonResponse({'message': 'Sin cambio'})
-
 
     # Autor: Kevin Campoverde
     def memory(request):
@@ -258,3 +259,7 @@ class MultimediaGame(ListView):
             session_info = {"url_socket": "ws://localhost:8000/ws/chat/123456/"}
 
             return JsonResponse(session_info)
+
+
+def get_url_active():
+    return 'http://' + get_ip_address() + ':8000/500/multimedia/active/'
