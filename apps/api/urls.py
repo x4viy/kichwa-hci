@@ -35,8 +35,7 @@ urlpatterns = [
     path("multimedia/memory/", MultimediaGame.memory, name="memory_game"),
 
     # classification game
-    path('multimedia/classification/', include("apps.clasificacion.urls")),
-    path('multimedia/classification_info/', MultimediaGame.classification_info, name="game_info"),
+    path('multimedia/classification<str:token>/', include("apps.clasificacion.urls")),
 
 
     path("carta/list/", login_required(Gen_CartaListView.as_view()), name="gen_carta_list"),

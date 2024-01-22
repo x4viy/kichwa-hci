@@ -107,6 +107,7 @@ class MultimediaGame(ListView):
         request.session['name'] = name
         request.session['code'] = enc_code
         token = request.POST.get('token')
+        request.session['token'] = token
         # Verify the type of game session by the code session
         if need_qr(enc_code):
             data = get_game_data(enc_code, name)
@@ -139,12 +140,13 @@ class MultimediaGame(ListView):
             return JsonResponse({'message': 'No existe el usuario o el código de sesión'})
         code = request.POST.get('code')
         name = request.POST.get('name')
+        token = request.session.get('token')
         session_type = get_game_type(code)
         user_url = None
         if session_type == '5':
             user_url = reverse('multimedia_game:memory_game')
         if session_type == '6':
-            user_url = reverse('multimedia_game:clasification_game')
+            user_url = reverse('multimedia_game:clasification_game', args=[token])
         if user_url:
             return JsonResponse({'message': 'ok', 'url': user_url, 'code': code})
         return JsonResponse({'message': 'No existe el tipo de juego'})
@@ -160,7 +162,8 @@ class MultimediaGame(ListView):
             return JsonResponse({'message': 'Not field token'})
         token = request.POST.get('token')
         if is_token_active(token):
-            user_url = reverse('multimedia_game:clasification_game')
+            token = request.session.get('token')
+            user_url = reverse('multimedia_game:clasification_game' , args=[token])
             return JsonResponse({'message': 'ok', 'url': user_url})
         return JsonResponse({'message': 'Sin cambio'})
 
@@ -216,8 +219,6 @@ class MultimediaGame(ListView):
     def secondView(request):
         return render(request, 'Juegos-Multimedia/memory-game.html')
 
-    def classification_info(request):
-        return render(request, 'Juegos-Multimedia/memory-game.html')
 
     def test(request):
         return render(request, 'Juegos-Multimedia/-game.html')
