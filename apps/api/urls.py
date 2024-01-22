@@ -31,10 +31,9 @@ urlpatterns = [
 
     # card memory game
     path("multimedia/game/", MultimediaGame.myFirstView, name="multimedia_game"),
-    path("multimedia/introduccion/", MultimediaGameCreateView.as_view(), name="multimedia_game2"),
 
     # classification game
-    path('multimedia/classification/', include("apps.clasificacion.urls")),
+    path('multimedia/classification/<str:code>/<str:name>/', include("apps.clasificacion.urls")),
     path('multimedia/classification_info/', MultimediaGame.classification_info, name="game_info"),
 
     path("carta/list/", login_required(Gen_CartaListView.as_view()), name="gen_carta_list"),

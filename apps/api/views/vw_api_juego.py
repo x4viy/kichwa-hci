@@ -24,15 +24,13 @@ from vars.msg import CRUD_MSG
 import numpy as np
 from django.shortcuts import redirect
 
-
-
 from django.db import connection
 from django.template import loader
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import ListView, UpdateView, CreateView
 
-from apps.api.database import is_code_in_db
+from apps.api.database import *
 from apps.gen.forms import *
 from django.http import HttpResponse, JsonResponse
 from core.encryption_util import *
@@ -47,7 +45,6 @@ class MultimediaGame(ListView):
 
     def code(request):
         """
-        TODO: verify if code session exist
         Verify code
         """
         # context = {'segment': 'Juego de Memoria', 'datos': data }
@@ -59,20 +56,19 @@ class MultimediaGame(ListView):
 
     def verify_code(request):
         """
-        TODO: verify if code session exist
         Verify code
         """
         if request.method != 'POST':
-            return JsonResponse({'message': 'Not a POST request'})
+            return JsonResponse({'message': 'Solictud no válida'})
 
         if not request.POST.get('code'):
-            return JsonResponse({'message': 'Not field code'})
+            return JsonResponse({'message': 'No existen campos en el formulario'})
 
         code = request.POST.get('code')
-        print('code: ', code)
+        print('verify_code: ', code)
 
         if not is_code_in_db(code):
-            return JsonResponse({'message': 'No se encontro el códio de sesión'})
+            return JsonResponse({'message': 'No se encontró el código de sesión'})
 
         # return reverse('user_code', args(code))
         # user_url = 'multimedia/user/'
@@ -86,9 +82,7 @@ class MultimediaGame(ListView):
         """
         Display qr code and socket url with code session and name user
         """
-
         print('user', code)
-
         # context = {'segment': 'Juego de Memoria', 'code': code, 'name': name}
         html_template = loader.get_template('Juegos-Multimedia/multimedia-user.html')
         context = {'segment': 'Juego de Memoria', 'code': code}
@@ -103,29 +97,44 @@ class MultimediaGame(ListView):
         """
         if request.method != 'POST':
             return JsonResponse({'message': 'Not a POST request user_code'})
-        if not request.POST.get('code') and not request.POST.get('name'):
+        if not request.POST.get('code') and not request.POST.get('name') and not request.POST.get('token'):
             return JsonResponse({'message': 'No existe el usuario o el código de sesión'})
-        print('intro', request.POST.get('name'))
-        # TODO: GET THE INTRO OF THE SESSION
-        intro = 'Este es el intro del juego de cartas consultado en la base de datos con el codigo de sesion y el nombre del usuario'
-        name = request.POST.get('name')
         enc_code = request.POST.get('code')
+        intro = get_game_intro(enc_code)
+        name = request.POST.get('name')
+        token = request.POST.get('token')
+
+        # TODO: SAVE PRE INFO ON DB
+        # Verify the type of the game by the code session
+        games_with_phone = ['6']
+        if get_game_type(enc_code) in games_with_phone:
+            data = get_game_data(enc_code)
+            store_pre_session(token, data)
         user_url = reverse('multimedia_game:intro', args=[enc_code, name, intro])
         return JsonResponse({'message': 'ok', 'url': user_url})
 
     def intro(request, code, name, text_intro):
         """
-        Display qr code and socket url with code session and name user
+        Display qr code (byGame) and socket url with code session and name user
         """
-        print('code', code)
-        print('user', name)
-        # context = {'segment': 'Juego de Memoria', 'code': code, 'name': name}
+        print('intro:code', code)
+        print('intro:user', name)
+        need_qr = needQr(code)
         html_template = loader.get_template('Juegos-Multimedia/multimedia-intro.html')
         context = {'segment': 'Juego de Memoria', 'code': code, 'name': name, 'intro': text_intro}
-        # user_url = reverse('multimedia_game:intro', args=[code])
-        # return JsonResponse({'message': 'ok', 'url': user_url, 'code': code, 'name': name})
-        # return JsonResponse({'message': 'no'})
         return HttpResponse(html_template.render(context, request))
+
+    def toGame(request):
+        """
+        Register user and code session , next redirect to introduction game
+        """
+        if request.method != 'POST':
+            return JsonResponse({'message': 'Not a POST request user_code'})
+        if not request.POST.get('code') and not request.POST.get('name'):
+            return JsonResponse({'message': 'No existe el usuario o el código de sesión'})
+        print('intro', request.POST.get('name'))
+        enc_code = request.POST.get('code')
+        intro = get_game_intro(enc_code)
 
     def check_phone_connection(request):
         """
@@ -146,8 +155,6 @@ class MultimediaGame(ListView):
     # Autor: Kevin Campoverde
     def myFirstView(request):
         # Se establece la conección a la base de datos
-        print('tas aqui')
-
         with connection.cursor() as cursor:
             cursor.execute(
                 """ SELECT c.cart_descripcion AS DESCRIPCION, ma.muar_ruta AS RUTA, ma.muar_tipo AS TIPO
@@ -175,7 +182,6 @@ class MultimediaGame(ListView):
 
     def secondView(request):
         return render(request, 'Juegos-Multimedia/memory-game.html')
-
 
     def classification_info(request):
         return render(request, 'Juegos-Multimedia/memory-game.html')
