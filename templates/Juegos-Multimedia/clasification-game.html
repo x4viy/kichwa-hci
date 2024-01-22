@@ -20,23 +20,16 @@
     </div>
     {% if cards %}
         <div class="tinder--cards">
-            {% for i in cards %}
+            {% for key, value in cards.items %}
                 <div class="tinder--card">
                 <div class="image-wrapper">
-                    <img src="{{ i.ruta }}" alt="{{ i.descripcion }}">
+                    <img src="{{ value.image }}" alt="{{ value.descripcion }}">
                 </div>
-                    {% if i.descripcion %}
-                        <h3>{{ i.descripcion }}</h3>
+                    {% if value.descripcion %}
+                        <h3>{{ value.descripcion }}</h3>
                     {% else %}
                         <h3>Sin descripcion</h3>
                     {% endif %}
-
-{#                    {% if i.traduccion %}#}
-{#                        <h3>{{ i.traduccion }}</h3>#}
-{#                    {% else %}#}
-{#                        <h3>Sin traduccion</h3>#}
-{#                    {% endif %}#}
-
                 </div>
             {% endfor %}
         </div>
@@ -78,18 +71,26 @@
         let textSecondOpt = document.getElementById("second-opt").innerHTML;
 
         // Return a dictionary with the id of the cards as keys and the value as true
-        function getDictById(lista) {
+        function getDictById(dict) {
             const diccionario = {};
-              for (const elemento of lista) {
-                diccionario[elemento.id] = true;
-              }
+            for (const [key, value] of Object.entries(dict)) {
+                diccionario[value.id] = true;
+            }
             return diccionario;
+        }
+
+        function dicToArray(dict) {
+            const array = [];
+            for (const [key, value] of Object.entries(dict)) {
+                array.push(value);
+            }
+            return array;
         }
 
         class SessionInfo{
             constructor() {
                 this.currentCardIndex = 0;
-                this.cards = cards;
+                this.cardsList = dicToArray(cards);
                 this.info = sessionGameData;
                 this.options = options;
             }
@@ -103,11 +104,11 @@
             }
 
             getCurrentCard() {
-                return this.cards[this.currentCardIndex];
+                return this.cardsList[this.currentCardIndex];
             }
 
             getActualCorrectOption(){
-                return this.cards[this.currentCardIndex].descripcion;
+                return this.cardsList[this.currentCardIndex].traduccion;
             }
 
             getActualOption(index){
@@ -137,42 +138,42 @@
         let sessionInfo = new SessionInfo();
 
         class SessionStats {
-          constructor() {
-              this.numSucces = 0;
-              this.numAttempts = 0;
-              this.gameTurns = cards.length;
-              this.cardsStats = getDictById(cards);
-          }
+            constructor() {
+                this.numSucces = 0;
+                this.numAttempts = 0;
+                this.gameTurns = Object.keys(cards).length;
+                this.cardsStats = getDictById(cards);
+            }
 
-          incorrectAttempt(idCarta) {
-            this.numAttempts++;
-            this.cardsStats[idCarta] = false;
-          }
+            incorrectAttempt(idCarta) {
+                this.numAttempts++;
+                this.cardsStats[idCarta] = false;
+            }
 
-          correctAttempt(idCarta) {
-            this.numAttempts++;
-            this.numSucces++;
-          }
+            correctAttempt(idCarta) {
+                this.numAttempts++;
+                this.numSucces++;
+            }
 
-          getSucces() {
-            return this.numSucces;
-          }
+            getSucces() {
+                return this.numSucces;
+            }
 
-          getAtempts() {
-            return this.numAttempts;
-          }
+            getAtempts() {
+                return this.numAttempts;
+            }
 
-          getCards() {
-            return this.cardsStats;
-          }
+            getCards() {
+                return this.cardsStats;
+            }
 
-          getGameTurns() {
-            return this.gameTurns;
-          }
+            getGameTurns() {
+                return this.gameTurns;
+            }
         }
 
         class messagesSocket{
-            
+
         }
 
         let sessionStats = new SessionStats();

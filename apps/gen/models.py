@@ -302,10 +302,10 @@ def convertir_a_minusculas(texto):
 
 
 class PreInfoSession(ERPBaseModel):
-    pis_is = models.BigAutoField(primary_key=True, verbose_name='ID_Carta')
-    csrf_token = models.CharField(max_length=500, verbose_name='Descripción')
-    session_info = models.JSONField(verbose_name='session_info')
-    is_active = models.BooleanField(default=True, verbose_name='is_active')
+    pis_is = models.BigAutoField(primary_key=True, db_column='pis_id')
+    csrf_token = models.CharField(max_length=64, db_column='csrf_token')
+    session_info = models.JSONField(db_column='session_info')
+    is_active = models.BooleanField(default=True, db_column='is_active')
 
     class Meta:
         managed = False
