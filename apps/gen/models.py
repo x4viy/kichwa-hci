@@ -475,6 +475,7 @@ class Gen_PuntajeMultimedia(ERPBaseModel):
                                              verbose_name='Puntaje total')
     pumu_puntaje_fin = models.DecimalField(max_digits=16, decimal_places=2, db_column='pumu_puntaje_fin',
                                              verbose_name='Puntaje realizado')
+    pumu_nombre = models.CharField(max_length=2000, db_column='pumu_nombre', verbose_name='Nombre')
 
     class Meta:
         managed = False

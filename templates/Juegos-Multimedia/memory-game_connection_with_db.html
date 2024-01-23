@@ -71,6 +71,7 @@
   <div class='face' tabindex="6" onkeydown="handleSpaceKey(event)"></div>
   <div class='face' tabindex="7" onkeydown="handleSpaceKey(event)"></div>
 </div>
+
 <form action="/500/multimedia/game/" method="post" id="form_memory_game_id">
     {% csrf_token %}
     <div class='overlay hidden' tabindex="8" onkeydown="handleSpaceKey(event)">
@@ -231,8 +232,6 @@ document.addEventListener('click', (e) => {
     }
   }
 
-  const men = new SpeechSynthesisUtterance("Hola como estas");
-    window.speechSynthesis.speak(men);
 let tiempo_inicio = new Date();
 let tiempo_final;
 const board = document.querySelector('.board');

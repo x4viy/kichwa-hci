@@ -187,10 +187,19 @@ class MultimediaGame(ListView):
     # Autor: Kevin Campoverde
     def memory(request):
 
+        print(request.POST)
+
         code = request.session.get('code')
+        print('anuel', code)
         name = request.session.get('name')
+
         if 'CREATE' in request.POST:
-            sesion_juego_actual = Gen_SesionJuego.objects.filter(seju_id=request.POST['sesion'])
+            print('aqui tas')
+            code = request.POST['sesion']
+            name = request.session.get('name')
+            print('code', code)
+            print('name', name)
+            sesion_juego_actual = Gen_SesionJuego.objects.filter(seju_id=code)
             for sesion_juego in sesion_juego_actual:
                 puntaje_multimedia = Gen_PuntajeMultimedia()
                 puntaje_multimedia.pumu_seju_id = sesion_juego
@@ -202,6 +211,7 @@ class MultimediaGame(ListView):
                 fecha_fin_formateada = fecha_fin.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
                 puntaje_multimedia.pumu_fecha_fin = fecha_fin_formateada
+                puntaje_multimedia.pumu_nombre = request.session.get('name')
 
                 puntaje_multimedia.save()
             return JsonResponse({'message': 'ok', "url": '/500/multimedia/code/'})
@@ -216,9 +226,9 @@ class MultimediaGame(ListView):
                         INNER JOIN gen.carta_categoria cc ON cc.carca_cart_id =c.cart_id 
                         INNER JOIN gen.cart_cate_sesion ccs ON ccs.ccs_carca_id  = cc.carca_id  
                         INNER JOIN gen.sesion_juego sj ON sj.seju_id =ccs.ccs_seju_id 
-                        WHERE c.cart_estado = 1 and sj.seju_estado =1
+                        WHERE c.cart_estado = 1 and sj.seju_estado =1 and sj.seju_codigo =%s
                         """,
-                )
+                [code])
 
                 data = dictfetchall(cursor)
                 print('data', data)
