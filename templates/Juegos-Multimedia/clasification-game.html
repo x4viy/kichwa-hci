@@ -63,6 +63,7 @@
             </div>
         {% endif %}
 
+
         {#  <div class="tinder--cards">#}
         {#    <div class="tinder--card">#}
         {#      <img src="{{ '/media/pina.jpg' }}">#}
@@ -75,10 +76,22 @@
         </div>
     </div>
 
+    <form action="/500/multimedia/code/" method="post" id="form_memory_game_id">
+        {% csrf_token %}
+        <div class='overlay hidden' tabindex="8" onkeydown="handleSpaceKey(event)">
+            <div class='gameover' tabindex="9" onkeydown="handleSpaceKey(event)">
+                <p tabindex="10" onkeydown="handleSpaceKey(event)" class="final-text">Finalizar</p>
+                <button type="submit" tabindex="11" class="enviar">
+                    <i class="fas fa-arrow-right nav-icon"></i>
+                    {#          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M485.8 113.9L349.3 250.5c-3.5 3.5-3.5 9.1 0 12.6l136.6 136.6c5.6 5.6 15.2 1.6 15.2-6.3V120.2c-.1-7.9-9.7-11.9-15.3-6.3z" fill="#fff"/><path d="M500 194.8V317c125.9 0 228 102.1 228 228S625.9 773 500 773v121.8c193.3 0 350-156.7 350-350s-156.7-350-350-350zM272 545c0-55.1 19.6-105.7 52.1-145.1 6.5-7.9 5.9-19.5-1.4-26.8l-58.3-58.3c-8.2-8.2-21.7-7.7-29.3 1-53 61.5-85.1 141.5-85.1 229 0 193.3 156.7 350 350 350V773c-125.9 0-228-102.1-228-228z" fill="#fff"/></svg>#}
+                </button>
+            </div>
+        </div>
+    </form>
 {% endblock %}
 {% block js_script %}
     <script>
-
+        const overlay = document.querySelector('.overlay');
         var sessionGameData = '{{ info|escapejs|safe }}';
         sessionGameData = sessionGameData.replace(/'/g, '"');
         sessionGameData = JSON.parse(sessionGameData);
@@ -163,6 +176,7 @@
             getCorrectOption() {
 
             }
+
         }
         let sessionInfo = new SessionInfo();
 
@@ -309,10 +323,17 @@
                 sessionInfo.nextCard();
                 updateScore();
                 updateOptionLabels();
+                isFinished();
                 return true;
             }
             sessionStats.incorrectAttempt(sessionInfo.currentCardIndex);
             return false;
+        }
+
+        function isFinished(){
+            if (sessionStats.getGameTurns() === sessionInfo.getCurrentCardIndex()  ){
+                overlay.classList.remove('hidden');
+            }
         }
 
 
@@ -441,6 +462,36 @@
             document.getElementById('playAudio').addEventListener('click', function() {
                 document.querySelector(`.audio-${sessionInfo.getCurrentCard().descripcion}`).play();
             });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $("form#form_memory_game_id").submit(function (e) {
+                {#e.preventDefault();#}
+                {#let url_ = $(this).attr('action');#}
+                {#let fields = new FormData(this);#}
+                {#// Obtener la fecha y hora actual en formato local (zona horaria de Ecuador)#}
+                {#const fecha_inicio = tiempo_inicio.toLocaleString('en-US', { timeZone: 'America/Guayaquil' });#}
+                {#const fecha_fin = tiempo_final.toLocaleString('en-US', { timeZone: 'America/Guayaquil' });#}
+                {##}
+                {##}
+                {#fields.append('turnos',sessionStats.gameTurns)#}
+                {#fields.append('turnos',sessionStats.numSucces)#}
+                {#fields.append('CREATE','1');#}
+                {##}
+                {#sendToServer(url = url_, data = fields, method = 'POST')#}
+                {#    .then(data => {#}
+                {#        if (data.message !== "ok") {#}
+                {#            shakeAndTurnRed('.inputText')#}
+                {#            showError(data.message,2.5, '#F2676C');#}
+                {#            return;#}
+                {#        }#}
+                {#        console.log('url', data.url)#}
+                {#        window.location.href = data.url;#}
+                {#    });#}
+
+            });
+        });
     </script>
 {% endblock %}
 
