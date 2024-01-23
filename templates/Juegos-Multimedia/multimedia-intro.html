@@ -6,10 +6,8 @@
 
 <!-- Custom block content -->
 {% block content %}
-    {#      <!-- qrCode -->#}
-{#    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>#}
     <script src="{% static '/js/multimedia-game/qr.js' %}"></script>
-    <form action="/500/multimedia/check/" method="POST" id="form_Gen_SesionJuegoForm_id">
+    <form action="/500/multimedia/to_game/" method="POST" id="form_Gen_SesionJuegoForm_id">
         {% csrf_token %}
         <div class="wrapper">
             <div class="square_intro">
@@ -30,31 +28,29 @@
 {% block js_script %}
 
     <script>
-        let jsonObject = {
-            key1: 'value1',
-            key2: 'value2'
-            // ... your JSON data ...
-        };
+        const title = document.querySelector('.title');
+        const intro = document.querySelector('p');
+        const btnSound = document.querySelector('.btnSound');
 
-        let jsonString = JSON.stringify(jsonObject);
+        btnSound.addEventListener('click', () => {
+            speakText([title, intro]);
+        });        const qr_code = '{{ qr_code }}';
 
-        new QRCode(document.getElementById("qrcode"), jsonString);
+        var qr_decoded;
+        if (qr_code !== ''){
+            let decodedString = atob(qr_code);
+            let info_parts = decodedString.split('|');
+            qr_decoded = info_parts[1];
+            new QRCode(document.getElementById("qrcode"), qr_code);
+        }
 
         $(document).ready(function() {
             $("form#form_Gen_SesionJuegoForm_id").submit(function (e) {
                 e.preventDefault();
-
-                const input = document.querySelector('.inputText');
-                if (input.value === '') {
-                    showError('El campo de entrada está vacío',2.5, '#F2676C');
-                    return;
-                }
-                console.log('{{ url_list }}')
-                console.log('{{ code }}')
                 let url_ = $(this).attr('action');
                 let fields = new FormData(this);
                 fields.append('code', '{{ code }}');
-
+                fields.append('name', '{{ name }}');
                 sendToServer(url = url_, data = fields, method = 'POST')
                     .then(data => {
                         if (data.message !== "ok") {
@@ -62,11 +58,48 @@
                             showError(data.message,2.5, '#F2676C');
                             return
                         }
-                        {#window.location.href = '/500/multimedia/ingresoNombre/'#}
-                        window.location.replace("{{ url_list }}?code=" + input.value);
-                        console.log(data)
+                        window.location.href = data.url;
                     })
             });
         });
+
+        //verify qr scann
+        function sendPostRequest() {
+            if (qr_code === '') return
+            const requestObj = new XMLHttpRequest();
+            requestObj.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    const jsonResponse = JSON.parse(this.responseText);
+                    if (jsonResponse.message === 'ok'){
+                        window.location.href = jsonResponse.url;
+                        {#console.log('cambio de url' + jsonResponse.url)#}
+                    }
+
+                }
+            };
+            requestObj.open("POST", "/500/multimedia/check/", true);
+            requestObj.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            const data = new FormData();
+            data.append('token', qr_decoded);
+            console.log('doing request:'+ qr_decoded);
+            requestObj.send(data);
+        }
+        setInterval(sendPostRequest, 2000);
+
+        function speakText(elements) {
+            const utterance = new SpeechSynthesisUtterance();
+            let text = '';
+            for (let element of elements) {
+                text += element.textContent + ' ';
+            }
+            utterance.text = text;
+            utterance.lang = 'es-ES';
+            speechSynthesis.speak(utterance);
+        }
+        {#if (this.responseText == "True"){#}
+        {#    window.location.href = '/500/multimedia/ingresoNombre/'#}
+        {# }else{#}
+        {#        alert("Codigo incorrecto")#}
+        {#    }#}
     </script>
 {% endblock %}

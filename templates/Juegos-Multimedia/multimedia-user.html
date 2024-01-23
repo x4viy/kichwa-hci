@@ -24,6 +24,8 @@
 <!-- Custom block for javascript -->
 {% block js_script %}
     <script>
+        const csrf_tk =  '{{ csrf_token }}'
+        const token = csrf_tk.slice(0,10);
         $(document).ready(function() {
             $("form#form_Gen_SesionJuegoForm_id").submit(function (e) {
                 e.preventDefault();
@@ -33,13 +35,11 @@
                     showError('El campo de entrada está vacío',2.5, '#F2676C');
                     return;
                 }
-                console.log('{{ url_list }}')
-                console.log('{{ code }}')
                 let url_ = $(this).attr('action');
                 let fields = new FormData(this);
                 fields.append('code', '{{ code }}');
                 fields.append('name', input.value);
-
+                fields.append('token', token);
                 sendToServer(url = url_, data = fields, method = 'POST')
                     .then(data => {
                         if (data.message !== "ok") {

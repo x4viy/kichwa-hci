@@ -4,81 +4,76 @@
 
 {% block content %}
     <link rel="stylesheet" href="{% static 'clasification_game/css/clasification-game.css' %}" >
-
     <style>
-    .Regresar {
-        left: 0;
-        top: 0;
-        position: absolute;
-        z-index: 999;
-        {#float: left;#}
-        margin: 10px;
-  padding: 10px 20px;
-  font-size: 16px;
-  /*border: 2px solid #4CAF50;*/
-  background-color: #00507F;
-  color: #fff;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
-  font-weight: bold;
-}
+        .Regresar {
+            left: 0;
+            top: 0;
+            position: absolute;
+            z-index: 999;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            /*border: 2px solid #4CAF50;*/
+            background-color: #00507F;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            font-weight: bold;
+        }
 
-.Regresar:hover {
-  background-color: #59A3E9;
-}
+        .Regresar:hover {
+            background-color: #59A3E9;
+        }
 
-.Regresar:active {
-  transform: translateY(4px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+        .Regresar:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
     </style>
 
     <button class="Regresar" onclick="irAPagina()"><i class="fa fa-home" aria-hidden="true"></i> Regresar</button>
 
-{#<div class="upper-bar">#}
+    {#<div class="upper-bar">#}
     <div class="score-container">0/0</div>
-{#</div>#}
-<div class="tinder">
-    <div class="tinder--status">
-        <i class="fa fa-remove"></i>
-        <i class="fa fa-heart"></i>
-    </div>
-    {% if cards %}
-        <div class="tinder--cards">
-            {% for i in cards %}
-                <div class="tinder--card">
-                <div class="image-wrapper">
-                    <img src="{{ i.ruta }}" alt="{{ i.descripcion }}">
-                </div>
-                    {% if i.descripcion %}
-                        <h3>{{ i.descripcion }}</h3>
-                    {% else %}
-                        <h3>Sin descripcion</h3>
-                    {% endif %}
-
-{#                    {% if i.traduccion %}#}
-{#                        <h3>{{ i.traduccion }}</h3>#}
-{#                    {% else %}#}
-{#                        <h3>Sin traduccion</h3>#}
-{#                    {% endif %}#}
-
-                </div>
-            {% endfor %}
+    {#</div>#}
+    <div class="tinder">
+        <div class="tinder--status">
+            <i class="fa fa-remove"></i>
+            <i class="fa fa-heart"></i>
         </div>
-    {% endif %}
+        <div class="btnSound" id="playAudio"><i class="fas fa-volume-up"></i></div>
+        {% if cards %}
+            <div class="tinder--cards">
+                {% for key, value in cards.items %}
+                    <div class="tinder--card">
+                        <div class="image-wrapper">
+                            <img src="{{ value.image }}" alt="{{ value.descripcion }}">
+                            <audio preload="auto" class="audio-{{ value.descripcion }}" >
+                                <source src="{{ value.audio }} ">
+                            </audio>
+                        </div>
+                        {% if value.descripcion %}
+                            <h3>{{ value.descripcion }}</h3>
+                        {% else %}
+                            <h3>Sin descripcion</h3>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
 
-    {#  <div class="tinder--cards">#}
-    {#    <div class="tinder--card">#}
-    {#      <img src="{{ '/media/pina.jpg' }}">#}
-    {#      <h3>Demo card 0</h3>#}
-    {#      <p>Ejemplo carta</p>#}
-    {#    </div>#}
-    <div class="tinder--buttons">
-        <div class="optButton" id="first-opt"></div>
-        <div class="optButton" id="second-opt"></div>
+        {#  <div class="tinder--cards">#}
+        {#    <div class="tinder--card">#}
+        {#      <img src="{{ '/media/pina.jpg' }}">#}
+        {#      <h3>Demo card 0</h3>#}
+        {#      <p>Ejemplo carta</p>#}
+        {#    </div>#}
+        <div class="tinder--buttons">
+            <div class="optButton" id="first-opt"></div>
+            <div class="optButton" id="second-opt"></div>
+        </div>
     </div>
-</div>
 
 {% endblock %}
 {% block js_script %}
@@ -105,18 +100,26 @@
         let textSecondOpt = document.getElementById("second-opt").innerHTML;
 
         // Return a dictionary with the id of the cards as keys and the value as true
-        function getDictById(lista) {
+        function getDictById(dict) {
             const diccionario = {};
-              for (const elemento of lista) {
-                diccionario[elemento.id] = true;
-              }
+            for (const [key, value] of Object.entries(dict)) {
+                diccionario[value.id] = true;
+            }
             return diccionario;
+        }
+
+        function dicToArray(dict) {
+            const array = [];
+            for (const [key, value] of Object.entries(dict)) {
+                array.push(value);
+            }
+            return array;
         }
 
         class SessionInfo{
             constructor() {
                 this.currentCardIndex = 0;
-                this.cards = cards;
+                this.cardsList = dicToArray(cards);
                 this.info = sessionGameData;
                 this.options = options;
             }
@@ -130,11 +133,11 @@
             }
 
             getCurrentCard() {
-                return this.cards[this.currentCardIndex];
+                return this.cardsList[this.currentCardIndex];
             }
 
             getActualCorrectOption(){
-                return this.cards[this.currentCardIndex].descripcion;
+                return this.cardsList[this.currentCardIndex].traduccion;
             }
 
             getActualOption(index){
@@ -164,42 +167,42 @@
         let sessionInfo = new SessionInfo();
 
         class SessionStats {
-          constructor() {
-              this.numSucces = 0;
-              this.numAttempts = 0;
-              this.gameTurns = cards.length;
-              this.cardsStats = getDictById(cards);
-          }
+            constructor() {
+                this.numSucces = 0;
+                this.numAttempts = 0;
+                this.gameTurns = Object.keys(cards).length;
+                this.cardsStats = getDictById(cards);
+            }
 
-          incorrectAttempt(idCarta) {
-            this.numAttempts++;
-            this.cardsStats[idCarta] = false;
-          }
+            incorrectAttempt(idCarta) {
+                this.numAttempts++;
+                this.cardsStats[idCarta] = false;
+            }
 
-          correctAttempt(idCarta) {
-            this.numAttempts++;
-            this.numSucces++;
-          }
+            correctAttempt(idCarta) {
+                this.numAttempts++;
+                this.numSucces++;
+            }
 
-          getSucces() {
-            return this.numSucces;
-          }
+            getSucces() {
+                return this.numSucces;
+            }
 
-          getAtempts() {
-            return this.numAttempts;
-          }
+            getAtempts() {
+                return this.numAttempts;
+            }
 
-          getCards() {
-            return this.cardsStats;
-          }
+            getCards() {
+                return this.cardsStats;
+            }
 
-          getGameTurns() {
-            return this.gameTurns;
-          }
+            getGameTurns() {
+                return this.gameTurns;
+            }
         }
 
         class messagesSocket{
-            
+
         }
 
         let sessionStats = new SessionStats();
@@ -387,54 +390,57 @@
         };
 
         // sending the text message to server
-        document.querySelector('#addMessage').onclick = function(e) {
-            const messageInputDom = document.querySelector('#textMessage');
-            const message = messageInputDom.value;
+        {#document.querySelector('#addMessage').onclick = function(e) {#}
+        {#    const messageInputDom = document.querySelector('#textMessage');#}
+        {#    const message = messageInputDom.value;#}
+        {##}
+        {#    chatSocket.send(JSON.stringify({#}
+        {#        'message': message#}
+        {#    }));#}
+        {##}
+        {#    messageInputDom.value = '';#}
+        {#};#}
 
-            chatSocket.send(JSON.stringify({
-                'message': message
-            }));
+            function sendToPhone(message, motion, isCorrect){
+                message  =  message ?? '';
+                motion =  motion ?? '';
+                isCorrect  =  isCorrect ?? '';
 
-            messageInputDom.value = '';
-        };
-
-        function sendToPhone(message, motion, isCorrect){
-            message  =  message ?? '';
-            motion =  motion ?? '';
-            isCorrect  =  isCorrect ?? '';
-
-            chatSocket.send(JSON.stringify({
-                'message': message,
-                'motion': motion,
-                'isCorrect': isCorrect
-            }));
-        }
-        function moveCart(motion){
-            // compare if the message is right or left
-            if (motion === 'right' ) {
-                rightGroupListener() ;
-            }if(motion === 'left'){
-                leftGroupListener();
+                chatSocket.send(JSON.stringify({
+                    'message': message,
+                    'motion': motion,
+                    'isCorrect': isCorrect
+                }));
             }
-        }
-
-        function hideOptionButtons(message){
-            if (message === 'hide') {
-                // hide labes buttons
-                document.getElementById('first-opt').style.display = 'none';
-                document.getElementById('second-opt').style.display = 'none';
-                // increase the size of the card
-                const allCards = document.querySelectorAll('.tinder--card');
-                allCards .forEach(function(card) {
-                    card.classList.add('expanded');
-                });
-                const images = document.querySelectorAll('.image-wrapper');
-                images.forEach(function(image) {
-                    image.classList.add('expandedImg');
-                });
+            function moveCart(motion){
+                // compare if the message is right or left
+                if (motion === 'right' ) {
+                    rightGroupListener() ;
+                }if(motion === 'left'){
+                    leftGroupListener();
+                }
             }
-        }
 
+            function hideOptionButtons(message){
+                if (message === 'hide') {
+                    // hide labes buttons
+                    document.getElementById('first-opt').style.display = 'none';
+                    document.getElementById('second-opt').style.display = 'none';
+                    // increase the size of the card
+                    const allCards = document.querySelectorAll('.tinder--card');
+                    allCards .forEach(function(card) {
+                        card.classList.add('expanded');
+                    });
+                    const images = document.querySelectorAll('.image-wrapper');
+                    images.forEach(function(image) {
+                        image.classList.add('expandedImg');
+                    });
+                }
+            }
+
+            document.getElementById('playAudio').addEventListener('click', function() {
+                document.querySelector(`.audio-${sessionInfo.getCurrentCard().descripcion}`).play();
+            });
     </script>
 {% endblock %}
 
