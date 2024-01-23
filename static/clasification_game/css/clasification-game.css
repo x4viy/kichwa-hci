@@ -256,3 +256,25 @@ body {
 .fa-remove {
   color: #CDD6DD;
 }
+.btnSound{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 6vw;
+    max-width: 9vw;
+    min-height: 6vw;
+    max-height: 8vw;
+    margin-bottom: 1rem;
+    background-color: #D8F3FF;
+    border-radius: 50%;
+    font-size: 2.5rem;
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+.btnSound:hover {
+    background-color: #59A3E9;
+}

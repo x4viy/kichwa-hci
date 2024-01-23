@@ -6,25 +6,30 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="{% static 'clasification_game/css/clasification-game.css' %}" >
 
 </head>
 <body>
 {#<div class="upper-bar">#}
-    <div class="score-container">0/0</div>
+<div class="score-container">0/0</div>
 {#</div>#}
 <div class="tinder">
     <div class="tinder--status">
         <i class="fa fa-remove"></i>
         <i class="fa fa-heart"></i>
     </div>
+    <div class="btnSound" id="playAudio"><i class="fas fa-volume-up"></i></div>
     {% if cards %}
         <div class="tinder--cards">
             {% for key, value in cards.items %}
                 <div class="tinder--card">
-                <div class="image-wrapper">
-                    <img src="{{ value.image }}" alt="{{ value.descripcion }}">
-                </div>
+                    <div class="image-wrapper">
+                        <img src="{{ value.image }}" alt="{{ value.descripcion }}">
+                        <audio preload="auto" class="audio-{{ value.descripcion }}" >
+                            <source src="{{ value.audio }} ">
+                        </audio>
+                    </div>
                     {% if value.descripcion %}
                         <h3>{{ value.descripcion }}</h3>
                     {% else %}
@@ -361,16 +366,16 @@
         };
 
         // sending the text message to server
-        document.querySelector('#addMessage').onclick = function(e) {
-            const messageInputDom = document.querySelector('#textMessage');
-            const message = messageInputDom.value;
-
-            chatSocket.send(JSON.stringify({
-                'message': message
-            }));
-
-            messageInputDom.value = '';
-        };
+        {#document.querySelector('#addMessage').onclick = function(e) {#}
+        {#    const messageInputDom = document.querySelector('#textMessage');#}
+        {#    const message = messageInputDom.value;#}
+        {##}
+        {#    chatSocket.send(JSON.stringify({#}
+        {#        'message': message#}
+        {#    }));#}
+        {##}
+        {#    messageInputDom.value = '';#}
+        {#};#}
 
         function sendToPhone(message, motion, isCorrect){
             message  =  message ?? '';
@@ -409,6 +414,9 @@
             }
         }
 
+        document.getElementById('playAudio').addEventListener('click', function() {
+            document.querySelector(`.audio-${sessionInfo.getCurrentCard().descripcion}`).play();
+        });
     </script>
 {% endblock %}
 

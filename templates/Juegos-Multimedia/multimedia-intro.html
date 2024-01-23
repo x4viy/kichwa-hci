@@ -27,7 +27,14 @@
 {% block js_script %}
 
     <script>
-        const qr_code = '{{ qr_code }}';
+        const title = document.querySelector('.title');
+        const intro = document.querySelector('p');
+        const btnSound = document.querySelector('.btnSound');
+
+        btnSound.addEventListener('click', () => {
+            speakText([title, intro]);
+        });        const qr_code = '{{ qr_code }}';
+
         var qr_decoded;
         if (qr_code !== ''){
             let decodedString = atob(qr_code);
@@ -35,6 +42,7 @@
             qr_decoded = info_parts[1];
             new QRCode(document.getElementById("qrcode"), qr_code);
         }
+
         $(document).ready(function() {
             $("form#form_Gen_SesionJuegoForm_id").submit(function (e) {
                 e.preventDefault();
@@ -77,6 +85,16 @@
         }
         setInterval(sendPostRequest, 2000);
 
+        function speakText(elements) {
+            const utterance = new SpeechSynthesisUtterance();
+            let text = '';
+            for (let element of elements) {
+                text += element.textContent + ' ';
+            }
+            utterance.text = text;
+            utterance.lang = 'es-ES';
+            speechSynthesis.speak(utterance);
+        }
         {#if (this.responseText == "True"){#}
         {#    window.location.href = '/500/multimedia/ingresoNombre/'#}
         {# }else{#}
