@@ -9,6 +9,27 @@ body{
     font-family: 'Exo',  'Comic Sans MS', sans-serif;
 }
 
+   .Regresar {
+        margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  /*border: 2px solid #4CAF50;*/
+  background-color: #00507F;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  font-weight: bold;
+}
+
+.Regresar:hover {
+  background-color: #59A3E9;
+}
+
+.Regresar:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
 /*.context {*/
 /*    width: 100%;*/

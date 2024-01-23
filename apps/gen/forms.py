@@ -17,6 +17,7 @@ from django.forms.widgets import *
 from django.utils.html import mark_safe
 from django.db import connection
 from utils.utils import dictfetchall
+from django import forms
 import html
 from django.utils.html import format_html
 from vars.msg import CRUD_MSG
@@ -1500,12 +1501,26 @@ def get_genCartaDetsForm(cart_id):
 # Descripción: Formulario para la opción 'Sesion Juego(Multimedia)'.
 class Gen_SesionJuegoForm(ModelForm):
 
+    STATES = (
+        (1, 'Activo'),
+        (2, 'Finalizado'),
+    )
+
+    seju_estado = forms.ChoiceField(choices=STATES, label='Estado')
+    seju_codigo = forms.CharField(label='Código')
+
     def __init__(self, *args, **kwargs):
         super(Gen_SesionJuegoForm, self).__init__(*args, **kwargs)
+
+        # Deshabilita el campo seju_codigo si está en modo de creación
+        if not self.instance.pk or (self.instance.seju_estado == 1):
+            self.fields['seju_codigo'].disabled = True
 
         self.fields['seju_introduccion'].required = True
         self.fields['seju_tip_id'].required = True
         self.fields['seju_codigo'].required = True
+        self.fields['seju_estado'].required = True
+
         self.fields['seju_introduccion'].widget.attrs['autofocus'] = True
 
         # Cambiar atributos especificos
@@ -1538,6 +1553,7 @@ class Gen_SesionJuegoForm(ModelForm):
                         Div('seju_introduccion',
                             'seju_tip_id',
                             'seju_codigo',
+                            'seju_estado',
                             css_class='col-sm'
                             ),
                         css_class='row'

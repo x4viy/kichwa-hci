@@ -5,9 +5,35 @@
 
 <!-- Custom CSS -->
 <link rel="stylesheet" href="{% static 'game_code/css/game_code.css' %}" >
+    <link rel="stylesheet" href="{% static 'lib/adminlte-3.1.0/plugins/fontawesome-free/css/all.min.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <!-- Custom block content -->
 {% block content %}
+    <style>
+    .Regresar {
+        margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  /*border: 2px solid #4CAF50;*/
+  background-color: #00507F;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  font-weight: bold;
+}
+
+.Regresar:hover {
+  background-color: #59A3E9;
+}
+
+.Regresar:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+    </style>
+        <button class="Regresar" onclick="irAPagina()"><i class="fa fa-home" aria-hidden="true"></i> Regresar</button>
         <form action="/500/multimedia/verify_code/" method="POST" id="form_Gen_SesionJuegoForm_id">
             {% csrf_token %}
               <div class="wrapper">
@@ -22,6 +48,10 @@
 <!-- Custom block for javascript -->
 {% block js_script %}
     <script>
+    function irAPagina() {
+      // Cambiar la URL por la que desees redirigir
+      window.location.href = '/100/';
+    }
         $(document).ready(function() {
             $("form#form_Gen_SesionJuegoForm_id").submit(function (e) {
                 e.preventDefault();

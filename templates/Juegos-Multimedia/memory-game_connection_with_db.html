@@ -1,19 +1,16 @@
+{% extends 'Juegos-Multimedia/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Juego de Memoria</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <link rel="stylesheet" href="{% static 'memory_game/css/memory-game.css' %}" >
+
+{% block title %}Memoria{% endblock %}
+{% block content %}
+
+        <link rel="stylesheet" href="{% static 'memory_game/css/memory-game.css' %}" >
 <!-- Font Awesome -->
     <link rel="stylesheet" href="{% static 'lib/adminlte-3.1.0/plugins/fontawesome-free/css/all.min.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/handtrackjs@latest/dist/handtrack.min.js"> </script>
+    <script src="https://cdn.jsdelivr.net/npm/handtrackjs/dist/handtrack.min.js"></script>
 
     <style>
-
         {% if datos %}
             {% for i in datos %}
                 {% if i.tipo == "image" %}
@@ -26,18 +23,44 @@
         {% endfor %}
     {% endif %}
 
+.Regresar {
+        left: 0;
+        top: 0;
+        position: absolute;
+        z-index: 999;
+        {#float: left;#}
+        margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  /*border: 2px solid #4CAF50;*/
+  background-color: #00507F;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  font-weight: bold;
+}
+
+.Regresar:hover {
+  background-color: #59A3E9;
+}
+
+.Regresar:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+
     </style>
+{#<div id="cameraToggleContainer">#}
+<button class="Regresar" onclick="irAPagina()"><i class="fa fa-home" aria-hidden="true"></i> Regresar</button>
 
-
-</head>
-<body>
-
-<div id="cameraToggleContainer">
-
-  <button id="toggleCamera" class="fas fa-camera nav-icon">
-      <p>Activar/Desactivar Cámara</p>
+  <button id="cameraToggleContainer" ><i class="fa fa-camera" aria-hidden="true"></i>Activar/desactivar cámara
+{#      <p>Activar/Desactivar Cámara</p>#}
   </button>
-</div>
+{#</div>#}
+
 
 <div class='board' onkeydown="handleSpaceKey(event)"></div>
 <div class='clone' tabindex="1" onkeydown="handleSpaceKey(event)">
@@ -48,14 +71,18 @@
   <div class='face' tabindex="6" onkeydown="handleSpaceKey(event)"></div>
   <div class='face' tabindex="7" onkeydown="handleSpaceKey(event)"></div>
 </div>
-<div class='overlay hidden' tabindex="8" onkeydown="handleSpaceKey(event)">
-  <div class='gameover' tabindex="9" onkeydown="handleSpaceKey(event)">
-    <p tabindex="10" onkeydown="handleSpaceKey(event)" class="final-text">FELICIDADES!</p>
-    <button class='reset' tabindex="11" onkeydown="handleSpaceKey(event)">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M485.8 113.9L349.3 250.5c-3.5 3.5-3.5 9.1 0 12.6l136.6 136.6c5.6 5.6 15.2 1.6 15.2-6.3V120.2c-.1-7.9-9.7-11.9-15.3-6.3z" fill="#fff"/><path d="M500 194.8V317c125.9 0 228 102.1 228 228S625.9 773 500 773v121.8c193.3 0 350-156.7 350-350s-156.7-350-350-350zM272 545c0-55.1 19.6-105.7 52.1-145.1 6.5-7.9 5.9-19.5-1.4-26.8l-58.3-58.3c-8.2-8.2-21.7-7.7-29.3 1-53 61.5-85.1 141.5-85.1 229 0 193.3 156.7 350 350 350V773c-125.9 0-228-102.1-228-228z" fill="#fff"/></svg>
-    </button>
-  </div>
-</div>
+<form action="/500/multimedia/game/" method="post" id="form_memory_game_id">
+    {% csrf_token %}
+    <div class='overlay hidden' tabindex="8" onkeydown="handleSpaceKey(event)">
+      <div class='gameover' tabindex="9" onkeydown="handleSpaceKey(event)">
+        <p tabindex="10" onkeydown="handleSpaceKey(event)" class="final-text">Finalizar</p>
+        <button type="submit" tabindex="11" class="enviar">
+            <i class="fas fa-arrow-right nav-icon"></i>
+{#          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M485.8 113.9L349.3 250.5c-3.5 3.5-3.5 9.1 0 12.6l136.6 136.6c5.6 5.6 15.2 1.6 15.2-6.3V120.2c-.1-7.9-9.7-11.9-15.3-6.3z" fill="#fff"/><path d="M500 194.8V317c125.9 0 228 102.1 228 228S625.9 773 500 773v121.8c193.3 0 350-156.7 350-350s-156.7-350-350-350zM272 545c0-55.1 19.6-105.7 52.1-145.1 6.5-7.9 5.9-19.5-1.4-26.8l-58.3-58.3c-8.2-8.2-21.7-7.7-29.3 1-53 61.5-85.1 141.5-85.1 229 0 193.3 156.7 350 350 350V773c-125.9 0-228-102.1-228-228z" fill="#fff"/></svg>#}
+        </button>
+      </div>
+    </div>
+</form>
 
 <audio preload="auto" class="audio-win" >
         <source src="{% static '/audios/juego-finalizado.mp3' %} ">
@@ -73,14 +100,18 @@
 
 
 
-<video id="camara21312" width="640" height="480" style="display: none;"></video>
+<video id="camara" width="640" height="480" style="display: none;"></video>
 
-<img id="hola" src="{% static 'sesion-juego/mano-abierta.png' %}" alt="a" style="visibility: hidden">
+<img id="img-default" src="{% static 'sesion-juego/mano-abierta.png' %}" alt="mano selectora" style="visibility: hidden">
+{% endblock %}
+
+{% block js_script %}
 <script>
+
 
     let cameraEnabled = false;
 
-    document.getElementById('toggleCamera').addEventListener('click', () => {
+    document.getElementById('cameraToggleContainer').addEventListener('click', () => {
 
       cameraEnabled = !cameraEnabled; // Invierte el estado de la cámara al hacer clic en el botón
       startLoadCamera(); // Llama a la función para activar/desactivar la cámara
@@ -94,10 +125,9 @@ document.addEventListener('click', (e) => {
 
       async function startLoadCamera(){
 
-          const video = document.getElementById('camara21312');
-          const imagen = document.getElementById('hola');
-
-          console.log(cameraEnabled)
+          const video = document.getElementById('camara');
+          const imagen = document.getElementById('img-default');
+          imagen.style.pointerEvents = 'none';
 
            if (!cameraEnabled) {
                handTrack.stopVideo(video);
@@ -124,6 +154,7 @@ document.addEventListener('click', (e) => {
 
           const model = await handTrack.load(defaultParams);
           await handTrack.startVideo(video);
+          imagen.style.zIndex = "999";
 
            const detectHand = async () => {
                const predictions = await model.detect(video);
@@ -142,6 +173,7 @@ document.addEventListener('click', (e) => {
 
                         imagen.style.left = x + "px";
                         imagen.style.top= y + "px";
+                        imagen.style.zIndex = "999";
                         imagen.src = "{% static 'sesion-juego/mano-senalar.png' %}"
 
                         const click = (x, y) => {
@@ -151,9 +183,17 @@ document.addEventListener('click', (e) => {
                             'cancelable': true,
                             'screenX': x,
                             'screenY': y
+
                           });
                           const el = document.elementFromPoint(x, y);
-                          el.dispatchEvent(ev);
+                          if (el) {
+                              el.style.zIndex = "999";
+                              el.dispatchEvent(ev);
+                              console.log('click');
+                            } else {
+                              console.error('Element not found at coordinates:', x, y);
+                            }
+
                         }
                         click(x, y)
 
@@ -167,7 +207,10 @@ document.addEventListener('click', (e) => {
                });
 
            }
-           setInterval(detectHand, 100);
+           if(cameraEnabled){
+            setInterval(detectHand, 100);
+           }
+
            //})
 
 
@@ -181,20 +224,20 @@ document.addEventListener('click', (e) => {
 
 <script>
 
-
   function handleSpaceKey(event) {
     if (event.key === ' ' || event.key === 'Spacebar') {
       event.preventDefault(); // Prevent the default action of the space key
       event.target.click(); // Simulate a click on the focused element
     }
   }
-</script>
-<script>
 
+  const men = new SpeechSynthesisUtterance("Hola como estas");
+    window.speechSynthesis.speak(men);
+let tiempo_inicio = new Date();
+let tiempo_final;
 const board = document.querySelector('.board');
 const clone = document.querySelector('.clone');
 const overlay = document.querySelector('.overlay');
-const reset = document.querySelector('.reset');
 const descripciones =[]
 const media = []
 var cont = 0;
@@ -222,12 +265,9 @@ const state = {
   matches: 0
 };
 
-reset.addEventListener('click', () => {
-  if (state.boardLocked) return;
-  resetGame();
-});
 
 function resetGame() {
+
   state.boardLocked = true;
   state.selections = [];
   state.matches = 0;
@@ -295,6 +335,7 @@ function selectTile(selectedTile) {
           window.setTimeout(() => {
             overlay.classList.remove('hidden');
             document.querySelector('.audio-win').play();
+            tiempo_final = new Date()
           }, 600);
         }
         state.selections = [];
@@ -325,5 +366,37 @@ function shuffleArray(array) {
 createBoard();
 
 </script>
-</body>
-</html>
+
+
+<!-- Custom block for javascript -->
+
+    <script>
+        $(document).ready(function() {
+            $("form#form_memory_game_id").submit(function (e) {
+                e.preventDefault();
+                let url_ = $(this).attr('action');
+                let fields = new FormData(this);
+                // Obtener la fecha y hora actual en formato local (zona horaria de Ecuador)
+                const fecha_inicio = tiempo_inicio.toLocaleString('en-US', { timeZone: 'America/Guayaquil' });
+                const fecha_fin = tiempo_final.toLocaleString('en-US', { timeZone: 'America/Guayaquil' });
+
+                fields.append('tiempo_inicio',fecha_inicio);
+                fields.append('tiempo_final',fecha_fin);
+                fields.append('sesion',{{ sesion_juego }})
+                fields.append('CREATE','1');
+
+                sendToServer(url = url_, data = fields, method = 'POST')
+                    .then(data => {
+                        if (data.message !== "ok") {
+                            shakeAndTurnRed('.inputText')
+                            showError(data.message,2.5, '#F2676C');
+                            return;
+                        }
+                        console.log('url', data.url)
+                        window.location.href = data.url;
+                    });
+
+            });
+        });
+    </script>
+{% endblock %}

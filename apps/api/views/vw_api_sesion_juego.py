@@ -65,10 +65,15 @@ class Gen_SesionJuegoListView(ListView):
         context['show_fields'] = {'seju_introduccion': None,
                                   'seju_codigo': None,
                                   'seju_tip_id': None,
+                                  'seju_estado': None,
                                 }
         # encriptacion del id
         for r in context['object_list']:
             r.seju_id = _e.encrypt(r.seju_id)
+            if r.seju_estado == 1:
+                r.seju_estado = 'Activo'
+            else:
+                r.seju_estado = 'Finalizado'
         return context
 
 
@@ -346,6 +351,8 @@ class Gen_SesionJuegoUpdateView(UpdateView):
                     cabecera = form.save(commit=False)
                     usuario_actual = self.request.session['AIGN_USERID']
                     cabecera.usuario_actual = usuario_actual
+                    if cabecera.seju_estado == 2:
+                        cabecera.seju_codigo = ''
                     cabecera.save()
                     resultado_post = request.POST
                     self.find_cartas_categoria_seleccionadas(resultado_post, cabecera)

@@ -95,6 +95,13 @@
 
                             {% for obj_menu in request.session.AIGN_MENU %}
                                 {% if obj_menu.opc_id_padre == obj.opc_id %}
+                                    {% if obj_menu.opc_nombre == "Tema" %}
+                                        <hr style="border: 15px; width: 100%; height: 1px; background: #FFF5F3">
+                                    {% endif %}
+                                    {% if obj_menu.opc_nombre == "Carta" %}
+                                        <hr style="border: 15px; width: 100%; height: 1px; background: #FFF5F3">
+                                    {% endif %}
+
                                     <li class="nav-item">
 {#                                        <a href="#" class="nav-link">#}
                                         <a href="{{ obj_menu.opc_url }}" class="nav-link">

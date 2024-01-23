@@ -6,6 +6,9 @@
 
 <!-- Custom block content -->
 {% block content %}
+    {#      <!-- qrCode -->#}
+{#    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>#}
+    <script src="{% static '/js/multimedia-game/qr.js' %}"></script>
     <form action="/500/multimedia/check/" method="POST" id="form_Gen_SesionJuegoForm_id">
         {% csrf_token %}
         <div class="wrapper">

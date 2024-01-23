@@ -394,6 +394,7 @@ class Gen_SesionJuego(ERPBaseModel):
     seju_introduccion = models.CharField(max_length=100, db_column='seju_introduccion', verbose_name='Introduccion')
     seju_codigo = models.CharField(max_length=2000, db_column='seju_codigo', verbose_name='Codigo Único')
     seju_tip_id = models.ForeignKey('Gen_Tipo', models.CASCADE, db_column='seju_tip_id', verbose_name='Tipo de Juego')
+    seju_estado = models.IntegerField( db_column='seju_estado', verbose_name='Estado')
     class Meta:
         managed = False
         verbose_name = 'Sesion de Juego'
@@ -456,6 +457,30 @@ class Gen_CartaCategoriaSesion(ERPBaseModel):
         verbose_name = 'Carta Categoria Sesion'
         verbose_name_plural = 'Carta Categoria Sesiones'
         db_table = 'gen\".\"cart_cate_sesion'
+
+
+def convertir_a_minusculas(texto):
+    return texto.lower()
+
+
+# Autor: Kevin Campoverde
+# Fecha: 06/01/2024 20:00
+# Descripción: Modelo de relacion entre Categoria y Carta.
+class Gen_PuntajeMultimedia(ERPBaseModel):
+    pumu_id = models.BigAutoField(primary_key=True, db_column='pumu_id', verbose_name='ID_CartaCategoriaSesion')
+    pumu_seju_id = models.ForeignKey('Gen_SesionJuego', models.CASCADE, db_column='pumu_seju_id')
+    pumu_fecha_inicio = models.DateTimeField(db_column='pumu_fecha_inicio',verbose_name='Fecha inicio')
+    pumu_fecha_fin = models.DateTimeField(db_column='pumu_fecha_fin', verbose_name='Fecha fin')
+    pumu_puntaje_total = models.DecimalField(max_digits=16, decimal_places=2, db_column='pumu_puntaje_total',
+                                             verbose_name='Puntaje total')
+    pumu_puntaje_fin = models.DecimalField(max_digits=16, decimal_places=2, db_column='pumu_puntaje_fin',
+                                             verbose_name='Puntaje realizado')
+
+    class Meta:
+        managed = False
+        verbose_name = 'Puntaje multimedia'
+        verbose_name_plural = 'Puntajes multimedia'
+        db_table = 'gen\".\"puntaje_multimedia'
 
 
 def convertir_a_minusculas(texto):

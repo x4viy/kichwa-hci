@@ -23,6 +23,8 @@ from utils import utils
 from vars.msg import CRUD_MSG
 import numpy as np
 from django.shortcuts import redirect
+from datetime import datetime
+
 
 
 
@@ -145,33 +147,60 @@ class MultimediaGame(ListView):
 
     # Autor: Kevin Campoverde
     def myFirstView(request):
-        # Se establece la conección a la base de datos
-        print('tas aqui')
 
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """ SELECT c.cart_descripcion AS DESCRIPCION, ma.muar_ruta AS RUTA, ma.muar_tipo AS TIPO
-                    FROM gen.carta c 
-                    INNER JOIN gen.carta_mult cm ON cm.camu_cart_id = c.cart_id
-                    INNER JOIN gen.multimedia_archivos ma ON ma.muar_id = cm.camu_muar_id 
-                    INNER JOIN gen.carta_categoria cc ON cc.carca_cart_id =c.cart_id 
-                    INNER JOIN gen.cart_cate_sesion ccs ON ccs.ccs_carca_id  = cc.carca_id  
-                    INNER JOIN gen.sesion_juego sj ON sj.seju_id =ccs.ccs_seju_id 
-                    WHERE c.cart_estado = 1 and sj.seju_estado =1
-                    """,
-            )
+        if 'CREATE' in request.POST:
 
-            data = dictfetchall(cursor)
+            sesion_juego_actual = Gen_SesionJuego.objects.filter(seju_id=request.POST['sesion'])
 
-        for i in data:
-            i['descripcion'] = i['descripcion'].replace(' ', '-')
+            for sesion_juego in sesion_juego_actual:
 
-        context = {'segment': 'Juego de Memoria', 'datos': data}
-        print('datitos ', data)
-        # html_template = loader.get_template('home/juego1.html')
-        html_template = loader.get_template('../templates/Juegos-Multimedia/memory-game_connection_with_db.html')
-        return HttpResponse(html_template.render(context, request))
-        # return render(request, 'Juegos-Multimedia/memory-game_connection_with_db.html')
+                puntaje_multimedia = Gen_PuntajeMultimedia()
+                puntaje_multimedia.pumu_seju_id = sesion_juego
+
+                fecha_inicio = datetime.strptime(request.POST['tiempo_inicio'], "%m/%d/%Y, %I:%M:%S %p")
+                fecha_inicio_formateada = fecha_inicio.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+                puntaje_multimedia.pumu_fecha_inicio = fecha_inicio_formateada
+
+                fecha_fin = datetime.strptime(request.POST['tiempo_final'], "%m/%d/%Y, %I:%M:%S %p")
+                fecha_fin_formateada = fecha_fin.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+                puntaje_multimedia.pumu_fecha_fin = fecha_fin_formateada
+
+                puntaje_multimedia.save()
+
+            return JsonResponse({'message': 'ok', "url": '/500/multimedia/code/'})
+
+
+        else:
+
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """ SELECT sj.seju_id AS SESION_JUEGO ,c.cart_descripcion AS DESCRIPCION, ma.muar_ruta AS RUTA, ma.muar_tipo AS TIPO
+                        FROM gen.carta c 
+                        INNER JOIN gen.carta_mult cm ON cm.camu_cart_id = c.cart_id
+                        INNER JOIN gen.multimedia_archivos ma ON ma.muar_id = cm.camu_muar_id 
+                        INNER JOIN gen.carta_categoria cc ON cc.carca_cart_id =c.cart_id 
+                        INNER JOIN gen.cart_cate_sesion ccs ON ccs.ccs_carca_id  = cc.carca_id  
+                        INNER JOIN gen.sesion_juego sj ON sj.seju_id =ccs.ccs_seju_id 
+                        WHERE c.cart_estado = 1 and sj.seju_estado =1
+                        """,
+                )
+
+                data = dictfetchall(cursor)
+                print('data', data)
+
+            sesion_juego = -1
+            for i in data:
+                i['descripcion'] = i['descripcion'].replace(' ', '-')
+                sesion_juego = i['sesion_juego']
+
+            context = {'segment': 'Juego de Memoria', 'datos': data, 'sesion_juego': sesion_juego}
+            print('datitos ', data)
+            # html_template = loader.get_template('home/juego1.html')
+            html_template = loader.get_template('../templates/Juegos-Multimedia/memory-game_connection_with_db.html')
+            return HttpResponse(html_template.render(context, request))
+            # return render(request, 'Juegos-Multimedia/memory-game_connection_with_db.html')
 
     def secondView(request):
         return render(request, 'Juegos-Multimedia/memory-game.html')
