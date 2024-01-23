@@ -14,6 +14,9 @@ from utils.utils import get_ip_address
 # Cards to be displayed in the game by session code
 def index(request, token):
     context = get_session_info_by_token(token)
+    code = request.session.get('code')
+    # add code to dicctionary
+    context['sesion_juego'] = code
     return render(request, 'Juegos-Multimedia/clasification-game.html', context)
 
 
